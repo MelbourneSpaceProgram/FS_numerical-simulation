@@ -1,0 +1,13 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>msp</groupId>
+  <artifactId>simulator</artifactId>
+  <version>0.1</version>
+  <name>MSP Numerical Simulator </name>
+  <description>This software stands as a numerical software validation facility for the Melbourne Space Program’s cubesat.</description>
+  <organization>
+  	<name>Melbourne Space Program</name>
+  	<url>http://melbournespace.org/</url>
+  </organization>
+  <url>http://melbournespace.org/</url>
+</project>
