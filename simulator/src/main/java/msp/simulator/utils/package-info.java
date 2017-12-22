@@ -4,4 +4,4 @@
  * @author Florian CHAUBEYRE
  *
  */
-package msp.simulator.environment;
+package msp.simulator.utils;

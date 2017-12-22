@@ -1,4 +1,4 @@
-/* Copyright 2017-2017 Melbourne Space Program */
+/* Copyright 2017-2018 Melbourne Space Program */
 
 package msp.simulator.dashboard;
 
@@ -7,13 +7,13 @@ package msp.simulator.dashboard;
  *
  */
 public class Main {
-
+	
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		System.out.println("Hello World");
+		NumericalSimulator theSimulation = new NumericalSimulator();
+		theSimulation.process();
 	}
 
 }

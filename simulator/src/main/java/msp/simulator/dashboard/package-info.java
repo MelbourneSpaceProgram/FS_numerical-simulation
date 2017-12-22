@@ -1,4 +1,4 @@
-/* Copyright 2017-2017 Melbourne Space Program */
+/* Copyright 2017-2018 Melbourne Space Program */
 
 /**
  * @author Florian CHAUBEYRE
