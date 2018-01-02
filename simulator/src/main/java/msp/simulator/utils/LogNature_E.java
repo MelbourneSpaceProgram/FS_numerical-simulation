@@ -4,7 +4,7 @@ package msp.simulator.utils;
 
 /**
  * 
- * Enumeration of the different log storing possibilities.<p>
+ * Enumeration of the different possibilities of a log.<p>
  * STD_OUT: 0 <p>
  * FILE: 1 <p>
  * 

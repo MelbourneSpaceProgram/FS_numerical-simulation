@@ -3,5 +3,8 @@
 /**
  * @author Florian CHAUBEYRE
  *
+ * This package provides the main dashboard to control the launch
+ * of the simulation.
+ *
  */
 package msp.simulator.dashboard;

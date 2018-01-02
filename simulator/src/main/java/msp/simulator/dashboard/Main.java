@@ -9,11 +9,13 @@ package msp.simulator.dashboard;
 public class Main {
 	
 	/**
-	 * @param args
+	 * Main method: Create an instance of the numerical simulator
+	 * and launch it.
+	 * @param args (unused)
 	 */
 	public static void main(String[] args) {
-		NumericalSimulator theSimulation = new NumericalSimulator();
-		theSimulation.process();
+		NumericalSimulator simulator = new NumericalSimulator();
+		simulator.launch();
 	}
 
 }

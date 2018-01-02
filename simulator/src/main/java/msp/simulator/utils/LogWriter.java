@@ -8,8 +8,10 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 
 /**
+ * This class enables to write messages into a specific log.<p>
+ * E.g. a file or the std output.
+ * 
  * @author Florian CHAUBEYRE
- *
  */
 public class LogWriter {
 
@@ -33,12 +35,32 @@ public class LogWriter {
 		/* FILE Processing */
 		if (this.verboseStateArray[LogNature_E.FILE.index]) {
 			try {
+				boolean fileExecStatus = true;
 				File file = new File(filePath);
 				File directory = new File(file.getParentFile().getAbsolutePath());
-				directory.mkdirs();
-				file.createNewFile();
-				this.logFile = new FileWriter(file.getAbsoluteFile());
 				
+				/* Creating directories. */
+				if(!directory.exists() && !directory.mkdirs()) {
+					this.verboseStateArray[LogNature_E.FILE.index] = false;
+					fileExecStatus = false;
+					this.printError("Fail to create log file directories.");
+				}
+				
+				/* Creating Log File. */
+				if(!file.createNewFile()) {
+					this.verboseStateArray[LogNature_E.FILE.index] = false;
+					fileExecStatus = false;
+					this.printError("Fail to create log file at:" 
+							+ file.getCanonicalPath().toString());
+				}
+				
+				/* Associating the FileWriter to the log file. */
+				if (fileExecStatus) {
+					this.logFile = new FileWriter(file.getAbsoluteFile());
+					this.printMsg("Log file successfully created.");
+				} else {
+					this.printError("Processing of creating a log file failed.");
+				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -56,11 +78,12 @@ public class LogWriter {
 	
 	/**
 	 * Print a log message in the appropriate log, e.g. file or std output.
+	 * The current date is automatically append.
 	 * @param string Information to store in the log.
 	 */
-	public void print(String string) {
+	public void printMsg(String string) {
 		/* Add the current date to the message. */
-		string += "\n\t\t" + LocalDateTime.now() + "\n";
+		string += "\n\t\t" + LocalDateTime.now() + "\n\n";
 		
 		if(this.verboseStateArray[LogNature_E.STD_OUT.index]) {
 			System.out.print(string);
@@ -72,6 +95,11 @@ public class LogWriter {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public void printError(String string) {
+		string = "Error: " + string;
+		this.printMsg(string);
 	}
 	
 	/**
