@@ -43,7 +43,7 @@ public class LogWriter {
 				if(!directory.exists() && !directory.mkdirs()) {
 					this.verboseStateArray[LogNature_E.FILE.index] = false;
 					fileExecStatus = false;
-					this.printError("Fail to create log file directories.");
+					this.printError("Fail to create log file directories.", this);
 				}
 				
 				/* Creating Log File. */
@@ -51,15 +51,16 @@ public class LogWriter {
 					this.verboseStateArray[LogNature_E.FILE.index] = false;
 					fileExecStatus = false;
 					this.printError("Fail to create log file at:" 
-							+ file.getCanonicalPath().toString());
+							+ file.getCanonicalPath().toString(),
+							this);
 				}
 				
 				/* Associating the FileWriter to the log file. */
 				if (fileExecStatus) {
 					this.logFile = new FileWriter(file.getAbsoluteFile());
-					this.printMsg("Log file successfully created.");
+					this.printMsg("Log file successfully created.", this);
 				} else {
-					this.printError("Processing of creating a log file failed.");
+					this.printError("Processing of creating a log file failed.", this);
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -77,14 +78,25 @@ public class LogWriter {
 	}
 	
 	/**
-	 * Print a log message in the appropriate log, e.g. file or std output.
-	 * The current date is automatically append.
-	 * @param string Information to store in the log.
+	 * Getter of the log file of this instance.
+	 * @return The FileWriter Object related to the log file of the instance.
 	 */
-	public void printMsg(String string) {
-		/* Add the current date to the message. */
-		string += "\n\t\t" + LocalDateTime.now() + "\n\n";
-		
+	public FileWriter getLogFile() {
+		return this.logFile;
+	}
+	
+	/**
+	 * Print a log message in the appropriate log, e.g. file or std output.
+	 * The current date is automatically append and the calling class is
+	 * added to the message as well as an automatic indentation.
+	 * 
+	 * @param string Information to store in the log.
+	 * @param Object The calling class. This is used to indent the
+	 * output regarding the deepness of the calling package.
+	 * @see LogWriter.normalizeMsg
+	 */
+	public void printMsg(String string, Object theCallingClass) {
+		string = this.normalizeMsg(string, theCallingClass);
 		if(this.verboseStateArray[LogNature_E.STD_OUT.index]) {
 			System.out.print(string);
 		}
@@ -97,9 +109,19 @@ public class LogWriter {
 		}
 	}
 	
-	public void printError(String string) {
-		string = "Error: " + string;
-		this.printMsg(string);
+	/**
+	 * Print an error message in the appropriate log, e.g. file or std output.
+	 * The current date is automatically append and the calling class is
+	 * added as well as an automatic indentation.
+	 * 
+	 * @param string Error to store in the log.
+	 * @param Object The calling class. This is used to indent the
+	 * output regarding the deepness of the calling package.
+	 * @see LogWriter.normalizeMsg
+	 */
+	public void printError(String string, Object theCallingClass) {
+		string = "## Error ## " + string ;
+		this.printMsg(string, theCallingClass);
 	}
 	
 	/**
@@ -113,6 +135,36 @@ public class LogWriter {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	/**
+	 * This function is responsible to normalize in a standard form
+	 * the user message to print in the log.<p>
+	 * 
+	 * E.g. "2018-01-04T15:41:08.158069 - NumericalSimulator - Processing..."
+	 * 
+	 * @param string User message to print.
+	 * @param theCallingClass The initial calling class for a log write is used
+	 * 				   to add the class name and indent as required.
+	 * @return
+	 */
+	public String normalizeMsg(String string, Object theCallingClass) {
+		String message = "" ;
+		int indentation = theCallingClass.getClass().getCanonicalName().split("\\.").length - 3;
+		
+		/* Add the current date to the message. */
+		message += LocalDateTime.now() + " - " ;
+		/* Indent as required. */
+		for (int i = 0; i < indentation; i++) {
+			message += "\t" ;
+		}
+		/* Add the calling Class. */
+		message += theCallingClass.getClass().getSimpleName() + " - " ;
+		/* Add the user message. */
+		message += string ;
+		/* Line Break. */
+		message += "\n" ;
+		return message;
 	}
 	
 }

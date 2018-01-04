@@ -1,6 +1,8 @@
 /* Copyright 2017-2018 Melbourne Space Program */
 
-package msp.simulator.dashboard;
+package msp.simulator;
+
+import msp.simulator.NumericalSimulator;
 
 /**
  * @author Florian CHAUBEYRE

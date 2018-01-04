@@ -1,6 +1,6 @@
 /* Copyright 2017-2018 Melbourne Space Program */
 
-package msp.simulator.dashboard;
+package msp.simulator;
 
 import java.time.LocalDateTime;
 
@@ -15,9 +15,8 @@ import msp.simulator.utils.LogWriter;
 public class NumericalSimulator {
 
 	/* TODO: Enumerate the execution status. */
-	protected int executionStatus;
-	protected LogWriter logWriter;
-	protected String logFilePath;
+	private int executionStatus;
+	private LogWriter logWriter;
 	
 	private final LocalDateTime startDate;
 	@SuppressWarnings("unused")
@@ -41,21 +40,23 @@ public class NumericalSimulator {
 		this.executionStatus = 0;
 		
 		/* Instance of the LogWriter. */
-		this.logFilePath = "src/main/resources/logs/log-" + this.startDate.toString() +".txt";
+		String logFilePath = "src/main/resources/logs/log-" + this.startDate.toString() +".txt";
 		this.logState = new boolean[]{true, true};
-		this.logWriter = new LogWriter(this.logState, this.logFilePath);
+		this.logWriter = new LogWriter(this.logState, logFilePath);
 	}
 	
 	public void process() {
 		this.executionStatus = 1;
-		this.logWriter.printMsg("Processing...");
+		this.logWriter.printMsg("Processing...", this);
+		
+		this.logWriter.printError("Ceci est un test.", this);
 
 	}
 	
 	public void exit() {
 		this.endDate = LocalDateTime.now();
 		this.logWriter.printMsg("Simulation exits with execution status: " 
-				+ this.executionStatus);
+				+ this.executionStatus, this);
 		this.logWriter.close();
 	}
 	
