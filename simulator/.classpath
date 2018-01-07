@@ -34,5 +34,15 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/orekit-9.1"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hipparchus-clustering"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hipparchus-core"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hipparchus-fft"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hipparchus-fitting"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hipparchus-geometry"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hipparchus-migration"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hipparchus-ode"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hipparchus-optim"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hipparchus-samples"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hipparchus-stat"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

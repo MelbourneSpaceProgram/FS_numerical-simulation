@@ -1,6 +1,6 @@
 /* Copyright 2017-2018 Melbourne Space Program */
 
-package msp.simulator.utils;
+package msp.simulator.utils.logs;
 
 /**
  * 

@@ -4,7 +4,10 @@ package msp.simulator;
 
 import java.time.LocalDateTime;
 
-import msp.simulator.utils.LogWriter;
+import org.orekit.errors.OrekitException;
+
+import msp.simulator.utils.architecture.OrekitConfiguration;
+import msp.simulator.utils.logs.LogWriter;
 
 /**
  * This class is responsible to create the instance of the
@@ -13,6 +16,10 @@ import msp.simulator.utils.LogWriter;
  * @author Florian CHAUBEYRE
  */
 public class NumericalSimulator {
+	
+	/* The different modules of the simulator. */
+	@SuppressWarnings("unused")
+	private msp.simulator.environment.Environment environment;
 
 	/* TODO: Enumerate the execution status. */
 	private int executionStatus;
@@ -21,10 +28,9 @@ public class NumericalSimulator {
 	private final LocalDateTime startDate;
 	@SuppressWarnings("unused")
 	private LocalDateTime endDate;
-	private boolean[] logState;
 	
 	public NumericalSimulator() {
-		this.startDate = LocalDateTime.now(); 
+		this.startDate = LocalDateTime.now();
 	}
 	
 	public void launch() {
@@ -37,20 +43,32 @@ public class NumericalSimulator {
 	
 	public void initialize() {
 		/* Instance of the Simulator. */
-		this.executionStatus = 0;
+		this.executionStatus = 1;
 		
 		/* Instance of the LogWriter. */
 		String logFilePath = "src/main/resources/logs/log-" + this.startDate.toString() +".txt";
-		this.logState = new boolean[]{true, true};
-		this.logWriter = new LogWriter(this.logState, logFilePath);
+		this.logWriter = new LogWriter(logFilePath);
+		this.logWriter.printMsg("Launching the Initialization...", this);
+		
+		/* Configure OreKit. */
+		OrekitConfiguration.processConfiguration(this.logWriter);
+		
+		/* Instanciate the environment. */
+		try {
+			this.environment = new msp.simulator.environment.Environment(this.logWriter);
+			
+		} catch (OrekitException e) {
+			this.logWriter.printError("Building the Environment Failed."	, this);
+			e.printStackTrace();
+		}
+		
+		
 	}
 	
 	public void process() {
-		this.executionStatus = 1;
-		this.logWriter.printMsg("Processing...", this);
-		
-		this.logWriter.printError("Ceci est un test.", this);
-
+		if (this.executionStatus == 1) {
+			this.logWriter.printMsg("Processing...", this);
+		}
 	}
 	
 	public void exit() {
@@ -59,6 +77,5 @@ public class NumericalSimulator {
 				+ this.executionStatus, this);
 		this.logWriter.close();
 	}
-	
 	
 }

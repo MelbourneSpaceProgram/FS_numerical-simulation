@@ -1,6 +1,6 @@
 /* Copyright 2017-2018 Melbourne Space Program */
 
-package msp.simulator.utils;
+package msp.simulator.utils.logs;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -15,8 +15,19 @@ import java.time.LocalDateTime;
  */
 public class LogWriter {
 
-	private boolean[] verboseStateArray;
+	/**
+	 * This array contains the availability of each output form.
+	 */
+	private boolean[] verboseStateArray ;
 	private FileWriter logFile;
+	
+	/**
+	 * Default constructor with file and standard outputs activated.
+	 * @param filePath Relative workspace name of the log file.
+	 */
+	public LogWriter(String filePath) {
+		this(new boolean[] {true, true}, filePath);
+	}
 	
 	/**
 	 * Constructor of a LogWriter.
@@ -92,7 +103,8 @@ public class LogWriter {
 	 * 
 	 * @param string Information to store in the log.
 	 * @param Object The calling class. This is used to indent the
-	 * output regarding the deepness of the calling package.
+	 * output regarding the deepness of the calling package. The user
+	 * should put here "this".
 	 * @see LogWriter.normalizeMsg
 	 */
 	public void printMsg(String string, Object theCallingClass) {

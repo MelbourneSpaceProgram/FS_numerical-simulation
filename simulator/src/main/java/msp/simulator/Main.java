@@ -13,7 +13,7 @@ public class Main {
 	/**
 	 * Main method: Create an instance of the numerical simulator
 	 * and launch it.
-	 * @param args (unused)
+	 * @param args - unused
 	 */
 	public static void main(String[] args) {
 		NumericalSimulator simulator = new NumericalSimulator();
