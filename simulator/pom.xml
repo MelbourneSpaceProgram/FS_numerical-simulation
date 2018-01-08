@@ -10,4 +10,11 @@
   	<url>http://melbournespace.org/</url>
   </organization>
   <url>http://melbournespace.org/</url>
+  <dependencies>
+  	<dependency>
+  		<groupId>org.orekit</groupId>
+  		<artifactId>orekit</artifactId>
+  		<version>9.1</version>
+  	</dependency>
+  </dependencies>
 </project>
