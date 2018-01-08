@@ -4,4 +4,4 @@
  *
  * @author Florian CHAUBEYRE
  */
-package msp.simulator.environment.celestialBodies;
+package msp.simulator.environment.solarSystem;

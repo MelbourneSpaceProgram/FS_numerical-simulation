@@ -8,11 +8,11 @@ import msp.simulator.utils.logs.LogWriter;
  *
  * @author Florian CHAUBEYRE
  */
-public abstract class ClusterFactory {
+public abstract class ClusterManager {
 	
 	protected LogWriter logWriter;
 	
-	public ClusterFactory(LogWriter simulatorLogMsg) {
+	public ClusterManager(LogWriter simulatorLogMsg) {
 		this.logWriter = simulatorLogMsg ;
 	}
 

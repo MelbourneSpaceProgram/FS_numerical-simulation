@@ -2,15 +2,10 @@
 
 package msp.simulator.environment.orbit;
 
-import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
 import org.orekit.frames.LocalOrbitalFrame;
 import org.orekit.frames.LOFType;
 import org.orekit.orbits.CircularOrbit;
-import org.orekit.orbits.PositionAngle;
-import org.orekit.time.AbsoluteDate;
-import org.orekit.utils.PVCoordinates;
-import org.orekit.utils.TimeStampedPVCoordinates;
 
 /**
  * This class represents an instance of an orbit for the MSP

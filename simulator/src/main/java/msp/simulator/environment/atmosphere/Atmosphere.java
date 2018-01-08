@@ -7,7 +7,7 @@ import org.orekit.errors.OrekitException;
 import org.orekit.forces.drag.atmosphere.HarrisPriester;
 import org.orekit.utils.PVCoordinatesProvider;
 
-import msp.simulator.environment.celestialBodies.Earth;
+import msp.simulator.environment.solarSystem.Earth;
 
 /**
  * This class represents the atmosphere of the earth used
@@ -31,10 +31,11 @@ public final class Atmosphere extends HarrisPriester {
 	
 	/**
 	 * Constructor of the instance of atmosphere.
+	 * @param earth The Earth Instance of the simulation.
 	 * 
 	 * @throws OrekitException 
 	 */
-	public Atmosphere() throws OrekitException {
+	public Atmosphere(Earth earth) throws OrekitException {
 		
 		/* Harris-Priester Model 
 		 * - Sun Coordinate Provider
@@ -42,7 +43,7 @@ public final class Atmosphere extends HarrisPriester {
 		 * - Cosine Exponent : 2 (low inclinaison) to 6 (Polar Orbit)
 		 */
 		super(	(PVCoordinatesProvider) 	CelestialBodyFactory.getSun(),
-				Earth.getBodyShape(),
+				earth.getBodyShape(),
 				/* Cosine Exponent */ 5
 				);
 	}

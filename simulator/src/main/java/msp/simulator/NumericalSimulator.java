@@ -48,7 +48,7 @@ public class NumericalSimulator {
 		/* Instance of the LogWriter. */
 		String logFilePath = "src/main/resources/logs/log-" + this.startDate.toString() +".txt";
 		this.logWriter = new LogWriter(logFilePath);
-		this.logWriter.printMsg("Launching the Initialization...", this);
+		this.logWriter.printMsg("Initialization in process...", this);
 		
 		/* Configure OreKit. */
 		OrekitConfiguration.processConfiguration(this.logWriter);
