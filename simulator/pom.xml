@@ -1,6 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>msp</groupId>
   <artifactId>simulator</artifactId>
   <version>0.1</version>
   <name>MSP Numerical Simulator </name>
@@ -15,6 +14,11 @@
   		<groupId>org.orekit</groupId>
   		<artifactId>orekit</artifactId>
   		<version>9.1</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.slf4j</groupId>
+  		<artifactId>slf4j-jdk14</artifactId>
+  		<version>1.8.0-beta0</version>
   	</dependency>
   </dependencies>
   <issueManagement>
@@ -37,4 +41,5 @@
 
     </pluginManagement>
 </build>
+	<groupId>msp.simulator</groupId>
 </project>

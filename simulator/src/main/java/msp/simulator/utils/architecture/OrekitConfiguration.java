@@ -3,11 +3,14 @@
 package msp.simulator.utils.architecture;
 
 import java.io.File;
+
 import org.orekit.data.DataProvidersManager;
 import org.orekit.data.DirectoryCrawler;
 import org.orekit.errors.OrekitException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import msp.simulator.utils.logs.LogWriter;
+import msp.simulator.utils.logs.CustomLoggingTools;
 
 /**
  * This class provides methods to configure OreKit.
@@ -18,6 +21,9 @@ import msp.simulator.utils.logs.LogWriter;
  */
 public final class OrekitConfiguration {
 
+	/** The Logger of the instance. */
+	private static final Logger logger = LoggerFactory.getLogger(OrekitConfiguration.class);
+	
 	/**
 	 * The directory location of the external data.
 	 */
@@ -36,13 +42,13 @@ public final class OrekitConfiguration {
 	 * - Set the Data Directory.
 	 * @param logWriter Print a trace of the configuration in the log file.
 	 */
-	public static void processConfiguration(LogWriter logWriter) {
+	public static void processConfiguration() {
 		DataProvidersManager dataManager = DataProvidersManager.getInstance();
 		try {
-			logWriter.printMsg("Set Orekit External Data directory to:\n\t"
-					+ OrekitConfiguration.orekitDataDir.getAbsolutePath(),
-					new OrekitConfiguration()
-					);
+			OrekitConfiguration.logger.info(CustomLoggingTools.indentMsg(logger,
+					"Setting Orekit External Data directory to:\n\t"
+					+ OrekitConfiguration.orekitDataDir.getAbsolutePath()
+					));
 			dataManager.addProvider(new DirectoryCrawler(OrekitConfiguration.orekitDataDir));
 
 		} catch (OrekitException e) {

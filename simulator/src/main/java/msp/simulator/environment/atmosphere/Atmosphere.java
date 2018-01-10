@@ -2,12 +2,14 @@
 
 package msp.simulator.environment.atmosphere;
 
-import org.orekit.bodies.CelestialBodyFactory;
 import org.orekit.errors.OrekitException;
 import org.orekit.forces.drag.atmosphere.HarrisPriester;
-import org.orekit.utils.PVCoordinatesProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import msp.simulator.environment.solarSystem.Earth;
+import msp.simulator.environment.solarSystem.Sun;
+import msp.simulator.utils.logs.CustomLoggingTools;
 
 /**
  * This class represents the atmosphere of the earth used
@@ -29,23 +31,29 @@ public final class Atmosphere extends HarrisPriester {
 	/** Generated Serial Version UID. */
 	private static final long serialVersionUID = -1497026274240688235L;
 	
+	/** Logger of the instance of the class. */
+	private Logger logger;
+	
 	/**
-	 * Constructor of the instance of atmosphere.
+	 * Constructor of the instance of Earth atmosphere.
 	 * @param earth The Earth Instance of the simulation.
 	 * 
 	 * @throws OrekitException 
 	 */
-	public Atmosphere(Earth earth) throws OrekitException {
+	public Atmosphere(Earth earth, Sun sun) throws OrekitException {
 		
 		/* Harris-Priester Model 
 		 * - Sun Coordinate Provider
 		 * - Earth One Axis Ellipsoid
 		 * - Cosine Exponent : 2 (low inclinaison) to 6 (Polar Orbit)
 		 */
-		super(	(PVCoordinatesProvider) 	CelestialBodyFactory.getSun(),
+		super(	sun.getPvCoordinateProvider(),
 				earth.getBodyShape(),
 				/* Cosine Exponent */ 5
 				);
+		this.logger = LoggerFactory.getLogger(this.getClass());
+		this.logger.info(CustomLoggingTools.indentMsg(this.logger, 
+				"Building the Earth Atmosphere."));
 	}
 	
 }

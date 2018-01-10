@@ -26,7 +26,7 @@ public class LogWriter {
 	 * @param filePath Relative workspace name of the log file.
 	 */
 	public LogWriter(String filePath) {
-		this(new boolean[] {true, true}, filePath);
+		this(new boolean[] {true, false}, filePath);
 	}
 	
 	/**

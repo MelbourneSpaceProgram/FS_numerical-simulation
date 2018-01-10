@@ -2,12 +2,16 @@
 
 package msp.simulator;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.logging.LogManager;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.orekit.errors.OrekitException;
 
 import msp.simulator.utils.architecture.OrekitConfiguration;
-import msp.simulator.utils.logs.LogWriter;
+import msp.simulator.utils.logs.CustomLoggingTools;
 
 /**
  * This class is responsible to create the instance of the
@@ -17,48 +21,61 @@ import msp.simulator.utils.logs.LogWriter;
  */
 public class NumericalSimulator {
 	
+	/** Logger of the instance. */
+	private Logger logger;
+	
 	/* The different modules of the simulator. */
 	@SuppressWarnings("unused")
 	private msp.simulator.environment.Environment environment;
 
 	/* TODO: Enumerate the execution status. */
 	private int executionStatus;
-	private LogWriter logWriter;
 	
+	@SuppressWarnings("unused")
 	private final LocalDateTime startDate;
 	@SuppressWarnings("unused")
 	private LocalDateTime endDate;
 	
 	public NumericalSimulator() {
 		this.startDate = LocalDateTime.now();
+		
+		LogManager myLogManager = LogManager.getLogManager();
+		
+		System.setProperty(
+				"java.util.logging.config.file", 
+				"src/main/resources/config/log-config-file.txt");
+		
+		try {
+			myLogManager.readConfiguration();
+			
+		} catch (SecurityException | IOException e) {
+			e.printStackTrace();
+		}
+
+		this.logger = LoggerFactory.getLogger(this.getClass());
+	    this.logger.info("Launching the Simulation...");
 	}
 	
 	public void launch() {
-		
 		this.initialize();
 		this.process();
-		
 		this.exit();
 	}
 	
 	public void initialize() {
+		this.logger.info(CustomLoggingTools.indentMsg(this.logger,
+				"Initialization in Process..."));
+		
 		/* Instance of the Simulator. */
 		this.executionStatus = 1;
 		
-		/* Instance of the LogWriter. */
-		String logFilePath = "src/main/resources/logs/log-" + this.startDate.toString() +".txt";
-		this.logWriter = new LogWriter(logFilePath);
-		this.logWriter.printMsg("Initialization in process...", this);
-		
 		/* Configure OreKit. */
-		OrekitConfiguration.processConfiguration(this.logWriter);
+		OrekitConfiguration.processConfiguration();
 		
-		/* Instanciate the environment. */
+		/* Building the environment. */
 		try {
-			this.environment = new msp.simulator.environment.Environment(this.logWriter);
-			
+			this.environment = new msp.simulator.environment.Environment();
 		} catch (OrekitException e) {
-			this.logWriter.printError("Building the Environment Failed."	, this);
 			e.printStackTrace();
 		}
 		
@@ -67,15 +84,17 @@ public class NumericalSimulator {
 	
 	public void process() {
 		if (this.executionStatus == 1) {
-			this.logWriter.printMsg("Processing...", this);
-		}
+			this.logger.info(CustomLoggingTools.indentMsg(this.logger,
+					"Processing the Simulation..."));
+			}
 	}
 	
 	public void exit() {
 		this.endDate = LocalDateTime.now();
-		this.logWriter.printMsg("Simulation exits with execution status: " 
-				+ this.executionStatus, this);
-		this.logWriter.close();
+		this.logger.info(CustomLoggingTools.indentMsg(this.logger,
+				"Simulation exits with execution status: "
+						+ this.executionStatus)
+				);
 	}
 	
 }

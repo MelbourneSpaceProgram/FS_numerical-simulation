@@ -2,26 +2,46 @@
 
 package msp.simulator.environment.solarSystem;
 
-import msp.simulator.utils.architecture.ClusterManager;
-import msp.simulator.utils.logs.LogWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import msp.simulator.utils.logs.CustomLoggingTools;
 
 /**
+ * This class represents the instance of the Solar System
+ * in the simulation environment.<p>
+ * 
+ * The Solar System is the class at the roots of the
+ * different Celestial Bodies and is responsible to 
+ * provide tools and methods to build them, access them
+ * and manage them.
+ * 
+ * @see Earth
+ * @see Sun
  *
  * @author Florian CHAUBEYRE
  */
-public class SolarSystem extends ClusterManager {
-
+public class SolarSystem {
+	
+	/** Logger instance of the instance. */
+	private final Logger logger;
+	
 	/** Earth Instance of the Solar System in the simulation. */
 	private Earth earth;
 	
+	/** Sun Instance of the Solar System in the simulation. */
+	private Sun sun;
+	
 	/**
-	 * 
+	 * Constructor of the SolarSystem
 	 */
-	public SolarSystem(LogWriter simulatorLogWriter) {
-		super(simulatorLogWriter);
-		this.logWriter.printMsg("Building the Solar System...", this);
+	public SolarSystem() {
+		this.logger = LoggerFactory.getLogger(this.getClass());
+		this.logger.info(CustomLoggingTools.indentMsg(this.logger,
+				"Building the Solar System..."));
 		
-		this.earth = new Earth(simulatorLogWriter);
+		this.earth = new Earth();
+		this.sun = new Sun();
 	}
 	
 	/**
@@ -31,6 +51,15 @@ public class SolarSystem extends ClusterManager {
 	 */
 	public Earth getEarth() {
 		return this.earth;
+	}
+	
+	/**
+	 * Return the Sun instance of the simulation.
+	 * @return Sun instance of the simulation
+	 * @see Sun
+	 */
+	public Sun getSun() {
+		return this.sun;
 	}
 
 }
