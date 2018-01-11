@@ -2,6 +2,8 @@
 
 package msp.simulator.environment.solarSystem;
 
+import org.orekit.frames.Frame;
+import org.orekit.frames.FramesFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +62,16 @@ public class SolarSystem {
 	 */
 	public Sun getSun() {
 		return this.sun;
+	}
+	
+	/** Return the inertial frame of the Solar System,
+	 * i.e. the EME2000 singleton instance from OreKit.
+	 * @return FramesFactory.getEME2000()
+	 * 
+	 * @see FramesFactory
+	 */
+	public Frame getIntertialFrame() {
+		return FramesFactory.getEME2000();
 	}
 
 }

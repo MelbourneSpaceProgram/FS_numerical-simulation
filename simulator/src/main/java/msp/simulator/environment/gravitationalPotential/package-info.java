@@ -4,4 +4,4 @@
  *
  * @author Florian CHAUBEYRE
  */
-package msp.simulator.environment.gravityField;
+package msp.simulator.environment.gravitationalPotential;

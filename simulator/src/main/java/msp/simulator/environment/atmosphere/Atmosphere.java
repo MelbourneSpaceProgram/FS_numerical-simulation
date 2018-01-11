@@ -53,7 +53,7 @@ public final class Atmosphere extends HarrisPriester {
 				);
 		this.logger = LoggerFactory.getLogger(this.getClass());
 		this.logger.info(CustomLoggingTools.indentMsg(this.logger, 
-				"Building the Earth Atmosphere."));
+				"Building the Earth Atmosphere: success."));
 	}
 	
 }

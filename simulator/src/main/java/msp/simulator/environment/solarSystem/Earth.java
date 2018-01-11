@@ -22,6 +22,9 @@ import msp.simulator.utils.logs.CustomLoggingTools;
  */
 public class Earth {
 
+	/** Logger of the Earth instance. */
+	private final Logger logger;
+	
 	/* We do not extend a Celestial Body as it would imply a
 	 * possible instantiation of several Earth bodies.
 	 * In our case, if we still can instanciate several earth
@@ -36,10 +39,13 @@ public class Earth {
 	private CelestialBody earthCelestialBody = null;
 	
 	/** Body Shape of the Earth Celestial Body. */
-	private OneAxisEllipsoid earthBodyShape = null;
+	private OneAxisEllipsoid earthEllipsoidBodyShape = null;
 	
-	/** Logger of the Earth instance. */
-	private final Logger logger;
+	/** The Earth Radius. */
+	private double earthRadius = Constants.EGM96_EARTH_EQUATORIAL_RADIUS;
+	
+	/** Earth Attraction Coefficient. ~ 3.986e14 m³/s² */
+	private double attractCoeff_mu = Constants.EGM96_EARTH_MU;
 	
 	/**
 	 * Constructor of the Earth instance.<p>
@@ -54,16 +60,23 @@ public class Earth {
 				"-> Building the Earth..."));
 		
 		try {
+			/** Building the shape of the Earth body. 	**/
+			
 			/* Linking the singleton. */
 			this.earthCelestialBody = CelestialBodyFactory.getEarth();
 			
-			/* Building the shape of the Earth body. */
-			this.earthBodyShape = new OneAxisEllipsoid (
-				Constants.GRS80_EARTH_EQUATORIAL_RADIUS,
-				Constants.GRS80_EARTH_FLATTENING,
+			/* Attraction Coefficient mu					*/
+			this.attractCoeff_mu = Constants.EGM96_EARTH_MU;
+			
+			/*	-> Radius								*/
+			this.earthRadius = Constants.WGS84_EARTH_EQUATORIAL_RADIUS;
+			
+			/*	-> Ellipsoid								*/
+			this.earthEllipsoidBodyShape = new OneAxisEllipsoid (
+				this.earthRadius,
+				Constants.WGS84_EARTH_FLATTENING,
 				this.earthCelestialBody.getInertiallyOrientedFrame()
 				);
-	
 		} catch (OrekitException e) {
 			e.printStackTrace();
 		}
@@ -83,7 +96,27 @@ public class Earth {
 	 * @return OneAxisEllipsoid
 	 */
 	public OneAxisEllipsoid getBodyShape() {
-		return this.earthBodyShape;
+		return this.earthEllipsoidBodyShape;
 	}
-
+	
+	/**
+	 * Return the radius of the Earth body
+	 * following the same shape model. (WGS84 ...)
+	 * 
+	 * @return The Earth radius in m.
+	 */
+	public double getRadius() {
+		return this.earthRadius;
+	}
+	
+	/**
+	 * Return the Attraction Coefficient of the Earth
+	 * following the EGM96 model. 
+	 * (~ 3.986e14 m³/s²)
+	 * 
+	 * @return Attraction Coefficient 
+	 */
+	public double getAttractCoeffMu() {
+		return this.attractCoeff_mu;
+	}
 }
