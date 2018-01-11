@@ -8,7 +8,10 @@ import java.util.logging.LogManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.orekit.attitudes.Attitude;
 import org.orekit.errors.OrekitException;
+import org.orekit.frames.FramesFactory;
+import org.orekit.utils.AngularCoordinates;
 
 import msp.simulator.utils.architecture.OrekitConfiguration;
 import msp.simulator.utils.logs.CustomLoggingTools;
@@ -25,8 +28,13 @@ public class NumericalSimulator {
 	private Logger logger;
 	
 	/* The different modules of the simulator. */
+	/** Environment Instance in the Simulation. */
 	@SuppressWarnings("unused")
 	private msp.simulator.environment.Environment environment;
+	
+	/** Satellite Instance of the Simulation. */
+	@SuppressWarnings("unused")
+	private msp.simulator.satellite.Satellite satellite;
 
 	/* TODO: Enumerate the execution status. */
 	private int executionStatus;
@@ -72,9 +80,19 @@ public class NumericalSimulator {
 		/* Configure OreKit. */
 		OrekitConfiguration.processConfiguration();
 		
-		/* Building the environment. */
 		try {
+			/* Building the environment. */
 			this.environment = new msp.simulator.environment.Environment();
+			
+			/* Building the satellite. */
+			this.satellite = new msp.simulator.satellite.Satellite(
+					this.environment.getOrbit(),
+					new Attitude (
+							this.environment.getOrbit().getDate(),
+							FramesFactory.getEME2000(),
+							new AngularCoordinates()
+							),
+					this.environment.getSolarSystem().getSun());
 		} catch (OrekitException e) {
 			e.printStackTrace();
 		}

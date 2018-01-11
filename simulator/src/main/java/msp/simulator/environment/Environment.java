@@ -22,15 +22,12 @@ public class Environment {
 	private msp.simulator.environment.solarSystem.SolarSystem solarSystem;
 
 	/** Instance of the Earth Atmosphere in the simulation. */
-	@SuppressWarnings("unused")
 	private msp.simulator.environment.atmosphere.Atmosphere atmosphere;
 
 	/** Instance of the Orbit in the simulation. */
-	@SuppressWarnings("unused")
 	private msp.simulator.environment.orbit.Orbit orbit;
 
 	/** Instance of the Gravitational Potential. */
-	@SuppressWarnings("unused")
 	private msp.simulator.environment.gravitationalPotential.GravitationalPotential
 	gravitationalPotential;
 
@@ -56,6 +53,41 @@ public class Environment {
 	
 		/* Building the Earth Gravity Field (Potential) */
 		this.gravitationalPotential = new GravitationalPotential();
+	}
+
+	/**
+	 * @return the logger
+	 */
+	public Logger getLogger() {
+		return logger;
+	}
+
+	/**
+	 * @return the solarSystem
+	 */
+	public msp.simulator.environment.solarSystem.SolarSystem getSolarSystem() {
+		return solarSystem;
+	}
+
+	/**
+	 * @return the atmosphere
+	 */
+	public msp.simulator.environment.atmosphere.Atmosphere getAtmosphere() {
+		return atmosphere;
+	}
+
+	/**
+	 * @return the orbit
+	 */
+	public msp.simulator.environment.orbit.Orbit getOrbit() {
+		return orbit;
+	}
+
+	/**
+	 * @return the gravitationalPotential
+	 */
+	public msp.simulator.environment.gravitationalPotential.GravitationalPotential getGravitationalPotential() {
+		return gravitationalPotential;
 	}
 
 }

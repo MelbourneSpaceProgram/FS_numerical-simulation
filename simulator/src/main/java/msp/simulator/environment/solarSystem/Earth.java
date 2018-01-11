@@ -6,7 +6,9 @@ import org.orekit.bodies.CelestialBody;
 import org.orekit.bodies.CelestialBodyFactory;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.errors.OrekitException;
+import org.orekit.frames.FramesFactory;
 import org.orekit.utils.Constants;
+import org.orekit.utils.IERSConventions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,12 +62,12 @@ public class Earth {
 				"-> Building the Earth..."));
 		
 		try {
-			/** Building the shape of the Earth body. 	**/
+			/* Building the shape of the Earth body. 	*/
 			
-			/* Linking the singleton. */
+			/*  -> Celestial Body: linking the singleton.*/
 			this.earthCelestialBody = CelestialBodyFactory.getEarth();
 			
-			/* Attraction Coefficient mu					*/
+			/*  -> Attraction Coefficient mu				*/
 			this.attractCoeff_mu = Constants.EGM96_EARTH_MU;
 			
 			/*	-> Radius								*/
@@ -75,8 +77,8 @@ public class Earth {
 			this.earthEllipsoidBodyShape = new OneAxisEllipsoid (
 				this.earthRadius,
 				Constants.WGS84_EARTH_FLATTENING,
-				this.earthCelestialBody.getInertiallyOrientedFrame()
-				);
+				FramesFactory.getITRF(IERSConventions.IERS_2010, true) 
+					);
 		} catch (OrekitException e) {
 			e.printStackTrace();
 		}
