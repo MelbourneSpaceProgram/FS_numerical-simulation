@@ -9,6 +9,19 @@ import org.slf4j.LoggerFactory;
 import msp.simulator.utils.logs.CustomLoggingTools;
 
 /**
+ * Major Class related to the Space Environment in the
+ * simulation.
+ * 
+ * This class handles a set of sub-classes representing
+ * the modules actually used for the accuracy of the environment.
+ * E.g. Orbit, Atmosphere, GravitationalPotential, GeoMagneticField etc.
+ * <p>
+ * This class is responsible for creating and loading any object
+ * or instance of such sub-classes and provides methods to access
+ * and maintain these ones.
+ * <p>
+ * The Environment is considered as a set of non-interacting modules
+ * only providing its instances and tools to the user.
  *
  * @author Florian CHAUBEYRE
  */

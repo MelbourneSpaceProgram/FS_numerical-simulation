@@ -1,5 +1,5 @@
 /.metadata/
 /.recommenders/
-**/log*
+**/resources/log*
 **/*DS_Store
 **/*.class

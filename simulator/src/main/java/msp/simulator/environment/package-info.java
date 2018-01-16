@@ -10,6 +10,7 @@
  * that is the dynamic package including the main orbit 
  * propagation.
  * 
+ * @version 0.1
  * @author Florian CHAUBEYRE
  *
  */
