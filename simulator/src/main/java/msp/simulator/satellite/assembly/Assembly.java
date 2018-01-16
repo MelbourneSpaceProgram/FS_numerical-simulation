@@ -16,9 +16,6 @@ import msp.simulator.utils.logs.CustomLoggingTools;
  */
 public class Assembly {
 
-	/** Logger of the class */
-	Logger logger = LoggerFactory.getLogger(this.getClass());
-	
 	/* **************************************************************	*/
 	/* 				STATIC FIELD FOR CUBESAT PARAMETERS.				*/
 	/* **************************************************************	*/
@@ -29,6 +26,10 @@ public class Assembly {
 	/** Static field describing the Satellite Body Mass. */
 	private static double cubesatMass = 10 ; /* kg */
 	
+	/* **************************************************************	*/
+	
+	/** Logger of the class */
+	Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	/** Instance of the satellite body for the assembly. */
 	private SatelliteBody satelliteBody;

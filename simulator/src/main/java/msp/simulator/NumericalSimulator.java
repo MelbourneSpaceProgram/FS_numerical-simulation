@@ -35,6 +35,10 @@ public class NumericalSimulator {
 	/** Satellite Instance of the Simulation. */
 	@SuppressWarnings("unused")
 	private msp.simulator.satellite.Satellite satellite;
+	
+	/** Dynamic Module of the Simulation. */
+	@SuppressWarnings("unused")
+	private msp.simulator.dynamic.Dynamic dynamic;
 
 	/* TODO: Enumerate the execution status. */
 	private int executionStatus;
@@ -92,7 +96,12 @@ public class NumericalSimulator {
 							FramesFactory.getEME2000(),
 							new AngularCoordinates()
 							),
-					this.environment.getSolarSystem().getSun());
+					this.environment.getSolarSystem().getSun()
+					);
+			
+			/* Building the Dynamic Module. */
+			this.dynamic = new msp.simulator.dynamic.Dynamic(this.satellite) ;
+					
 		} catch (OrekitException e) {
 			e.printStackTrace();
 		}
@@ -105,6 +114,14 @@ public class NumericalSimulator {
 			this.logger.info(CustomLoggingTools.indentMsg(this.logger,
 					"Processing the Simulation..."));
 			}
+
+		/* TODO: Test for propagation purpose. */
+		this.logger.info(CustomLoggingTools.indentMsg(this.logger,
+				"Launching a Propagation Test..."));
+		this.dynamic.launchPropa();
+		
+		
+		
 	}
 	
 	public void exit() {

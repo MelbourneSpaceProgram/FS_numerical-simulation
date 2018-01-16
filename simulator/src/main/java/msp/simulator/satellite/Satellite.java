@@ -30,6 +30,8 @@ public class Satellite {
 	public Satellite(Orbit orbit, Attitude attitude, Sun sun) {
 		this.logger.info(CustomLoggingTools.indentMsg(this.logger,
 				"Building the Satellite..."));
+		
+		/* Building the Assembly of the Satellite. */
 		this.assembly = new Assembly(orbit, attitude, sun);
 	}
 	

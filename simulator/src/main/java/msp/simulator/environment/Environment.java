@@ -6,7 +6,6 @@ import org.orekit.errors.OrekitException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import msp.simulator.environment.gravitationalPotential.GravitationalPotential;
 import msp.simulator.utils.logs.CustomLoggingTools;
 
 /**
@@ -30,6 +29,8 @@ public class Environment {
 	/** Instance of the Gravitational Potential. */
 	private msp.simulator.environment.gravitationalPotential.GravitationalPotential
 	gravitationalPotential;
+	
+	private msp.simulator.environment.geomagneticField.EarthMagneticField geoMagneticField;
 
 	/**
 	 * Constructor of the Space Environment of the Simulation.
@@ -52,7 +53,11 @@ public class Environment {
 		this.orbit = new msp.simulator.environment.orbit.Orbit(this.solarSystem);
 	
 		/* Building the Earth Gravity Field (Potential) */
-		this.gravitationalPotential = new GravitationalPotential();
+		this.gravitationalPotential = new msp.simulator.environment.gravitationalPotential.
+				GravitationalPotential();
+		
+		/* Building the Earth Magnetic Field. */
+		this.geoMagneticField = new msp.simulator.environment.geomagneticField.EarthMagneticField();
 	}
 
 	/**
@@ -88,6 +93,13 @@ public class Environment {
 	 */
 	public msp.simulator.environment.gravitationalPotential.GravitationalPotential getGravitationalPotential() {
 		return gravitationalPotential;
+	}
+	
+	/**
+	 * @return the geoMagneticField
+	 */
+	public msp.simulator.environment.geomagneticField.EarthMagneticField getGeoMagneticField() {
+		return geoMagneticField ;
 	}
 
 }

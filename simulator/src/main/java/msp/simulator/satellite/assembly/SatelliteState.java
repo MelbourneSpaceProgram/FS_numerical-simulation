@@ -24,18 +24,21 @@ public class SatelliteState extends SpacecraftState {
 	
 	/**
 	 * Build the Satellite State in Space to be propagated.
-	 * This constructor should provide the initial state.
+	 * This constructor should provide the initial state through
+	 * the Orbit and the Attitude.
 	 * 
-	 * @param orbit Orbit followed by the satellite
-	 * @param attitude Initial Attitude of the satellite
+	 * @param orbit Orbit followed by the satellite - Contains
+	 * the initial position and speed
+	 * @param attitude Initial attitude of the satellite
 	 * @param mass Mass of the satellite
 	 * @throws IllegalArgumentException
 	 */
-	public SatelliteState(Orbit orbit, Attitude attitude, double mass) throws IllegalArgumentException {
+	public SatelliteState(Orbit orbit, Attitude attitude, double mass)
+			throws IllegalArgumentException {
 		super(orbit, attitude, mass);
 		
 		this.logger.info(CustomLoggingTools.indentMsg(this.logger,
-				" -> Loading Initial State of the satellite: Success."));
+				" -> Creating Initial State of the satellite: Success."));
 	}
 
 }

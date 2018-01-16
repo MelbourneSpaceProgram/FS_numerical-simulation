@@ -29,6 +29,9 @@ public final class OrekitConfiguration {
 	 */
 	private static final File orekitDataDir = 
 			new File("src/main/resources/orekit-data/");
+	
+	/** Version of the GeoLagnetic Field data: WMM2015. */
+	public static final int GeoMagneticDataYear = 2015;
     
 	/** Private constructor.
      * <p>This class is a utility class, it should neither have a public
