@@ -23,107 +23,102 @@ import msp.simulator.utils.logs.CustomLoggingTools;
  * @author Florian CHAUBEYRE
  */
 public class NumericalSimulator {
-	
+
 	/** Logger of the instance. */
 	private Logger logger;
-	
+
 	/* The different modules of the simulator. */
 	/** Environment Instance in the Simulation. */
-	@SuppressWarnings("unused")
 	private msp.simulator.environment.Environment environment;
-	
+
 	/** Satellite Instance of the Simulation. */
-	@SuppressWarnings("unused")
 	private msp.simulator.satellite.Satellite satellite;
-	
+
 	/** Dynamic Module of the Simulation. */
 	@SuppressWarnings("unused")
 	private msp.simulator.dynamic.Dynamic dynamic;
 
 	/* TODO: Enumerate the execution status. */
 	private int executionStatus;
-	
+
 	@SuppressWarnings("unused")
 	private final LocalDateTime startDate;
 	@SuppressWarnings("unused")
 	private LocalDateTime endDate;
-	
+
 	public NumericalSimulator() {
 		this.startDate = LocalDateTime.now();
-		
+
 		LogManager myLogManager = LogManager.getLogManager();
-		
+
 		System.setProperty(
 				"java.util.logging.config.file", 
 				"src/main/resources/config/log-config-file.txt");
-		
+
 		try {
 			myLogManager.readConfiguration();
-			
+
 		} catch (SecurityException | IOException e) {
 			e.printStackTrace();
 		}
 
 		this.logger = LoggerFactory.getLogger(this.getClass());
-	    this.logger.info("Launching the Simulation...");
+		this.logger.info("Launching the Simulation...");
 	}
-	
+
 	public void launch() {
 		this.initialize();
 		this.process();
 		this.exit();
 	}
-	
+
 	public void initialize() {
 		this.logger.info(CustomLoggingTools.indentMsg(this.logger,
 				"Initialization in Process..."));
-		
+
 		/* Instance of the Simulator. */
 		this.executionStatus = 1;
-		
+
 		/* Configure OreKit. */
 		OrekitConfiguration.processConfiguration();
-		
+
 		try {
 			/* Building the environment. */
 			this.environment = new msp.simulator.environment.Environment();
-			
+
 			/* Building the satellite. */
 			this.satellite = new msp.simulator.satellite.Satellite(
-					this.environment.getOrbit(),
+					this.environment,
 					new Attitude (
 							this.environment.getOrbit().getDate(),
 							FramesFactory.getEME2000(),
 							new AngularCoordinates()
-							),
-					this.environment.getSolarSystem().getSun()
+							)
 					);
-			
+
 			/* Building the Dynamic Module. */
-			this.dynamic = new msp.simulator.dynamic.Dynamic(this.satellite) ;
-					
+			this.dynamic = new msp.simulator.dynamic.Dynamic(
+					this.satellite,
+					this.environment
+					) ;
+
 		} catch (OrekitException e) {
 			e.printStackTrace();
 		}
-		
-		
+
+
 	}
-	
+
 	public void process() {
 		if (this.executionStatus == 1) {
 			this.logger.info(CustomLoggingTools.indentMsg(this.logger,
 					"Processing the Simulation..."));
-			}
+		}
 
-		/* TODO: Test for propagation purpose. */
-		this.logger.info(CustomLoggingTools.indentMsg(this.logger,
-				"Launching a Propagation Test..."));
-		this.dynamic.launchPropa();
-		
-		
-		
+
+
 	}
-	
+
 	public void exit() {
 		this.endDate = LocalDateTime.now();
 		this.logger.info(CustomLoggingTools.indentMsg(this.logger,
@@ -131,5 +126,5 @@ public class NumericalSimulator {
 						+ this.executionStatus)
 				);
 	}
-	
+
 }
