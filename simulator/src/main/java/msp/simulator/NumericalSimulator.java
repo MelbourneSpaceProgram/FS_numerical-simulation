@@ -4,15 +4,17 @@ package msp.simulator;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.logging.LogManager;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.orekit.attitudes.Attitude;
 import org.orekit.errors.OrekitException;
 import org.orekit.frames.FramesFactory;
 import org.orekit.utils.AngularCoordinates;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import msp.simulator.utils.VTSTools;
 import msp.simulator.utils.architecture.OrekitConfiguration;
 import msp.simulator.utils.logs.CustomLoggingTools;
 
@@ -114,7 +116,20 @@ public class NumericalSimulator {
 			this.logger.info(CustomLoggingTools.indentMsg(this.logger,
 					"Processing the Simulation..."));
 		}
-
+		
+		VTSTools.generateAEMFile(
+				this.satellite.getAssembly().getSatelliteState().getDate(),
+				this.satellite.getAssembly().getSatelliteState().getDate()
+				.shiftedBy(60*60*1), 
+				this.dynamic.getPropagation().getPropagator(), 
+				"test");
+		
+		VTSTools.generateOEMFile(
+				this.satellite.getAssembly().getSatelliteState().getDate(),
+				this.satellite.getAssembly().getSatelliteState().getDate().
+				shiftedBy(60*60*1), 
+				this.dynamic.getPropagation().getPropagator(), 
+				"test");
 
 
 	}
@@ -123,7 +138,12 @@ public class NumericalSimulator {
 		this.endDate = LocalDateTime.now();
 		this.logger.info(CustomLoggingTools.indentMsg(this.logger,
 				"Simulation exits with execution status: "
-						+ this.executionStatus)
+						+ this.executionStatus 
+						+ "\n"
+						+ "\t Processing Time: " 
+						+ this.startDate.until(this.endDate, ChronoUnit.SECONDS)
+						+ "s."
+						)
 				);
 	}
 

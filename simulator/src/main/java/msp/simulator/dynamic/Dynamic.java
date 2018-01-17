@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import msp.simulator.dynamic.forces.Forces;
+import msp.simulator.dynamic.propagation.Propagation;
 import msp.simulator.environment.Environment;
 import msp.simulator.satellite.Satellite;
 import msp.simulator.utils.logs.CustomLoggingTools;
@@ -26,14 +27,19 @@ public class Dynamic {
 	/** Instance of Linear Forces Model of the dynamic. */
 	private Forces forces;
 
+	/** Instance of Propagation of the dynamic. */
+	private Propagation propagation;
+
+	
 	/**
 	 * 
 	 */
 	public Dynamic(Environment environment, Satellite satellite) {
 		Dynamic.logger.info(CustomLoggingTools.indentMsg(logger, 
-				"Building the Model of Dynamic..."));
+				"Building the Dynamic Engine..."));
 
 		this.forces = new Forces(environment, satellite);
+		this.propagation = new Propagation(environment, satellite, this.forces);
 	}
 
 	/**
@@ -41,6 +47,13 @@ public class Dynamic {
 	 */
 	public Forces getForces() {
 		return forces;
+	}
+
+	/**
+	 * @return The Propagtion Services of the Dynamic Module
+	 */
+	public Propagation getPropagation() {
+		return propagation;
 	}
 
 }
