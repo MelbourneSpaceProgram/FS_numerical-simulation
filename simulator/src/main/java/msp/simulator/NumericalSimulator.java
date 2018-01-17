@@ -98,8 +98,8 @@ public class NumericalSimulator {
 
 			/* Building the Dynamic Module. */
 			this.dynamic = new msp.simulator.dynamic.Dynamic(
-					this.satellite,
-					this.environment
+					this.environment,
+					this.satellite
 					) ;
 
 		} catch (OrekitException e) {

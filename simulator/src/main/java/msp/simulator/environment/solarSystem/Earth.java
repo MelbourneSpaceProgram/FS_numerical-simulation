@@ -6,6 +6,7 @@ import org.orekit.bodies.CelestialBody;
 import org.orekit.bodies.CelestialBodyFactory;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.errors.OrekitException;
+import org.orekit.frames.FactoryManagedFrame;
 import org.orekit.frames.FramesFactory;
 import org.orekit.utils.Constants;
 import org.orekit.utils.IERSConventions;
@@ -40,14 +41,18 @@ public class Earth {
 	/** Earth Celestial Body. */
 	private CelestialBody earthCelestialBody = null;
 	
+	/** Earth-centered and rotating frame. */
+	private FactoryManagedFrame rotatingFrame;
+	
 	/** Body Shape of the Earth Celestial Body. */
 	private OneAxisEllipsoid earthEllipsoidBodyShape = null;
 	
 	/** The Earth Radius. */
-	private double earthRadius = Constants.EGM96_EARTH_EQUATORIAL_RADIUS;
+	private double earthRadius;
 	
 	/** Earth Attraction Coefficient. ~ 3.986e14 m³/s² */
-	private double attractCoeff_mu = Constants.EGM96_EARTH_MU;
+	private double attractCoeff_mu;
+	
 	
 	/**
 	 * Constructor of the Earth instance.<p>
@@ -73,11 +78,14 @@ public class Earth {
 			/*	-> Radius								*/
 			this.earthRadius = Constants.WGS84_EARTH_EQUATORIAL_RADIUS;
 			
+			/*  -> Earth Rotating Frame. */
+			this.rotatingFrame = FramesFactory.getITRF(IERSConventions.IERS_2010, true);
+			
 			/*	-> Ellipsoid								*/
 			this.earthEllipsoidBodyShape = new OneAxisEllipsoid (
 				this.earthRadius,
 				Constants.WGS84_EARTH_FLATTENING,
-				FramesFactory.getITRF(IERSConventions.IERS_2010, true) 
+				this.rotatingFrame
 					);
 		} catch (OrekitException e) {
 			e.printStackTrace();
@@ -120,5 +128,14 @@ public class Earth {
 	 */
 	public double getAttractCoeffMu() {
 		return this.attractCoeff_mu;
+	}
+	
+	/**
+	 * Return the Earth-centered rotating frame.<p>
+	 * FramesFactory.getITRF(IERSConventions.IERS_2010, true)
+	 * @return ITRF Frame from IERS 2010 Convention
+	 */
+	public FactoryManagedFrame getRotatingFrame() {
+		return this.rotatingFrame;
 	}
 }

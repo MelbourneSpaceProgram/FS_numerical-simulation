@@ -43,15 +43,16 @@ public class Assembly {
 	 */
 	public Assembly(Orbit orbit, Attitude attitude, Sun sun) {
 		this.logger.info(CustomLoggingTools.indentMsg(this.logger,
-				" -> Assembly in process..."));
+				"Assembly in process..."));
 		
 		this.satelliteBody = new SatelliteBody(Assembly.cubesatLength, sun);
 		this.satelliteState = new SatelliteState(orbit, attitude, Assembly.cubesatMass);
 	}
 	
 	/**
-	 * Return the satellite body as a CubeSat box.
-	 * @return BoxAndSolarArraySpaceCraft.
+	 * Return the satellite body as a CubeSat box sensitive
+	 * to radiation and drag.
+	 * @return BoxAndSolarArraySpaceCraft (DragSensitive, RadiationSensitive)
 	 */
 	public SatelliteBody getSatelliteBody() {
 		return this.satelliteBody;

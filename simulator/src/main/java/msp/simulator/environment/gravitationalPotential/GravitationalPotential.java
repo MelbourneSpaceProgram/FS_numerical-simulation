@@ -55,7 +55,7 @@ public class GravitationalPotential {
 	 * @see GravityFieldFactory
 	 */
 	public NormalizedSphericalHarmonicsProvider 
-	getNormalizedSphericalHarmonicProvider() {
+	getNormalizedSphericalHarmonicCoeffProvider() {
 		return this.spericalHarmonicProvider;
 	}
 }
