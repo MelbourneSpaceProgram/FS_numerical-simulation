@@ -27,7 +27,7 @@ import msp.simulator.utils.logs.CustomLoggingTools;
 public class NumericalSimulator {
 
 	/** Logger of the instance. */
-	private Logger logger;
+	private static final Logger logger = LoggerFactory.getLogger(NumericalSimulator.class);
 
 	/* The different modules of the simulator. */
 	/** Environment Instance in the Simulation. */
@@ -37,35 +37,29 @@ public class NumericalSimulator {
 	private msp.simulator.satellite.Satellite satellite;
 
 	/** Dynamic Module of the Simulation. */
-	@SuppressWarnings("unused")
 	private msp.simulator.dynamic.Dynamic dynamic;
 
 	/* TODO: Enumerate the execution status. */
 	private int executionStatus;
 
-	@SuppressWarnings("unused")
 	private final LocalDateTime startDate;
-	@SuppressWarnings("unused")
 	private LocalDateTime endDate;
 
 	public NumericalSimulator() {
 		this.startDate = LocalDateTime.now();
 
+		/* Setting the configuration of the Logging Services. */
 		LogManager myLogManager = LogManager.getLogManager();
-
 		System.setProperty(
 				"java.util.logging.config.file", 
 				"src/main/resources/config/log-config-file.txt");
-
 		try {
 			myLogManager.readConfiguration();
-
 		} catch (SecurityException | IOException e) {
 			e.printStackTrace();
 		}
 
-		this.logger = LoggerFactory.getLogger(this.getClass());
-		this.logger.info("Launching the Simulation...");
+		NumericalSimulator.logger.info("Launching the Simulation...");
 	}
 
 	public void launch() {
@@ -75,7 +69,7 @@ public class NumericalSimulator {
 	}
 
 	public void initialize() {
-		this.logger.info(CustomLoggingTools.indentMsg(this.logger,
+		NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
 				"Initialization in Process..."));
 
 		/* Instance of the Simulator. */
@@ -113,7 +107,7 @@ public class NumericalSimulator {
 
 	public void process() {
 		if (this.executionStatus == 1) {
-			this.logger.info(CustomLoggingTools.indentMsg(this.logger,
+			NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
 					"Processing the Simulation..."));
 		}
 		
@@ -136,7 +130,7 @@ public class NumericalSimulator {
 
 	public void exit() {
 		this.endDate = LocalDateTime.now();
-		this.logger.info(CustomLoggingTools.indentMsg(this.logger,
+		NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
 				"Simulation exits with execution status: "
 						+ this.executionStatus 
 						+ "\n"

@@ -15,7 +15,17 @@ import msp.simulator.utils.logs.CustomLoggingTools;
  * @author Florian CHAUBEYRE
  */
 public class SatelliteState extends SpacecraftState {
-
+	
+	/* 
+	 * ************************************* * 
+	 * 	TODO: addAdditionnalState create a 	*
+	 * 	new instance, so we should update a 	*
+	 * 	current SpacecraftState attribute 	*
+	 * 	and do not extend SpacecraftState 	*
+	 * 	at all.								*
+	 * ************************************* * 
+	 */
+	
 	/** Generated Serial Version UID. */
 	private static final long serialVersionUID = 4915009976932582048L;
 
@@ -36,6 +46,8 @@ public class SatelliteState extends SpacecraftState {
 	public SatelliteState(Orbit orbit, Attitude attitude, double mass)
 			throws IllegalArgumentException {
 		super(orbit, attitude, mass);
+		
+		this.addAdditionalState("NewState", new double[]{4,5});
 		
 		this.logger.info(CustomLoggingTools.indentMsg(this.logger,
 				" -> Creating Initial State of the satellite: Success."));
