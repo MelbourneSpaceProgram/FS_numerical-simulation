@@ -24,15 +24,26 @@ public class Torques implements TorqueProvider {
 	/** Instance of the Logger of the class. */
 	private static final Logger logger = LoggerFactory.getLogger(Torques.class);
 	
+	/** Instance of the additional equation */
 	private TorqueToSpinEquation dynamicTorqueEquation;
 	
+	/**
+	 * Build the Main Torque Provider of the dynamic module.
+	 * @param environment The Environment of Simulation
+	 * @param satellite The Satellite in the simulation.
+	 */
 	public Torques (Environment environment, Satellite satellite) {
 		logger.info(CustomLoggingTools.indentMsg(logger,
 				"Building the Torque Engine..."));
 		
-		this.dynamicTorqueEquation = new TorqueToSpinEquation(satellite, this);
+		this.dynamicTorqueEquation = new TorqueToSpinEquation(this);
 	}
 	
+	/**
+	 * Return the Additional Equation computing the acceleration rotation
+	 * rate from the torque interaction on the satellite.
+	 * @return
+	 */
 	public AdditionalEquations getTorqueToSpinEquation() {
 		return this.dynamicTorqueEquation;
 	}
@@ -46,7 +57,7 @@ public class Torques implements TorqueProvider {
 	@Override
 	public Vector3D getTorque() {
 		/* TODO */
-		return new Vector3D(0.01, 0, 0.001) ;
+		return new Vector3D(0.0, 0.0, 0.0) ;
 	}
 
 }

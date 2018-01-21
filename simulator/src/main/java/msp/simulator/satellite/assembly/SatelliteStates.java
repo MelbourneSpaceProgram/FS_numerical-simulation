@@ -42,6 +42,19 @@ public class SatelliteStates {
 
 	private Attitude defaultAttitude; 
 
+	/** Initial Spin of the satellite */
+	private final Vector3D initialSpin = new Vector3D(
+			0.0,
+			0.031415,
+			0.0
+			);
+	/** Initial Rotation Acceleration of the satellite */
+	private final Vector3D initialRotAcceleration = new Vector3D(
+			0.0,
+			0.0,
+			0.0
+			);
+
 	/**
 	 * 
 	 * @param environment
@@ -57,7 +70,8 @@ public class SatelliteStates {
 				environment.getOrbit().getFrame(),
 				new AngularCoordinates(
 						new Rotation(1,0,0,0,true), 
-						new Vector3D(0.031415,0.031415,0.031415)
+						this.initialSpin,
+						this.initialRotAcceleration
 						)
 				);
 
@@ -75,9 +89,9 @@ public class SatelliteStates {
 				 *  - (rad/s) 
 				 */
 				.addAdditionalState("Spin", new double[]{
-						0.031415, 	/* W_x */
-						0.031415,	/* W_y */
-						0.0}			/* W_z */
+						this.initialSpin.getX(),
+						this.initialSpin.getY(),
+						this.initialSpin.getZ() }
 						)
 				/*	Torque Actions
 				 *  - Satellite frame
@@ -108,7 +122,7 @@ public class SatelliteStates {
 	public SpacecraftState getInitialState() {
 		return initialState;
 	}
-	
+
 	/**
 	 * Update the value of the state by the newState one.
 	 * @param state	The SpacecraftState to update
@@ -161,13 +175,11 @@ public class SatelliteStates {
 
 
 	/**
+	 * Use for automatic guidance.
 	 * @return the defaultAttitude
 	 */
 	public Attitude getDefaultAttitude() {
 		return defaultAttitude;
 	}	
-
-
-
 
 }

@@ -126,12 +126,14 @@ public class DynamicGuidance implements AttitudeProvider {
 				Propagation.integrationTimeStep
 				);
 
-		/* Compute the acceleration rate. */
-		Vector3D accRate = new Vector3D(
-				this.torqueProvider.getTorque().getX() / Assembly.cs1_inertia,
-				this.torqueProvider.getTorque().getY() / Assembly.cs1_inertia,
-				this.torqueProvider.getTorque().getZ() / Assembly.cs1_inertia
-				);
+		/* Compute the acceleration rate by adding the torque contribution. */
+		Vector3D accRate = 
+				this.satelliteStates.getCurrentState().getAttitude().getRotationAcceleration()
+				.add(new Vector3D(
+						this.torqueProvider.getTorque().getX() / Assembly.cs1_inertia,
+						this.torqueProvider.getTorque().getY() / Assembly.cs1_inertia,
+						this.torqueProvider.getTorque().getZ() / Assembly.cs1_inertia)
+						);
 
 		/* Wrap a new attitude from the final quaternion. */
 		Attitude finalAttitude = new Attitude(

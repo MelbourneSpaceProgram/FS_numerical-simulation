@@ -106,17 +106,17 @@ public class NumericalSimulator {
 		VTSTools.generateAEMFile(
 				this.satellite.getAssembly().getStates().getInitialState().getDate(),
 				this.satellite.getAssembly().getStates().getInitialState().getDate()
-				.shiftedBy(60*60*5), 
+				.shiftedBy(100), /* Second */
 				this.dynamic.getPropagation().getPropagator(), 
 				"test",
-				this.satellite);
+				this.satellite);	
 		
-		VTSTools.generateOEMFile(
-				this.satellite.getAssembly().getStates().getInitialState().getDate(),
-				this.satellite.getAssembly().getStates().getInitialState().getDate().
-				shiftedBy(60*60*5), 
-				this.dynamic.getPropagation().getPropagator(), 
-				"test");
+//		VTSTools.generateOEMFile(
+//				this.satellite.getAssembly().getStates().getInitialState().getDate(),
+//				this.satellite.getAssembly().getStates().getInitialState().getDate().
+//				shiftedBy(60*60*1), 
+//				this.dynamic.getPropagation().getPropagator(), 
+//				"test");
 
 
 	}

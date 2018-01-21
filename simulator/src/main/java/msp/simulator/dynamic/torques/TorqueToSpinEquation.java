@@ -3,15 +3,12 @@
 package msp.simulator.dynamic.torques;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.orekit.attitudes.Attitude;
 import org.orekit.errors.OrekitException;
 import org.orekit.propagation.SpacecraftState;
 import org.orekit.propagation.integration.AdditionalEquations;
-import org.orekit.utils.AngularCoordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import msp.simulator.satellite.Satellite;
 import msp.simulator.satellite.assembly.Assembly;
 
 /**
@@ -37,9 +34,6 @@ public class TorqueToSpinEquation implements AdditionalEquations {
 	private static final Logger logger = LoggerFactory.getLogger(
 			TorqueToSpinEquation.class);
 
-	/** Instance of the Satellite of the simulation.*/
-	private Satellite satellite;
-
 	/** Instance of torque provider of the dynamic engine. */
 	private TorqueProvider torqueProvider;
 
@@ -50,8 +44,7 @@ public class TorqueToSpinEquation implements AdditionalEquations {
 	 * torque interaction on the satellite in the satellite
 	 * frame.
 	 */
-	public TorqueToSpinEquation(Satellite satellite, TorqueProvider torqueProvider) {
-		this.satellite = satellite;
+	public TorqueToSpinEquation(TorqueProvider torqueProvider) {
 		this.torqueProvider = torqueProvider;
 	}
 
@@ -77,6 +70,8 @@ public class TorqueToSpinEquation implements AdditionalEquations {
 	 * the orbital parameters (a, ex, ey, i, Omega, Alpha) if
 	 * it changed else null.
 	 * <p>
+	 * Model: wDot = RotAcc + Torque / I
+	 * <p>
 	 * NB: The Attitude doens't belong to the propagation state
 	 * and that's why we need to add ourselves the spin and 
 	 * compute on our own the new attitude quaternion.
@@ -100,14 +95,17 @@ public class TorqueToSpinEquation implements AdditionalEquations {
 		 * 	double wy = s.getAdditionalState(this.getName())[1];			*
 		 * 	double wz = s.getAdditionalState(this.getName())[2];			*
 		 * **************************************************************	*/
+		
+		/* Extract the current acceleration of the satellite. */
+		Vector3D accRate = s.getAttitude().getRotationAcceleration();
 
 		/* Implementation of the equation.
-		 * 		wDot = M / I  	on each axis in the case the inertia
-		 * 						is the same on the three axis.
+		 * 		wDot = Ra + M / I  	on each axis in the case the inertia
+		 * 							is the same on the three axis.
 		 */
-		double wxDot = this.torqueProvider.getTorque().getX() / Assembly.cs1_inertia;
-		double wyDot = this.torqueProvider.getTorque().getY() / Assembly.cs1_inertia;
-		double wzDot = this.torqueProvider.getTorque().getZ() / Assembly.cs1_inertia;
+		double wxDot = accRate.getX() + this.torqueProvider.getTorque().getX() / Assembly.cs1_inertia;
+		double wyDot = accRate.getY() + this.torqueProvider.getTorque().getY() / Assembly.cs1_inertia;
+		double wzDot = accRate.getZ() + this.torqueProvider.getTorque().getZ() / Assembly.cs1_inertia;
 
 		/* Updating the Reference.
 		 * 	NB: The following does not update the reference:

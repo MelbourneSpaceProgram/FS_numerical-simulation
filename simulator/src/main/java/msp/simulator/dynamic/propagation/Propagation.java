@@ -39,7 +39,7 @@ public class Propagation {
 	private ODEIntegrator integrator ;
 
 	/** Time Step in use for integration step calculation. (s) */
-	public static double integrationTimeStep = 1. ; /* Default value */ 
+	public static double integrationTimeStep = 0.1 ; /* Default value */ 
 
 	/** Instance of Propagator in the simulation. */
 	private NumericalPropagator propagator;

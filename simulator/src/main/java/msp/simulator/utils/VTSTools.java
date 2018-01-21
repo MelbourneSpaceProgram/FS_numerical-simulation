@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
+import org.hipparchus.complex.Quaternion;
 import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.orekit.attitudes.Attitude;
@@ -45,7 +46,7 @@ public final class VTSTools {
 	/** Unit conversion */
 	private static final double M_TO_KM = 1e-3;
 	/** Default step */
-	private static final double STEP = 1.;
+	private static final double STEP = 1;
 	/** Reference date */
 	private static final AbsoluteDate reference = AbsoluteDate.MODIFIED_JULIAN_EPOCH;
 
@@ -247,7 +248,7 @@ public final class VTSTools {
 			int days;
 			StringBuffer bf;
 			int count = 0;
-			while (current.offsetFrom(end, utc) < 0) {
+			while (current.offsetFrom(end, utc) <= 0) {
 				// elapsed time
 				seconds = current.offsetFrom(reference, utc);
 				days = (int) (seconds / Constants.JULIAN_DAY);
@@ -257,18 +258,24 @@ public final class VTSTools {
 
 				/* TODO: Modifs */
 				System.out.println("----- STEP n°" + count++);
-
+				
 				SpacecraftState currentSatState = propagator.propagate(current);
-				satellite.getAssembly().getStates().setCurrentState(propagator.propagate(current));
+				satellite.getAssembly().getStates().setCurrentState(currentSatState);
 
+				Quaternion qAtt = new Quaternion(
+						currentSatState.getAttitude().getRotation().getQ0(),
+						currentSatState.getAttitude().getRotation().getQ1(),
+						currentSatState.getAttitude().getRotation().getQ2(),
+						currentSatState.getAttitude().getRotation().getQ3()
+						);
+				
 				System.out.println("      - Attitude Propagator: " + 
-						currentSatState.getAttitude().getRotation().getAngle() + "° - " +
+						currentSatState.getAttitude().getRotation().getAngle() + "°rad - " +
 						currentSatState.getAttitude().getSpin().toString() + " - " +
 						currentSatState.getAttitude().getRotationAcceleration()
 						);
 				System.out.println("      - Attitude Satellite : " + 
-						satellite.getAssembly().getStates().getCurrentState()
-						.getAttitude().getRotation().getAngle() + "° - " +
+						qAtt.toString() + " - " +
 						satellite.getAssembly().getStates().getCurrentState()
 						.getAttitude().getSpin().toString() + " - " +
 						satellite.getAssembly().getStates().getCurrentState()
