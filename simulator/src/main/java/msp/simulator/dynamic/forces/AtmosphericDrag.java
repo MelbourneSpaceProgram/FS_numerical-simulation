@@ -31,10 +31,15 @@ public class AtmosphericDrag extends DragForce {
 	 */
 	public AtmosphericDrag(Environment environment, Satellite satellite) {
 		super(	environment.getAtmosphere(),
-				satellite.getAssembly().getSatelliteBody()
+				satellite.getAssembly().getBody()
 				);
 		AtmosphericDrag.logger.info(CustomLoggingTools.indentMsg(logger, 
 				" -> Building Atmospheric Drag: Succeed."));
+	}
+	
+	@Override
+	public String toString() {
+		return new String("Atmospheric Drag");
 	}
 
 }

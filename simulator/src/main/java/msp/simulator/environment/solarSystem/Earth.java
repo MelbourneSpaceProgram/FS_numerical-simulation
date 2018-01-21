@@ -10,6 +10,7 @@ import org.orekit.frames.FactoryManagedFrame;
 import org.orekit.frames.FramesFactory;
 import org.orekit.utils.Constants;
 import org.orekit.utils.IERSConventions;
+import org.orekit.utils.PVCoordinatesProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -137,5 +138,9 @@ public class Earth {
 	 */
 	public FactoryManagedFrame getRotatingFrame() {
 		return this.rotatingFrame;
+	}
+	
+	public PVCoordinatesProvider getPvCoordinateProvider() {
+		return ((PVCoordinatesProvider) this.earthCelestialBody) ;
 	}
 }

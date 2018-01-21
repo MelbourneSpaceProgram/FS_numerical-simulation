@@ -2,12 +2,10 @@
 
 package msp.simulator.satellite.assembly;
 
-import org.orekit.attitudes.Attitude;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import msp.simulator.environment.orbit.Orbit;
-import msp.simulator.environment.solarSystem.Sun;
+import msp.simulator.environment.Environment;
 import msp.simulator.utils.logs.CustomLoggingTools;
 
 /**
@@ -21,32 +19,38 @@ public class Assembly {
 	/* **************************************************************	*/
 	
 	/** Static field describing the length of the sides of the cube body. */
-	private static double cubesatLength = 0.010 ; /* m */
+	public static double cs1_Length = 0.010; /* m */
 	
 	/** Static field describing the Satellite Body Mass. */
-	private static double cubesatMass = 10 ; /* kg */
+	public static double cs1_Mass = 10; /* kg */
+	
+	/** Static field describing the Satellite inertia. */
+	/* TODO Inertia */
+	public static double cs1_inertia = 1.0; /* m.s^2 */
 	
 	/* **************************************************************	*/
 	
 	/** Logger of the class */
-	Logger logger = LoggerFactory.getLogger(this.getClass());
+	private static final Logger logger = LoggerFactory.getLogger(Assembly.class);
 	
 	/** Instance of the satellite body for the assembly. */
 	private SatelliteBody satelliteBody;
 	
 	/** Instance of the satellite initial state in space. */
-	private SatelliteState satelliteState;
-	
+	private SatelliteStates satelliteStates;
 	
 	/**
+	 * Build the satellite as a body and a state vector.
 	 * 
+	 * @param environment Use to extract the Sun body to create a
+	 * radiation sensitive satellite body.
 	 */
-	public Assembly(Orbit orbit, Attitude attitude, Sun sun) {
-		this.logger.info(CustomLoggingTools.indentMsg(this.logger,
+	public Assembly(Environment environment) {
+		Assembly.logger.info(CustomLoggingTools.indentMsg(Assembly.logger,
 				"Assembly in process..."));
 		
-		this.satelliteBody = new SatelliteBody(Assembly.cubesatLength, sun);
-		this.satelliteState = new SatelliteState(orbit, attitude, Assembly.cubesatMass);
+		this.satelliteBody = new SatelliteBody(environment);
+		this.satelliteStates = new SatelliteStates(environment);
 	}
 	
 	/**
@@ -54,7 +58,7 @@ public class Assembly {
 	 * to radiation and drag.
 	 * @return BoxAndSolarArraySpaceCraft (DragSensitive, RadiationSensitive)
 	 */
-	public SatelliteBody getSatelliteBody() {
+	public SatelliteBody getBody() {
 		return this.satelliteBody;
 	}
 	
@@ -62,8 +66,8 @@ public class Assembly {
 	 * Return the satellite state in space.
 	 * @return SpacecraftState
 	 */
-	public SatelliteState getSatelliteState() {
-		return this.satelliteState;
+	public SatelliteStates getStates() {
+		return this.satelliteStates;
 	}
 
 }

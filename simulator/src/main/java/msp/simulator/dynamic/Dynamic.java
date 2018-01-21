@@ -6,7 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import msp.simulator.dynamic.forces.Forces;
+import msp.simulator.dynamic.guidance.Guidance;
 import msp.simulator.dynamic.propagation.Propagation;
+import msp.simulator.dynamic.torques.Torques;
 import msp.simulator.environment.Environment;
 import msp.simulator.satellite.Satellite;
 import msp.simulator.utils.logs.CustomLoggingTools;
@@ -26,6 +28,12 @@ public class Dynamic {
 
 	/** Instance of Linear Forces Model of the dynamic. */
 	private Forces forces;
+	
+	/** Instance of the Guidance Core of the Satellite in the simulation. */
+	private Guidance guidance;
+	
+	/** Instance of the Torques Manager of the Dynamic Module/. */
+	private Torques torques;
 
 	/** Instance of Propagation of the dynamic. */
 	private Propagation propagation;
@@ -39,7 +47,15 @@ public class Dynamic {
 				"Building the Dynamic Engine..."));
 
 		this.forces = new Forces(environment, satellite);
-		this.propagation = new Propagation(environment, satellite, this.forces);
+		this.torques = new Torques(environment, satellite);
+		this.guidance = new Guidance(environment, satellite, torques);
+		this.propagation = new Propagation(
+				environment,
+				satellite, 
+				this.forces,
+				this.torques,
+				this.guidance
+				);
 	}
 
 	/**
@@ -54,6 +70,13 @@ public class Dynamic {
 	 */
 	public Propagation getPropagation() {
 		return propagation;
+	}
+
+	/**
+	 * @return the guidance
+	 */
+	public Guidance getGuidance() {
+		return guidance;
 	}
 
 }

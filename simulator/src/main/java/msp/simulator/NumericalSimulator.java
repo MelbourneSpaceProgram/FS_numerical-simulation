@@ -7,10 +7,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.logging.LogManager;
 
-import org.orekit.attitudes.Attitude;
 import org.orekit.errors.OrekitException;
-import org.orekit.frames.FramesFactory;
-import org.orekit.utils.AngularCoordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,17 +76,12 @@ public class NumericalSimulator {
 		OrekitConfiguration.processConfiguration();
 
 		try {
-			/* Building the environment. */
+			/* Building the Environment Module. */
 			this.environment = new msp.simulator.environment.Environment();
 
-			/* Building the satellite. */
+			/* Building the Satellite Module. */
 			this.satellite = new msp.simulator.satellite.Satellite(
-					this.environment,
-					new Attitude (
-							this.environment.getOrbit().getDate(),
-							FramesFactory.getEME2000(),
-							new AngularCoordinates()
-							)
+					this.environment
 					);
 
 			/* Building the Dynamic Module. */
@@ -112,16 +104,17 @@ public class NumericalSimulator {
 		}
 		
 		VTSTools.generateAEMFile(
-				this.satellite.getAssembly().getSatelliteState().getDate(),
-				this.satellite.getAssembly().getSatelliteState().getDate()
-				.shiftedBy(60*60*1), 
+				this.satellite.getAssembly().getStates().getInitialState().getDate(),
+				this.satellite.getAssembly().getStates().getInitialState().getDate()
+				.shiftedBy(60*60*5), 
 				this.dynamic.getPropagation().getPropagator(), 
-				"test");
+				"test",
+				this.satellite);
 		
 		VTSTools.generateOEMFile(
-				this.satellite.getAssembly().getSatelliteState().getDate(),
-				this.satellite.getAssembly().getSatelliteState().getDate().
-				shiftedBy(60*60*1), 
+				this.satellite.getAssembly().getStates().getInitialState().getDate(),
+				this.satellite.getAssembly().getStates().getInitialState().getDate().
+				shiftedBy(60*60*5), 
 				this.dynamic.getPropagation().getPropagator(), 
 				"test");
 

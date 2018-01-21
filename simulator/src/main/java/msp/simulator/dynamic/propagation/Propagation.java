@@ -11,6 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import msp.simulator.dynamic.forces.Forces;
+import msp.simulator.dynamic.guidance.Guidance;
+import msp.simulator.dynamic.torques.Torques;
 import msp.simulator.environment.Environment;
 import msp.simulator.satellite.Satellite;
 import msp.simulator.utils.logs.CustomLoggingTools;
@@ -29,44 +31,66 @@ import msp.simulator.utils.logs.CustomLoggingTools;
  * @author Florian CHAUBEYRE
  */
 public class Propagation {
-	
+
 	/** Instance of the Logger of the class. */
 	private static final Logger logger = LoggerFactory.getLogger(Propagation.class);
-	
-	/** Instance of Propagator in the simulation. */
-	private NumericalPropagator propagator;
-	
+
 	/** Instance of Integrator of the Propagator. */
 	private ODEIntegrator integrator ;
-	
+
 	/** Time Step in use for integration step calculation. (s) */
-	private double integrationTimeStep;
-	
-	public Propagation(Environment environment, Satellite satellite, Forces forces) {
+	public static double integrationTimeStep = 1. ; /* Default value */ 
+
+	/** Instance of Propagator in the simulation. */
+	private NumericalPropagator propagator;
+
+	/**
+	 * 
+	 * @param environment
+	 * @param satellite
+	 * @param forces
+	 */
+	public Propagation(Environment environment, Satellite satellite, 
+			Forces forces,
+			Torques torques,
+			Guidance guidance
+			) {
 		Propagation.logger.info(CustomLoggingTools.indentMsg(Propagation.logger,
 				"Registering to the Propagation Services..."));
-		
-		/* Creating the Instance of Propagator. */
-		this.integrationTimeStep = 1.0;
-		this.integrator = new ClassicalRungeKuttaIntegrator(this.integrationTimeStep);
-		this.propagator = new NumericalPropagator(this.integrator);
-		
-		/* Registering the implmented force models. */
-		Propagation.logger.info(CustomLoggingTools.indentMsg(Propagation.logger,
-				"-> Registering the implemented Force Models..."));
-		for (ForceModel forceModel : forces.getListOfForces() ) {
-			this.propagator.addForceModel(forceModel);
-		}
-		
-		/* Registering the initial state of the satellite. */
-		Propagation.logger.info(CustomLoggingTools.indentMsg(Propagation.logger,
-				"-> Registering the initial Satellite State..."));
 		try {
-			this.propagator.setInitialState(satellite.getAssembly().getSatelliteState());
+			/* Creating the Instance of Propagator. */
+			Propagation.integrationTimeStep = 1.;
+			this.integrator = new ClassicalRungeKuttaIntegrator(Propagation.integrationTimeStep);
+			this.propagator = new NumericalPropagator(this.integrator);
+
+			/* Registering the implemented force models. */
+			Propagation.logger.info(CustomLoggingTools.indentMsg(Propagation.logger,
+					"-> Registering the implemented Force Models..."));
+			for (ForceModel forceModel : forces.getListOfForces() ) {
+				this.propagator.addForceModel(forceModel);
+				Propagation.logger.info(CustomLoggingTools.indentMsg(Propagation.logger,
+						"   + " + forceModel.toString()));
+			}
+
+			/* Registering the initial state of the satellite. */
+			Propagation.logger.info(CustomLoggingTools.indentMsg(Propagation.logger,
+					"-> Registering the initial Satellite State..."));
+			/*    DEFAULT INITIAL STATE. */
+			this.propagator.setInitialState(
+					satellite.getAssembly().getStates().getInitialState());
+			
+			/* Registering the Attitude Engine. */
+			this.propagator.setAttitudeProvider(
+					guidance.getAttitudeProvider());
+			
+			/* Registering the additional equations. */
+			/*  + Torque Dynamic 					*/
+			this.propagator.addAdditionalEquations(torques.getTorqueToSpinEquation());
+			
 		} catch (OrekitException e) {
 			e.printStackTrace();
 		}
-		
+
 		Propagation.logger.info(CustomLoggingTools.indentMsg(Propagation.logger,
 				"Propagator Configured."));
 	}

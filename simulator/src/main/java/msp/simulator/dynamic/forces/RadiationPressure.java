@@ -34,7 +34,7 @@ public class RadiationPressure extends SolarRadiationPressure {
 		super(
 				environment.getSolarSystem().getSun().getPvCoordinateProvider(),
 				environment.getSolarSystem().getEarth().getRadius(),
-				satellite.getAssembly().getSatelliteBody()
+				satellite.getAssembly().getBody()
 				);
 		
 		RadiationPressure.logger.info(CustomLoggingTools.indentMsg(logger, 
