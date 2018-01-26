@@ -8,12 +8,13 @@ import java.time.temporal.ChronoUnit;
 import java.util.logging.LogManager;
 
 import org.orekit.errors.OrekitException;
+import org.orekit.time.AbsoluteDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import msp.simulator.utils.VTSTools;
 import msp.simulator.utils.architecture.OrekitConfiguration;
 import msp.simulator.utils.logs.CustomLoggingTools;
+import msp.simulator.utils.logs.ephemeris.EphemerisGenerator;
 
 /**
  * This class is responsible to create the instance of the
@@ -35,6 +36,9 @@ public class NumericalSimulator {
 
 	/** Dynamic Module of the Simulation. */
 	private msp.simulator.dynamic.Dynamic dynamic;
+
+	/** Ephemeris Generator Instance of the simulator. */
+	private msp.simulator.utils.logs.ephemeris.EphemerisGenerator ephemerisGenerator;
 
 	/* TODO: Enumerate the execution status. */
 	private int executionStatus;
@@ -84,11 +88,21 @@ public class NumericalSimulator {
 					this.environment
 					);
 
+			/* Configure here a new initial state of the satellite
+			 * if needed.
+			 */
+			// Empty
+			/* **************************** */
+
 			/* Building the Dynamic Module. */
 			this.dynamic = new msp.simulator.dynamic.Dynamic(
 					this.environment,
 					this.satellite
 					) ;
+
+			/* Ephemeris Generator Module */
+			this.ephemerisGenerator = new EphemerisGenerator();
+			this.ephemerisGenerator.start();
 
 		} catch (OrekitException e) {
 			e.printStackTrace();
@@ -102,23 +116,30 @@ public class NumericalSimulator {
 			NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
 					"Processing the Simulation..."));
 		}
-		
-		VTSTools.generateAEMFile(
-				this.satellite.getAssembly().getStates().getInitialState().getDate(),
-				this.satellite.getAssembly().getStates().getInitialState().getDate()
-				.shiftedBy(100), /* Second */
-				this.dynamic.getPropagation().getPropagator(), 
-				"test",
-				this.satellite);	
-		
-//		VTSTools.generateOEMFile(
-//				this.satellite.getAssembly().getStates().getInitialState().getDate(),
-//				this.satellite.getAssembly().getStates().getInitialState().getDate().
-//				shiftedBy(60*60*1), 
-//				this.dynamic.getPropagation().getPropagator(), 
-//				"test");
+		double duration = 100; /* s */
+		double currentOffset = 0;
+		AbsoluteDate startDate = 
+				this.satellite.getAssembly().getStates().getInitialState().getDate();
 
+		while (currentOffset <= duration ) {
+			
+			System.out.println("Summary at t = " + currentOffset + "--------");
+			
+			this.dynamic.getPropagation().propagate(startDate.shiftedBy(currentOffset));
 
+			/* Generate the related ephemeris line. */
+			this.ephemerisGenerator.writeStep(
+					this.satellite.getAssembly().getStates().getCurrentState()
+					);
+
+			/* Incrementing the ephemeris time step. */
+			currentOffset = currentOffset + 1. ;
+			System.out.println("---------------------------------");
+		}
+
+		/* End of processing. */
+		logger.info(CustomLoggingTools.indentMsg(logger,
+				"Processing End."));
 	}
 
 	public void exit() {
@@ -127,10 +148,10 @@ public class NumericalSimulator {
 				"Simulation exits with execution status: "
 						+ this.executionStatus 
 						+ "\n"
-						+ "\t Processing Time: " 
+						+ "\t Execution Time: " 
 						+ this.startDate.until(this.endDate, ChronoUnit.SECONDS)
 						+ "s."
-						)
+				)
 				);
 	}
 

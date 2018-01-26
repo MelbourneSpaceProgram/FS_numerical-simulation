@@ -2,6 +2,8 @@
 
 package msp.simulator.satellite.assembly;
 
+import org.orekit.frames.Frame;
+import org.orekit.frames.FramesFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,11 +24,21 @@ public class Assembly {
 	public static double cs1_Length = 0.010; /* m */
 	
 	/** Static field describing the Satellite Body Mass. */
-	public static double cs1_Mass = 10; /* kg */
+	public static double cs1_Mass = 1.04 ; /* kg */
 	
-	/** Static field describing the Satellite inertia. */
-	/* TODO Inertia */
-	public static double cs1_inertia = 1.0; /* m.s^2 */
+	/** Static field describing the satellite inertia matrix. */
+//	public static double[][] cs1_IMatrix =  /* kg.m^2 */ {
+//			{1191.648 * 1.3e-6,           0       ,           0        },
+//			{         0       ,  1169.506 * 1.3e-6,           0        },
+//			{         0       ,           0       ,  1203.969 * 1.3e-6 },
+//		};
+
+	public static double[][] cs1_IMatrix =  /* kg.m^2 */ {
+			{ 1,   0,   0 },
+			{ 0,   1,   0 },
+			{ 0,   0,   1 }
+		};
+
 	
 	/* **************************************************************	*/
 	
@@ -63,11 +75,27 @@ public class Assembly {
 	}
 	
 	/**
-	 * Return the satellite state in space.
+	 * Return the satellite states of the satellite
+	 * directly from the Assembly Object.
+	 * 
 	 * @return SpacecraftState
+	 * @see Assembly
 	 */
 	public SatelliteStates getStates() {
 		return this.satelliteStates;
 	}
+	
+	/**
+	 * @return The Satellite frame: a non-inertial rotating
+	 * frame fixed with the axis body.
+	 */
+	public Frame getSatelliteFrame() {
+		return new Frame (
+				FramesFactory.getEME2000(),
+				this.getStates().getCurrentState().toTransform(),
+				"SatelliteFrame"
+				);
+	}
+	
 
 }

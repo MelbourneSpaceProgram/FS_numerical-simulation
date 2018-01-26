@@ -48,7 +48,7 @@ public class Dynamic {
 
 		this.forces = new Forces(environment, satellite);
 		this.torques = new Torques(environment, satellite);
-		this.guidance = new Guidance(environment, satellite, torques);
+		this.guidance = new Guidance(environment, satellite, torques.getTorqueProvider());
 		this.propagation = new Propagation(
 				environment,
 				satellite, 

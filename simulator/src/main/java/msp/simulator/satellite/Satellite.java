@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import msp.simulator.environment.Environment;
 import msp.simulator.satellite.assembly.Assembly;
+import msp.simulator.satellite.assembly.SatelliteStates;
 import msp.simulator.utils.logs.CustomLoggingTools;
 
 /**
@@ -40,6 +41,14 @@ public class Satellite {
 	 */
 	public Assembly getAssembly() {
 		return this.assembly;
+	}
+
+	/**
+	 * Return the States object of the satellite.
+	 * @return SpacecraftState
+	 */
+	public SatelliteStates getStates() {
+		return this.getAssembly().getStates();
 	}
 
 }

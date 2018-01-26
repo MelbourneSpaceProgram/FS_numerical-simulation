@@ -36,7 +36,7 @@ public class Guidance {
 				"Building the Guidance Core..."));
 		
 		/* Build the different guidance engine. */
-		this.automaticGuidance = new AutomaticGuidanceEngine(environment, satellite);
+		//this.automaticGuidance = new AutomaticGuidanceEngine(environment, satellite);
 		this.dynamicGuidance = new DynamicGuidance(satellite, torqueProvider);
 		
 		/* Define the attitude provider for the simulation. */

@@ -2,7 +2,6 @@
 
 package msp.simulator.dynamic.torques;
 
-import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.orekit.propagation.integration.AdditionalEquations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,17 +11,20 @@ import msp.simulator.satellite.Satellite;
 import msp.simulator.utils.logs.CustomLoggingTools;
 
 /**
- * This class is responsible to handle the processing
- * of any torque and provide the overall interaction
+ * This class is responsible to manage the torque classes
+ * of the simulator and to provide the overall interaction
  * on the satellite - in the satellite frame - to the
  * dynamic engine.
  *
  * @author Florian CHAUBEYRE
  */
-public class Torques implements TorqueProvider {
+public class Torques {
 	
 	/** Instance of the Logger of the class. */
 	private static final Logger logger = LoggerFactory.getLogger(Torques.class);
+	
+	/** Instance of Torque Provider of the Engine. */
+	private TorqueProvider torqueProvider;
 	
 	/** Instance of the additional equation */
 	private TorqueToSpinEquation dynamicTorqueEquation;
@@ -36,28 +38,26 @@ public class Torques implements TorqueProvider {
 		logger.info(CustomLoggingTools.indentMsg(logger,
 				"Building the Torque Engine..."));
 		
-		this.dynamicTorqueEquation = new TorqueToSpinEquation(this);
+		this.torqueProvider = new AutomaticManoeuvre(
+				satellite.getAssembly().getStates().getInitialState().getDate());
+		
+		this.dynamicTorqueEquation = new TorqueToSpinEquation(this.torqueProvider);
 	}
 	
 	/**
 	 * Return the Additional Equation computing the acceleration rotation
 	 * rate from the torque interaction on the satellite.
-	 * @return
+	 * @return The Additional Equation to link to the propagator
 	 */
 	public AdditionalEquations getTorqueToSpinEquation() {
 		return this.dynamicTorqueEquation;
 	}
 
 	/**
-	 * Provide the overall torque interaction on the
-	 * satellite in the satellite frame.
-	 * 
-	 * @see msp.simulator.dynamic.torques.TorqueProvider#getTorque()
+	 * @return the torqueProvider
 	 */
-	@Override
-	public Vector3D getTorque() {
-		/* TODO */
-		return new Vector3D(0.0, 0.0, 0.0) ;
+	public TorqueProvider getTorqueProvider() {
+		return torqueProvider;
 	}
 
 }

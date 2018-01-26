@@ -3,6 +3,7 @@
 package msp.simulator.dynamic.torques;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.orekit.time.AbsoluteDate;
 
 /**
  * Interface to normalize the provision of torques
@@ -17,7 +18,7 @@ public interface TorqueProvider {
 	 * in the satellite frame.
 	 * @return Vector3D in Satellite Frame.
 	 */
-	public Vector3D getTorque();
+	public Vector3D getTorque(AbsoluteDate date);
 	
 
 }

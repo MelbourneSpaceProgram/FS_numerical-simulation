@@ -2,10 +2,10 @@
 
 package msp.simulator.dynamic.torques;
 
-import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.orekit.errors.OrekitException;
 import org.orekit.propagation.SpacecraftState;
 import org.orekit.propagation.integration.AdditionalEquations;
+import org.orekit.time.AbsoluteDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,31 +96,40 @@ public class TorqueToSpinEquation implements AdditionalEquations {
 		 * 	double wz = s.getAdditionalState(this.getName())[2];			*
 		 * **************************************************************	*/
 		
-		/* Extract the current acceleration of the satellite. */
-		Vector3D accRate = s.getAttitude().getRotationAcceleration();
+		/* Extract the date of the current step. */
+		AbsoluteDate date = s.getDate();
 
 		/* Implementation of the equation.
-		 * 		wDot = Ra + M / I  	on each axis in the case the inertia
-		 * 							is the same on the three axis.
+		 * 		wDot(t) = M(t) / I  	on each axis considering the inertia
+		 * 							independent along the three axis (Hypotheses)
+		 * 
+		 * To integrate the coupling between the different axis, one can refer to 
+		 * the Euler Equation for a rotating rigid body.
 		 */
-		double wxDot = accRate.getX() + this.torqueProvider.getTorque().getX() / Assembly.cs1_inertia;
-		double wyDot = accRate.getY() + this.torqueProvider.getTorque().getY() / Assembly.cs1_inertia;
-		double wzDot = accRate.getZ() + this.torqueProvider.getTorque().getZ() / Assembly.cs1_inertia;
+		double wxDot = this.torqueProvider.getTorque(date).getX() / Assembly.cs1_IMatrix[0][0];
+		double wyDot = this.torqueProvider.getTorque(date).getY() / Assembly.cs1_IMatrix[1][1];
+		double wzDot = this.torqueProvider.getTorque(date).getZ() / Assembly.cs1_IMatrix[2][2];
 
 		/* Updating the Reference.
-		 * 	NB: The following does not update the reference:
-		 * 	pDot = new double[] {wxDot, wyDot, wzDot};
+		 * NB: The following does not update the reference:
+		 * pDot = new double[] {wxDot, wyDot, wzDot};
 		 */
 		pDot[0] = wxDot;
 		pDot[1] = wyDot;
 		pDot[2] = wzDot;
 
-		/* Return the potentially new updated main propagation state, i.e.
-		 * the orbital parameters (a, ex, ey, i, Omega, Alpha).
-		 * NB: The Attitude doesn't belong to the propagation state.
+		/* 
+		 * Return the potentially new updated main propagation state, i.e.
+		 * the orbital parameters (a, ex, ey, i, Omega, Alpha) for a circular
+		 * orbit. 
+		 * E.g. return new double[]{Rt+600, 0, 0, 98, 0, 0)
+		 * 
+		 * NB: The Attitude doesn't belong to the main integrated state.
+		 * That's why it is computed here, as additional parameters.
 		 * 
 		 * As we do not update the main state through this computation
 		 * we return null.
+		 * A typical main change would a change of mass through gas consumption.
 		 */
 		return null;
 	}

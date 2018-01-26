@@ -43,13 +43,13 @@ public class SatelliteStates {
 	private Attitude defaultAttitude; 
 
 	/** Initial Spin of the satellite */
-	private final Vector3D initialSpin = new Vector3D(
+	private Vector3D initialSpin = new Vector3D(
 			0.0,
-			0.031415,
+			0.0,
 			0.0
 			);
 	/** Initial Rotation Acceleration of the satellite */
-	private final Vector3D initialRotAcceleration = new Vector3D(
+	private Vector3D initialRotAcceleration = new Vector3D(
 			0.0,
 			0.0,
 			0.0

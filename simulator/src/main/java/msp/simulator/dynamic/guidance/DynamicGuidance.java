@@ -116,8 +116,27 @@ public class DynamicGuidance implements AttitudeProvider {
 
 		/* The Spin is an additional parameter to integrate and therefore
 		 * not present in the Attitude state of the satellite. */
+
+
+		/* TODO: !! Time Stamp the Dynamic Guidance Attitude Provider.
+		 * 
+		 * The satellite spin is invoked before the integration of the current
+		 * step!! So what we are extracting here is the spin of the previous step
+		 * and not the "current" spin.
+		 * 
+		 * Why? Because the Attitude Provider is called to compute the attitude
+		 * and the linear acceleration of some forces, e.g. AtmosphericDrag, and
+		 * this is an obvious step before the integration.
+		 * 
+		 * Thus there is one step late in the computation. And on the opposite
+		 * the acceleration is compute, on its part, with the real "current" 
+		 * data.
+		 * 
+		 * It would be far better to take the time into account in this method.
+		 */
 		Vector3D currentSpin = new Vector3D(
 				this.satelliteStates.getCurrentState().getAdditionalState("Spin"));
+
 
 		/* Propagate the attitude quaternion. */
 		Quaternion Qj = this.wilcox(
@@ -126,14 +145,12 @@ public class DynamicGuidance implements AttitudeProvider {
 				Propagation.integrationTimeStep
 				);
 
-		/* Compute the acceleration rate by adding the torque contribution. */
-		Vector3D accRate = 
-				this.satelliteStates.getCurrentState().getAttitude().getRotationAcceleration()
-				.add(new Vector3D(
-						this.torqueProvider.getTorque().getX() / Assembly.cs1_inertia,
-						this.torqueProvider.getTorque().getY() / Assembly.cs1_inertia,
-						this.torqueProvider.getTorque().getZ() / Assembly.cs1_inertia)
-						);
+		/* Compute the acceleration rate through the torque contribution. */
+		Vector3D accRate = new Vector3D(
+				this.torqueProvider.getTorque(date).getX() / Assembly.cs1_IMatrix[0][0],
+				this.torqueProvider.getTorque(date).getY() / Assembly.cs1_IMatrix[1][1],
+				this.torqueProvider.getTorque(date).getZ() / Assembly.cs1_IMatrix[2][2]
+				);
 
 		/* Wrap a new attitude from the final quaternion. */
 		Attitude finalAttitude = new Attitude(
