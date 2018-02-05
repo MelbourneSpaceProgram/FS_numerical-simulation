@@ -239,7 +239,7 @@ public class EphemerisGenerator {
 			this.writerAEM.flush();
 
 			/* For DEBUG only. */
-			logger.error(
+			logger.debug(
 					"Satellite State after propagation\n" +
 							"Offset: " +
 							newState.getDate().durationFrom(this.extractedStartDate) + 

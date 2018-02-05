@@ -48,7 +48,7 @@ public class AutomaticManoeuvre implements TorqueProvider {
 	private ArrayList<Step> scenario;
 
 	/* Default torque intensity to apply to the satellite. */
-	private static final double maxTorqueIntensity = 1e-4 /* N.m */ ;
+	private static final double maxTorqueIntensity = 1e-1 /* N.m */ ;
 
 	/** Default Scenario of control of the satellite. */
 	private static ArrayList<Step> DEFAULT_SCENARIO = new ArrayList<Step>();
@@ -59,7 +59,7 @@ public class AutomaticManoeuvre implements TorqueProvider {
 
 	public AutomaticManoeuvre(AbsoluteDate startDate, ArrayList<Step> scenario) {
 		/* Building the Default Scenario. */
-		DEFAULT_SCENARIO.add(new Step(1, 20, Vector3D.PLUS_I));
+		DEFAULT_SCENARIO.add(new Step(0, 20, Vector3D.PLUS_I));
 		DEFAULT_SCENARIO.add(new Step(25, 20, Vector3D.MINUS_I));
 		DEFAULT_SCENARIO.add(new Step(50, 10, new Vector3D(1,1,1).normalize()));
 		DEFAULT_SCENARIO.add(new Step(65, 10, new Vector3D(-1,-1,-1).normalize()));
@@ -81,7 +81,7 @@ public class AutomaticManoeuvre implements TorqueProvider {
 			/* If we find a currently operating step, it's a success. */
 			if (	    (step.getStart() <= offset)
 					&&
-					(step.getStart() + step.getDuration() > offset)) 
+					(step.getStart() + step.getDuration() >= offset)) 
 			{
 				success = true;
 				break;

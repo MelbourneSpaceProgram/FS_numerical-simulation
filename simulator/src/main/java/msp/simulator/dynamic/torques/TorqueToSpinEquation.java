@@ -117,6 +117,8 @@ public class TorqueToSpinEquation implements AdditionalEquations {
 		pDot[0] = wxDot;
 		pDot[1] = wyDot;
 		pDot[2] = wzDot;
+		
+		//System.out.println(Arrays.toString(pDot));
 
 		/* 
 		 * Return the potentially new updated main propagation state, i.e.

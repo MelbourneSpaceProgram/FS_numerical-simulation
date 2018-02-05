@@ -116,14 +116,14 @@ public class NumericalSimulator {
 			NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
 					"Processing the Simulation..."));
 		}
-		double duration = 100; /* s */
+		double duration = 60*60*3 ; /* s */
 		double currentOffset = 0;
 		AbsoluteDate startDate = 
 				this.satellite.getAssembly().getStates().getInitialState().getDate();
 
 		while (currentOffset <= duration ) {
 			
-			System.out.println("Summary at t = " + currentOffset + "--------");
+			//System.out.println("Summary at t = " + currentOffset + "--------");
 			
 			this.dynamic.getPropagation().propagate(startDate.shiftedBy(currentOffset));
 
@@ -134,7 +134,7 @@ public class NumericalSimulator {
 
 			/* Incrementing the ephemeris time step. */
 			currentOffset = currentOffset + 1. ;
-			System.out.println("---------------------------------");
+			//System.out.println("---------------------------------");
 		}
 
 		/* End of processing. */

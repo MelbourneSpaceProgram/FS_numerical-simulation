@@ -79,7 +79,7 @@ public class Propagation {
 
 		try {
 			/* Creating the Instance of Propagator. */
-			Propagation.integrationTimeStep = 1.0 ;
+			Propagation.integrationTimeStep = 0.1 ;
 			this.integrator = new ClassicalRungeKuttaIntegrator(Propagation.integrationTimeStep);
 			this.propagator = new NumericalPropagator(this.integrator);
 
