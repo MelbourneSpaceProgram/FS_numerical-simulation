@@ -74,7 +74,7 @@ public class Earth {
 			this.earthCelestialBody = CelestialBodyFactory.getEarth();
 			
 			/*  -> Attraction Coefficient mu				*/
-			this.attractCoeff_mu = Constants.EGM96_EARTH_MU;
+			this.attractCoeff_mu = Constants.WGS84_EARTH_MU;
 			
 			/*	-> Radius								*/
 			this.earthRadius = Constants.WGS84_EARTH_EQUATORIAL_RADIUS;
@@ -103,7 +103,7 @@ public class Earth {
 	
 	/**
 	 * Return the Earth Body Shape as an OneAxisEllipsoid
-	 * according to the GRS80 convention.
+	 * according to the defined convention. (e.g. WGS84...)
 	 * @return OneAxisEllipsoid
 	 */
 	public OneAxisEllipsoid getBodyShape() {
@@ -112,7 +112,7 @@ public class Earth {
 	
 	/**
 	 * Return the radius of the Earth body
-	 * following the same shape model. (WGS84 ...)
+	 * following the same shape model. (e.g. WGS84...)
 	 * 
 	 * @return The Earth radius in m.
 	 */
@@ -122,8 +122,8 @@ public class Earth {
 	
 	/**
 	 * Return the Attraction Coefficient of the Earth
-	 * following the EGM96 model. 
-	 * (~ 3.986e14 m³/s²)
+	 * following the defined model. (e.g. WGS84...) 
+	 * (~ 3.986004418e14 m³/s²)
 	 * 
 	 * @return Attraction Coefficient 
 	 */

@@ -79,7 +79,6 @@ public class Propagation {
 
 		try {
 			/* Creating the Instance of Propagator. */
-			Propagation.integrationTimeStep = 0.1 ;
 			this.integrator = new ClassicalRungeKuttaIntegrator(Propagation.integrationTimeStep);
 			this.propagator = new NumericalPropagator(this.integrator);
 
@@ -96,7 +95,7 @@ public class Propagation {
 			Propagation.logger.info(CustomLoggingTools.indentMsg(Propagation.logger,
 					"-> Registering the initial Satellite State..."));
 			this.propagator.setInitialState(
-					satellite.getAssembly().getStates().getInitialState());
+					satellite.getStates().getInitialState());
 
 			/* Registering the Attitude Provider Engine. */
 			this.propagator.setAttitudeProvider(

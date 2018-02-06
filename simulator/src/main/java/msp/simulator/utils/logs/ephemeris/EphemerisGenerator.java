@@ -169,9 +169,11 @@ public class EphemerisGenerator {
 		}
 	}
 
+
 	/**
-	 * 
-	 * @param sat
+	 * Append the line corresponding the current satellite step to the
+	 * ephemeris file.
+	 * @param newState The satellite state to register in the ephemeris
 	 */
 	public void writeStep(SpacecraftState newState) {
 		/* Extracting the start date of the generation. */

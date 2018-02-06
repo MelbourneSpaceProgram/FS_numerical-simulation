@@ -116,27 +116,8 @@ public class DynamicGuidance implements AttitudeProvider {
 
 		/* The Spin is an additional parameter to integrate and therefore
 		 * not present in the Attitude state of the satellite. */
-
-
-		/* TODO: !! Time Stamp the Dynamic Guidance Attitude Provider.
-		 * 
-		 * The satellite spin is invoked before the integration of the current
-		 * step!! So what we are extracting here is the spin of the previous step
-		 * and not the "current" spin.
-		 * 
-		 * Why? Because the Attitude Provider is called to compute the attitude
-		 * and the linear acceleration of some forces, e.g. AtmosphericDrag, and
-		 * this is an obvious step before the integration.
-		 * 
-		 * Thus there is one step late in the computation. And on the opposite
-		 * the acceleration is compute, on its part, with the real "current" 
-		 * data.
-		 * 
-		 * It would be far better to take the time into account in this method.
-		 */
 		Vector3D currentSpin = new Vector3D(
 				this.satelliteStates.getCurrentState().getAdditionalState("Spin"));
-
 
 		/* Propagate the attitude quaternion. */
 		Quaternion Qj = this.wilcox(
@@ -168,11 +149,6 @@ public class DynamicGuidance implements AttitudeProvider {
 						accRate
 						)
 				);
-
-		//			System.out.println("     - Providing Attitude:   \n" 
-		//			+ finalAttitude.getRotation().getAngle() + "\n       "
-		//			+ finalAttitude.getSpin() + "\n       "
-		//					);
 
 		return finalAttitude;
 	}

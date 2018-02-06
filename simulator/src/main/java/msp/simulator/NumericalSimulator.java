@@ -91,7 +91,7 @@ public class NumericalSimulator {
 			/* Configure here a new initial state of the satellite
 			 * if needed.
 			 */
-			// Empty
+			//this.satellite.getStates().setInitialState(newInitialState);
 			/* **************************** */
 
 			/* Building the Dynamic Module. */
@@ -119,7 +119,7 @@ public class NumericalSimulator {
 		double duration = 60*60*1 ; /* s */
 		double currentOffset = 0;
 		AbsoluteDate startDate = 
-				this.satellite.getAssembly().getStates().getInitialState().getDate();
+				this.satellite.getStates().getInitialState().getDate();
 
 		while (currentOffset <= duration ) {
 			
@@ -129,7 +129,7 @@ public class NumericalSimulator {
 
 			/* Generate the related ephemeris line. */
 			this.ephemerisGenerator.writeStep(
-					this.satellite.getAssembly().getStates().getCurrentState()
+					this.satellite.getStates().getCurrentState()
 					);
 
 			/* Incrementing the ephemeris time step. */
