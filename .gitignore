@@ -1,2 +1,6 @@
 /.metadata/
 /.recommenders/
+**/resources/log*
+**/*DS_Store
+**/*.class
+**/ephemeris/*

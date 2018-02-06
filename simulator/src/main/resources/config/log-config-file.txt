@@ -1,0 +1,41 @@
+handlers = java.util.logging.ConsoleHandler java.util.logging.FileHandler
+config   =
+
+"logger".handlers           =
+"logger".useParentHandlers  =
+"logger".level              = ALL
+
+# Define the format of the output for the simple formatter used.
+java.util.logging.SimpleFormatter.format = %1$tY.%1$tm.%1$td - %1$tT:%1$tL - [%2$s] %n  %4$s: %5$s%n
+
+java.util.logging.FileHandler.level     = ALL
+java.util.logging.FileHandler.pattern   = %h/Desktop/MSP/simulator/workspace/simulator/src/main/resources/logs/log-simu-last.txt
+java.util.logging.FileHandler.append    = false
+java.util.logging.FileHandler.limit     =
+java.util.logging.FileHandler.count     = 1
+java.util.logging.FileHandler.formatter = java.util.logging.SimpleFormatter
+java.util.logging.FileHandler.filter    =
+java.util.logging.FileHandler.encoding  =
+
+java.util.logging.ConsoleHandler.level     = ALL
+java.util.logging.ConsoleHandler.filter    =
+java.util.logging.ConsoleHandler.formatter = java.util.logging.SimpleFormatter
+java.util.logging.ConsoleHandler.encoding  =
+                              
+java.util.logging.StreamHandler.level     = WARNING
+java.util.logging.StreamHandler.filter    =
+java.util.logging.StreamHandler.formatter =
+java.util.logging.StreamHandler.encoding  =
+
+# java.util.logging.SocketHandler.level     = 
+# java.util.logging.SocketHandler.filter    =
+# java.util.logging.SocketHandler.formatter =
+# java.util.logging.SocketHandler.encoding  =
+# java.util.logging.SocketHandler.host      =
+# java.util.logging.SocketHandler.port      =
+
+# java.util.logging.MemoryHandler.level     = 
+# java.util.logging.MemoryHandler.filter    =
+# java.util.logging.MemoryHandler.size      =
+# java.util.logging.MemoryHandler.push      =
+# java.util.logging.MemoryHandler.target    =
