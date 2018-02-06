@@ -116,7 +116,7 @@ public class NumericalSimulator {
 			NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
 					"Processing the Simulation..."));
 		}
-		double duration = 60*60*3 ; /* s */
+		double duration = 60*60*1 ; /* s */
 		double currentOffset = 0;
 		AbsoluteDate startDate = 
 				this.satellite.getAssembly().getStates().getInitialState().getDate();
