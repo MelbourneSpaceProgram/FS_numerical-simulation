@@ -73,12 +73,6 @@ public class Environment {
 		this.geoMagneticField = new msp.simulator.environment.geomagneticField.EarthMagneticField();
 	}
 
-	/**
-	 * @return the logger
-	 */
-	public Logger getLogger() {
-		return logger;
-	}
 
 	/**
 	 * @return the solarSystem

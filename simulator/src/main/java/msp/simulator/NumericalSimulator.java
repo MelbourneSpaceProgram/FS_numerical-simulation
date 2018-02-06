@@ -4,17 +4,18 @@ package msp.simulator;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.logging.LogManager;
 
+import org.orekit.errors.OrekitException;
+import org.orekit.time.AbsoluteDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.orekit.attitudes.Attitude;
-import org.orekit.errors.OrekitException;
-import org.orekit.frames.FramesFactory;
-import org.orekit.utils.AngularCoordinates;
 
+import msp.simulator.dynamic.propagation.Propagation;
 import msp.simulator.utils.architecture.OrekitConfiguration;
 import msp.simulator.utils.logs.CustomLoggingTools;
+import msp.simulator.utils.logs.ephemeris.EphemerisGenerator;
 
 /**
  * This class is responsible to create the instance of the
@@ -25,7 +26,7 @@ import msp.simulator.utils.logs.CustomLoggingTools;
 public class NumericalSimulator {
 
 	/** Logger of the instance. */
-	private Logger logger;
+	private static final Logger logger = LoggerFactory.getLogger(NumericalSimulator.class);
 
 	/* The different modules of the simulator. */
 	/** Environment Instance in the Simulation. */
@@ -35,35 +36,32 @@ public class NumericalSimulator {
 	private msp.simulator.satellite.Satellite satellite;
 
 	/** Dynamic Module of the Simulation. */
-	@SuppressWarnings("unused")
 	private msp.simulator.dynamic.Dynamic dynamic;
+
+	/** Ephemeris Generator Instance of the simulator. */
+	private msp.simulator.utils.logs.ephemeris.EphemerisGenerator ephemerisGenerator;
 
 	/* TODO: Enumerate the execution status. */
 	private int executionStatus;
 
-	@SuppressWarnings("unused")
 	private final LocalDateTime startDate;
-	@SuppressWarnings("unused")
 	private LocalDateTime endDate;
 
 	public NumericalSimulator() {
 		this.startDate = LocalDateTime.now();
 
+		/* Setting the configuration of the Logging Services. */
 		LogManager myLogManager = LogManager.getLogManager();
-
 		System.setProperty(
 				"java.util.logging.config.file", 
 				"src/main/resources/config/log-config-file.txt");
-
 		try {
 			myLogManager.readConfiguration();
-
 		} catch (SecurityException | IOException e) {
 			e.printStackTrace();
 		}
 
-		this.logger = LoggerFactory.getLogger(this.getClass());
-		this.logger.info("Launching the Simulation...");
+		NumericalSimulator.logger.info("Launching the Simulation...");
 	}
 
 	public void launch() {
@@ -73,7 +71,7 @@ public class NumericalSimulator {
 	}
 
 	public void initialize() {
-		this.logger.info(CustomLoggingTools.indentMsg(this.logger,
+		NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
 				"Initialization in Process..."));
 
 		/* Instance of the Simulator. */
@@ -83,24 +81,29 @@ public class NumericalSimulator {
 		OrekitConfiguration.processConfiguration();
 
 		try {
-			/* Building the environment. */
+			/* Building the Environment Module. */
 			this.environment = new msp.simulator.environment.Environment();
 
-			/* Building the satellite. */
+			/* Building the Satellite Module. */
 			this.satellite = new msp.simulator.satellite.Satellite(
-					this.environment,
-					new Attitude (
-							this.environment.getOrbit().getDate(),
-							FramesFactory.getEME2000(),
-							new AngularCoordinates()
-							)
+					this.environment
 					);
+
+			/* Configure here a new initial state of the satellite
+			 * if needed.
+			 */
+			//this.satellite.getStates().setInitialState(newInitialState);
+			/* **************************** */
 
 			/* Building the Dynamic Module. */
 			this.dynamic = new msp.simulator.dynamic.Dynamic(
-					this.satellite,
-					this.environment
+					this.environment,
+					this.satellite
 					) ;
+
+			/* Ephemeris Generator Module */
+			this.ephemerisGenerator = new EphemerisGenerator();
+			this.ephemerisGenerator.start();
 
 		} catch (OrekitException e) {
 			e.printStackTrace();
@@ -111,19 +114,51 @@ public class NumericalSimulator {
 
 	public void process() {
 		if (this.executionStatus == 1) {
-			this.logger.info(CustomLoggingTools.indentMsg(this.logger,
+			NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
 					"Processing the Simulation..."));
 		}
+		double duration = 10 ; /* s */
+		double currentOffset = 0;
+		AbsoluteDate startDate = 
+				this.satellite.getStates().getInitialState().getDate();
 
+		while (currentOffset <= duration ) {
+			
+			//System.out.println("Summary at t = " + currentOffset + "--------");
+			
+			this.dynamic.getPropagation().propagate(startDate.shiftedBy(currentOffset));
 
+			/* Generate the related ephemeris line. */
+			this.ephemerisGenerator.writeStep(
+					this.satellite.getStates().getCurrentState()
+					);
 
+			/* Incrementing the ephemeris time step. */
+			
+			/* WARNING
+			 * TODO: the attitude "Wilcox" propagation step must strictly be
+			 * the same as the integration step of the main propagator.
+			 */
+			currentOffset = currentOffset + Propagation.integrationTimeStep ;
+			
+			//System.out.println("---------------------------------");
+		}
+
+		/* End of processing. */
+		logger.info(CustomLoggingTools.indentMsg(logger,
+				"Processing End."));
 	}
 
 	public void exit() {
 		this.endDate = LocalDateTime.now();
-		this.logger.info(CustomLoggingTools.indentMsg(this.logger,
+		NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
 				"Simulation exits with execution status: "
-						+ this.executionStatus)
+						+ this.executionStatus 
+						+ "\n"
+						+ "\t Execution Time: " 
+						+ this.startDate.until(this.endDate, ChronoUnit.SECONDS)
+						+ "s."
+				)
 				);
 	}
 

@@ -7,7 +7,7 @@ import org.orekit.forces.BoxAndSolarArraySpacecraft;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import msp.simulator.environment.solarSystem.Sun;
+import msp.simulator.environment.Environment;
 import msp.simulator.utils.logs.CustomLoggingTools;
 
 /**
@@ -17,22 +17,24 @@ import msp.simulator.utils.logs.CustomLoggingTools;
 public class SatelliteBody extends BoxAndSolarArraySpacecraft {
 
 	/** Logger of the class */
-	Logger logger = LoggerFactory.getLogger(this.getClass());
+	private static final Logger logger = LoggerFactory.getLogger(SatelliteBody.class);
 	
 	/**
 	 * Build the Satellite Body as a CubeSat (Cube with no Solar Arrays)
+	 * sensitive to drag and radiation.
 	 * @param cubeLength
 	 * @param Sun 
 	 */
-	public SatelliteBody(double cubeLength, Sun sun) {
+	public SatelliteBody(Environment environment) {
 		super(
-				cubeLength,	/* X Length of Body */
-				cubeLength,	/* Y Length of Body */
-				cubeLength,	/* Z Length of Body */
-				sun.getPvCoordinateProvider(), /* Sun Coordinate Provider */
+				Assembly.cs1_Length,	/* X Length of Body */
+				Assembly.cs1_Length,	/* Y Length of Body */
+				Assembly.cs1_Length,	/* Z Length of Body */
+				environment.getSolarSystem().getSun()
+				.getPvCoordinateProvider(), /* Sun Coordinate Provider */
 				0, Vector3D.PLUS_I, 0, 0, 0 /* Solar Array Parameters: Zero */
 				);
-		this.logger.info(CustomLoggingTools.indentMsg(this.logger, 
+		SatelliteBody.logger.info(CustomLoggingTools.indentMsg(SatelliteBody.logger, 
 				" -> Building the CubeSat body: Success."));
 	}
 }

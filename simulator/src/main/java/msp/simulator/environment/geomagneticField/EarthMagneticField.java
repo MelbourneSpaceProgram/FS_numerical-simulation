@@ -35,7 +35,7 @@ public class EarthMagneticField {
 	
 	/**
 	 * Create the instance of Earth Magnetic Field following
-	 * the IGRF data as the current Year.
+	 * the WMM data as the current Year.
 	 */
 	public EarthMagneticField() {
 		this.logger.info(CustomLoggingTools.indentMsg(this.logger,
@@ -55,7 +55,7 @@ public class EarthMagneticField {
 	 * @return GeoMagneticField
 	 * @see GeoMagneticField
 	 */
-	public GeoMagneticField getIGRF() {
+	public GeoMagneticField getMagField() {
 		return this.geomagneticField;
 	}
 	

@@ -34,6 +34,9 @@ public class SolarSystem {
 	/** Sun Instance of the Solar System in the simulation. */
 	private Sun sun;
 	
+	/** Moon Instance of the Solar System in the simulation. */
+	private Moon moon;
+	
 	/**
 	 * Constructor of the SolarSystem
 	 */
@@ -44,6 +47,7 @@ public class SolarSystem {
 		
 		this.earth = new Earth();
 		this.sun = new Sun();
+		this.moon = new Moon();
 	}
 	
 	/**
@@ -62,6 +66,15 @@ public class SolarSystem {
 	 */
 	public Sun getSun() {
 		return this.sun;
+	}
+	
+	/**
+	 * Return the Moon instance of the simulation.
+	 * @return Moon instance of the simulation
+	 * @see Moon
+	 */
+	public Moon getMoon() {
+		return this.moon;
 	}
 	
 	/** Return the inertial frame of the Solar System,

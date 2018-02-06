@@ -37,6 +37,7 @@ public final class Atmosphere extends HarrisPriester {
 	/**
 	 * Constructor of the instance of Earth atmosphere.
 	 * @param earth The Earth Instance of the simulation.
+	 * @param sun The Sun Instance of the simulation.
 	 * 
 	 * @throws OrekitException 
 	 */
