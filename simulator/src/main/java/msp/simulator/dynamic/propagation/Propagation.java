@@ -46,7 +46,7 @@ public class Propagation {
 	private ODEIntegrator integrator ;
 
 	/** Time Step in use for integration step calculation. (s) */
-	public static double integrationTimeStep = 0.1 ; /* Default value */ 
+	public static final double integrationTimeStep = 0.1 ; /* Default value */ 
 
 	/** Instance of Propagator in the simulation. */
 	private NumericalPropagator propagator;
@@ -172,68 +172,77 @@ public class Propagation {
 			/* Compute the main new state:
 			 * - Orbital Parameters
 			 * - Spin integrated from the Torque Provider. 
+			 * WARNING: this integration linearly shift the attitude.
 			 */
 			mainPropagatedState = this.propagator.propagate(targetDate);
-
-			/* Compute the Attitude from the new integrated spin. */
-			/*	-> Compute the current Acceleration Rate; */
-			double[] currentAccArray = new double[3];
-
-			/* The equation is computed again so we have the exact same
-			 * spin derivatives as the propagator. */
-			this.torques.getTorqueToSpinEquation().computeDerivatives(
-					mainPropagatedState,
-					currentAccArray);
-
-			Vector3D currentAcc = new Vector3D(currentAccArray);
-
-			/* Get the current satellite spin normally just integrated. */
-			Vector3D currentSpin = new Vector3D(
-					mainPropagatedState.getAdditionalState("Spin")
-					);
-
-			/* Compute the Attitude by propagating the current attitude
-			 * quaternion at the current spin with the Wilcox Algorithm. 
+			
+			/* We need to take into account the non-integrated attitude from the
+			 * current satellite state to propagate.
 			 */
-			Quaternion currentQuaternion = new Quaternion (
-					mainPropagatedState.getAttitude().getRotation().getQ0(),
-					mainPropagatedState.getAttitude().getRotation().getQ1(),
-					mainPropagatedState.getAttitude().getRotation().getQ2(),
-					mainPropagatedState.getAttitude().getRotation().getQ3()
-					);
+			SpacecraftState currentSatState = this.satellite.getStates().getCurrentState();
+			
+			/* If this is not the initial step. */
+			if (!targetDate.equals(satellite.getStates().getInitialState().getDate())) {
+				/* Compute the Attitude from the new integrated spin. */
+				/*	-> Compute the current Acceleration Rate; */
+				double[] currentAccArray = new double[3];
 
-			Quaternion propagatedQuaternion = this.wilcox(
-					currentQuaternion, 
-					currentSpin, 
-					integrationTimeStep
-					);
+				/* The equation is computed again so we have the exact same
+				 * spin derivatives as the propagator. */
+				this.torques.getTorqueToSpinEquation().computeDerivatives(
+						currentSatState,
+						currentAccArray);
 
-			Attitude finalAttitude = new Attitude(
-					mainPropagatedState.getDate(),
-					mainPropagatedState.getFrame(),
-					new AngularCoordinates(
-							new Rotation(
-									propagatedQuaternion.getQ0(),
-									propagatedQuaternion.getQ1(),
-									propagatedQuaternion.getQ2(),
-									propagatedQuaternion.getQ3(),
-									true
-									),
-							currentSpin,
-							currentAcc
-							)
-					);
+				Vector3D currentAcc = new Vector3D(currentAccArray);
+				
+				/* Get the current satellite spin normally just integrated. */
+				Vector3D currentSpin = new Vector3D(
+						mainPropagatedState.getAdditionalState("Spin")
+						);
 
-			/* Finally mounting the new propagated state. */
-			SpacecraftState secondaryPropagatedState = new SpacecraftState(
-					mainPropagatedState.getOrbit(),
-					finalAttitude,
-					mainPropagatedState.getMass(),
-					mainPropagatedState.getAdditionalStates()
-					);
+				/* Compute the Attitude by propagating the current attitude
+				 * quaternion at the current spin with the Wilcox Algorithm. 
+				 */
+				Quaternion currentQuaternion = new Quaternion (
+						currentSatState.getAttitude().getRotation().getQ0(),
+						currentSatState.getAttitude().getRotation().getQ1(),
+						currentSatState.getAttitude().getRotation().getQ2(),
+						currentSatState.getAttitude().getRotation().getQ3()
+						);
 
-			/* Updating the satellite reference. */
-			this.satellite.getStates().setCurrentState(secondaryPropagatedState);
+				Quaternion propagatedQuaternion = this.wilcox(
+						currentQuaternion, 
+						currentSpin, 
+						integrationTimeStep
+						);
+
+				Attitude finalAttitude = new Attitude(
+						mainPropagatedState.getDate(),
+						mainPropagatedState.getFrame(),
+						new AngularCoordinates(
+								new Rotation(
+										propagatedQuaternion.getQ0(),
+										propagatedQuaternion.getQ1(),
+										propagatedQuaternion.getQ2(),
+										propagatedQuaternion.getQ3(),
+										true
+										),
+								currentSpin,
+								currentAcc
+								)
+						);
+
+				/* Finally mounting the new propagated state. */
+				SpacecraftState secondaryPropagatedState = new SpacecraftState(
+						mainPropagatedState.getOrbit(),
+						finalAttitude,
+						mainPropagatedState.getMass(),
+						mainPropagatedState.getAdditionalStates()
+						);
+
+				/* Updating the satellite reference. */
+				this.satellite.getStates().setCurrentState(secondaryPropagatedState);
+			}
 
 		} catch (OrekitException e) {
 			e.printStackTrace();

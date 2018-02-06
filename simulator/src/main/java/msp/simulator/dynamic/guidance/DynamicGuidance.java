@@ -3,9 +3,6 @@
 package msp.simulator.dynamic.guidance;
 
 import org.hipparchus.RealFieldElement;
-import org.hipparchus.complex.Quaternion;
-import org.hipparchus.geometry.euclidean.threed.Rotation;
-import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.orekit.attitudes.Attitude;
 import org.orekit.attitudes.AttitudeProvider;
 import org.orekit.attitudes.FieldAttitude;
@@ -13,16 +10,13 @@ import org.orekit.errors.OrekitException;
 import org.orekit.frames.Frame;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.FieldAbsoluteDate;
-import org.orekit.utils.AngularCoordinates;
 import org.orekit.utils.FieldPVCoordinatesProvider;
 import org.orekit.utils.PVCoordinatesProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import msp.simulator.dynamic.propagation.Propagation;
 import msp.simulator.dynamic.torques.TorqueProvider;
 import msp.simulator.satellite.Satellite;
-import msp.simulator.satellite.assembly.Assembly;
 import msp.simulator.satellite.assembly.SatelliteStates;
 import msp.simulator.utils.logs.CustomLoggingTools;
 
@@ -47,10 +41,6 @@ public class DynamicGuidance implements AttitudeProvider {
 	/** Link the instance of the satellite states. */
 	private SatelliteStates satelliteStates;
 
-	/** Instance of the Torque Provider. */
-	private TorqueProvider torqueProvider;
-
-
 	/**
 	 * 
 	 * @param satellite
@@ -60,106 +50,48 @@ public class DynamicGuidance implements AttitudeProvider {
 				"Implementing the Dynamic Guidance Engine..."));
 
 		this.satelliteStates = satellite.getAssembly().getStates();
-		this.torqueProvider = torqueProvider;
 	}
 
 
 	/**
-	 * Compute the Wilcox Algorithm.
-	 * <p>
-	 * This algorithm allows to propagate an initial quaternion
-	 * through a certain rotational speed during a small step
-	 * of time.
+	 * Simply return the current attitude of the satellite.
+	 * The attitude is actually computed dynamicaly by the 
+	 * propagator through the equations of motion.
 	 * 
-	 * @param Qi Initial quaternion to propagate
-	 * @param spin Instant rotational speed
-	 * @param dt Step of time
-	 * @return Qj The final quaternion after the rotation due 
-	 * to the spin during the step of time.
+	 * This method then allows the attitude-dependent functions,
+	 * e.g. gravity torque etc., to compute their interactions
+	 * with the current updated satellite attitude.
+	 * <p>
+	 * During the integration, we need to access the attitude for
+	 * intermediate time step. Then this method returns a linearly
+	 * extrapolated attitude.
+	 * <p>
+	 * Be aware this returned attitude is NOT the real attitude
+	 * of the satellite but only an image used for linear forces
+	 * computation.
 	 */
-	private Quaternion wilcox(Quaternion Qi, Vector3D spin, double dt) {
-
-		/* Vector Angle of Rotation: Theta = dt*W */
-		Vector3D theta = new Vector3D(dt, spin);
-
-		/* Compute the change-of-frame Quaternion dQ */
-		double dQ0 = 1. - 1./8. * theta.getNormSq();
-		double dQ1 = theta.getX() / 2. * (1. - 1./24. * theta.getNormSq());
-		double dQ2 = theta.getY() / 2. * (1. - 1./24. * theta.getNormSq());
-		double dQ3 = theta.getZ() / 2. * (1. - 1./24. * theta.getNormSq());
-
-		Quaternion dQ = new Quaternion(dQ0, dQ1, dQ2, dQ3);
-
-		/* Compute the final state Quaternion. */
-		Quaternion Qj = Qi.multiply(dQ);
-
-		return Qj ;
-	}
-
-
-	@Override
 	public Attitude getAttitude(
 			PVCoordinatesProvider pvProv, 
 			AbsoluteDate date, 
 			Frame frame) 
 					throws OrekitException {
+		
 
-		/* Load the current satellite state */
-		Attitude currentAttitude = this.satelliteStates.getCurrentState().getAttitude();
-
-		Quaternion currentQuaternion = new Quaternion(
-				currentAttitude.getRotation().getQ0(),
-				currentAttitude.getRotation().getQ1(),
-				currentAttitude.getRotation().getQ2(),
-				currentAttitude.getRotation().getQ3()
-				);
-
-		/* The Spin is an additional parameter to integrate and therefore
-		 * not present in the Attitude state of the satellite. */
-		Vector3D currentSpin = new Vector3D(
-				this.satelliteStates.getCurrentState().getAdditionalState("Spin"));
-
-		/* Propagate the attitude quaternion. */
-		Quaternion Qj = this.wilcox(
-				currentQuaternion,
-				currentSpin,
-				Propagation.integrationTimeStep
-				);
-
-		/* Compute the acceleration rate through the torque contribution. */
-		Vector3D accRate = new Vector3D(
-				this.torqueProvider.getTorque(date).getX() / Assembly.cs1_IMatrix[0][0],
-				this.torqueProvider.getTorque(date).getY() / Assembly.cs1_IMatrix[1][1],
-				this.torqueProvider.getTorque(date).getZ() / Assembly.cs1_IMatrix[2][2]
-				);
-
-		/* Wrap a new attitude from the final quaternion. */
-		Attitude finalAttitude = new Attitude(
-				date,
-				frame,
-				new AngularCoordinates(
-						new Rotation(
-								Qj.getQ0(),
-								Qj.getQ1(),
-								Qj.getQ2(),
-								Qj.getQ3(),
-								true
-								),
-						currentSpin,
-						accRate
-						)
-				);
-
-		return finalAttitude;
+		double shift = date.durationFrom(
+				this.satelliteStates.getCurrentState().getAttitude().getDate());
+		return this.satelliteStates.getCurrentState().getAttitude().shiftedBy(shift);
 	}
 
-	@Override
+	/**
+	 * Do nothing and return null.
+	 */
 	public <T extends RealFieldElement<T>> FieldAttitude<T> getAttitude(
 			FieldPVCoordinatesProvider<T> pvProv,
 			FieldAbsoluteDate<T> date,
 			Frame frame) 
 					throws OrekitException {
-		// TODO Auto-generated method stub
+		
+		/** TODO: auto-generated method stub. */
 		return null;
 	}
 

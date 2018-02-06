@@ -13,6 +13,8 @@ import msp.simulator.environment.Environment;
 import msp.simulator.satellite.Satellite;
 
 /**
+ * This class provides tools to access the defined automatic 
+ * attitude provider.
  *
  * @author Florian CHAUBEYRE
  */
@@ -24,6 +26,7 @@ public class AutomaticGuidanceEngine {
 	/** Link to the Satellite instance of the simulation. */
 	private Satellite satellite;
 
+	/** #1: Earth Pointing Attitude Provider. */
 	private AttitudeProvider earthPointing;
 
 	/**
@@ -44,6 +47,12 @@ public class AutomaticGuidanceEngine {
 
 	}
 
+	/**
+	 * Get the initial attitude of the registered automatic
+	 * attitude provider.
+	 * @param attitudeProvider
+	 * @return Initial Attitude of the Automatic AttitudeProvider
+	 */
 	public Attitude getInitialAttitude(AttitudeProvider attitudeProvider) {
 		Attitude initialAttitude = this.satellite.getAssembly().getStates().getDefaultAttitude();
 		try {
@@ -59,7 +68,10 @@ public class AutomaticGuidanceEngine {
 		return initialAttitude;
 	}
 	
-	
+	/**
+	 * Return an "Earth-Pointing" Guidance.
+	 * @return AttitudeProvider
+	 */
 	public AttitudeProvider getEarthPointing() {
 		return this.earthPointing;
 	}

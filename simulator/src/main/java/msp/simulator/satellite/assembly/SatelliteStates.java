@@ -44,7 +44,7 @@ public class SatelliteStates {
 
 	/** Initial Spin of the satellite */
 	private Vector3D initialSpin = new Vector3D(
-			0.0,
+			0.31415,
 			0.0,
 			0.0
 			);
@@ -83,27 +83,16 @@ public class SatelliteStates {
 				Assembly.cs1_Mass);
 
 		/* Add user-related additional states. */
+		/* Rotation Speed
+		 *  - Satellite frame
+		 *  - (rad/s) 
+		 */
 		this.initialState = this.initialState
-				/* Rotation Speed
-				 *  - Satellite frame
-				 *  - (rad/s) 
-				 */
 				.addAdditionalState("Spin", new double[]{
 						this.initialSpin.getX(),
 						this.initialSpin.getY(),
 						this.initialSpin.getZ() }
-						)
-				/*	Torque Actions
-				 *  - Satellite frame
-				 *  - (N.m) 
-				 *
-				 *	.addAdditionalState("Torque", new double[]{
-				 *		0.0, 	 M_x 
-				 *		0.0,		 M_y 
-				 *		0.0}		 M_z 
-				 *		)
-				 */
-				;
+						);
 
 		this.currentState = this.initialState;
 	}

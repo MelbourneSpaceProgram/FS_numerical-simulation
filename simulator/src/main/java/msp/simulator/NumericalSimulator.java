@@ -12,6 +12,7 @@ import org.orekit.time.AbsoluteDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import msp.simulator.dynamic.propagation.Propagation;
 import msp.simulator.utils.architecture.OrekitConfiguration;
 import msp.simulator.utils.logs.CustomLoggingTools;
 import msp.simulator.utils.logs.ephemeris.EphemerisGenerator;
@@ -116,7 +117,7 @@ public class NumericalSimulator {
 			NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
 					"Processing the Simulation..."));
 		}
-		double duration = 60*60*1 ; /* s */
+		double duration = 10 ; /* s */
 		double currentOffset = 0;
 		AbsoluteDate startDate = 
 				this.satellite.getStates().getInitialState().getDate();
@@ -133,7 +134,13 @@ public class NumericalSimulator {
 					);
 
 			/* Incrementing the ephemeris time step. */
-			currentOffset = currentOffset + 1. ;
+			
+			/* WARNING
+			 * TODO: the attitude "Wilcox" propagation step must strictly be
+			 * the same as the integration step of the main propagator.
+			 */
+			currentOffset = currentOffset + Propagation.integrationTimeStep ;
+			
 			//System.out.println("---------------------------------");
 		}
 
