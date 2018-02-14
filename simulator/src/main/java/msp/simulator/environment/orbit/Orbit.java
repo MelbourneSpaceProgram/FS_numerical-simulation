@@ -102,8 +102,8 @@ public class Orbit {
 	/**
 	 * Create the instance of Orbit in the simulation.
 	 * @param solarSystem instance in the simulation
-	 * @throws IllegalArgumentException
-	 * @throws OrekitException
+	 * @throws IllegalArgumentException if eccentricity is s. superior to 1
+	 * @throws OrekitException if OreKit initialization failed
 	 * @see CircularOrbit
 	 */
 	public Orbit(SolarSystem solarSystem) throws IllegalArgumentException, OrekitException {
@@ -131,7 +131,9 @@ public class Orbit {
 		this.createLOF(this);
 	}
 
-	/** Get the Orbit of the simulation. */
+	/** Get the Orbit of the simulation.
+	 * @return orbit instance
+	 */
 	public CircularOrbit getOrbit() {
 		return this.orbit;
 	}
@@ -143,10 +145,10 @@ public class Orbit {
 	 * The convention used is VNC:<p>
 	 * - X aligned with velocity vector.<p>
 	 * - Y aligned with orbit momentum.<p>
-	 * - Z completes the frame.<p>
+	 * - Z completes the frame.
 	 * 
-	 * @see org.orekit.frames.LOFType.VNC
-	 * @param orbit 
+	 * @see org.orekit.frames.LOFType
+	 * @param orbit Instance of the Simulation
 	 */
 	private void createLOF(Orbit orbit) {
 		this.localOrbitalFrame = new LocalOrbitalFrame (
@@ -161,8 +163,8 @@ public class Orbit {
 	 * The convention used is VNC:<p>
 	 * - Z completes the frame.<p>
 	 * - X aligned with velocity vector.<p>
-	 * - Y aligned with orbit momentum.<p>
-	 * @return
+	 * - Y aligned with orbit momentum.
+	 * @return LocalOrbitalFrame of the defined orbit
 	 */
 	public LocalOrbitalFrame getLof() {
 		return this.localOrbitalFrame;

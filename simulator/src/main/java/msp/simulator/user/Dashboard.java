@@ -75,8 +75,6 @@ public class Dashboard {
 		
 	}
 
-
-	
 	/**
 	 * Set the integration time step of the different integrators
 	 * used on the simulation (Attitude and Main PVT)

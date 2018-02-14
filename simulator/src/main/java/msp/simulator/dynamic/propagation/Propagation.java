@@ -64,10 +64,11 @@ public class Propagation {
 	/**
 	 * Create and Configure the Instance of Propagator
 	 * of the Simulation.
-	 * 
-	 * @param environment The Space Environment 
-	 * @param satellite The Satellite Object
-	 * @param forces The Forces Object of the Simulation
+	 * @param environment Instance of the Simulation
+	 * @param satellite Instance of the Simulation
+	 * @param forces Instance of the Simulation
+	 * @param torques Instance of the Simulation
+	 * @param guidance Instance of the Simulation
 	 */
 	public Propagation(Environment environment, Satellite satellite, 
 			Forces forces,
@@ -154,7 +155,7 @@ public class Propagation {
 	 * Compute and Update the satellite state at the next time step.
 	 * <p>
 	 * The dynamic computation is as follow: 
-	 * Torque -> Spin -> Attitude.
+	 * Torque -- Spin -- Attitude.
 	 * <p>
 	 * The main OreKit integration takes care of the orbital 
 	 * parameters and integrates the additional data - e.g. the 

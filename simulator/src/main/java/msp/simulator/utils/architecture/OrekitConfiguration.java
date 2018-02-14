@@ -43,7 +43,6 @@ public final class OrekitConfiguration {
 	/**
 	 * Process the configuration of Orekit:<p>
 	 * - Set the Data Directory.
-	 * @param logWriter Print a trace of the configuration in the log file.
 	 */
 	public static void processConfiguration() {
 		DataProvidersManager dataManager = DataProvidersManager.getInstance();

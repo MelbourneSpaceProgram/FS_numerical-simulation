@@ -49,8 +49,7 @@ public class Environment {
 
 	/**
 	 * Constructor of the Space Environment of the Simulation.
-	 * @param simulatorLogMsg The logger of the simulator.
-	 * @throws OrekitException
+	 * @throws OrekitException if OreKit initialization failed
 	 */
 	public Environment() throws OrekitException {
 		logger.info(CustomLoggingTools.indentMsg(logger,

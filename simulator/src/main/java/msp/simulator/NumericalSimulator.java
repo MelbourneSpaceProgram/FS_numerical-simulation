@@ -49,7 +49,7 @@ public class NumericalSimulator {
 
 	/** 
 	 * Time duration of the simulation : the double max value
-	 * states for an undefined duration.
+	 * states for an "infinite loop" duration.
 	 */
 	public static double simulationDuration = Double.MAX_VALUE;
 
@@ -73,6 +73,10 @@ public class NumericalSimulator {
 	/**
 	 * This method performs in order the initialization,
 	 * the processing and the exit of the simulation.
+	 * <p>
+	 * NOTE: Any user defined settings for the simulation
+	 * should be registered prior the initialization/launch.
+	 * @see msp.simulator.user.Dashboard
 	 */
 	public void launch() {
 		this.initialize();

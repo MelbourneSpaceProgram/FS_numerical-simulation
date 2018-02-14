@@ -68,9 +68,9 @@ public class SatelliteStates {
 
 	/**
 	 * Create the instance of Satellite states.
-	 * @param environment
+	 * @param environment  Instance of the Simulation
 	 * @param body of the satellite
-	 * @throws IllegalArgumentException
+	 * @throws IllegalArgumentException if orbit and attitude dates or frames are not equal
 	 */
 	public SatelliteStates(Environment environment, SatelliteBody body) {
 
@@ -135,8 +135,8 @@ public class SatelliteStates {
 
 	/**
 	 * Update the value of the state by the newState one.
-	 * @param state	The SpacecraftState to update
 	 * @param newState The new value for the state
+	 * @return The updated old-state.
 	 */
 	private SpacecraftState updateState(SpacecraftState newState) {
 		try {
@@ -168,7 +168,7 @@ public class SatelliteStates {
 	/**
 	 * Update the value of the initial state of the satellite.
 	 * A check is done on the compatibility of the additional states.
-	 * @param newInitialState
+	 * @param newInitialState The user defined initial state
 	 */
 	public void setInitialState(SpacecraftState newInitialState) {
 		this.initialState = this.updateState(newInitialState);
@@ -177,7 +177,7 @@ public class SatelliteStates {
 	/**
 	 * Update the value of the current state of the satellite.
 	 * A check is done on the compatibility of the additional states.
-	 * @param newCurrentState
+	 * @param newCurrentState the new -updated- satellite state
 	 */
 	public void setCurrentState(SpacecraftState newCurrentState) {
 		this.currentState = this.updateState(newCurrentState);

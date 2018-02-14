@@ -39,7 +39,7 @@ public final class Atmosphere extends HarrisPriester {
 	 * @param earth The Earth Instance of the simulation.
 	 * @param sun The Sun Instance of the simulation.
 	 * 
-	 * @throws OrekitException 
+	 * @throws OrekitException If OreKit initialization fails
 	 */
 	public Atmosphere(Earth earth, Sun sun) throws OrekitException {
 		

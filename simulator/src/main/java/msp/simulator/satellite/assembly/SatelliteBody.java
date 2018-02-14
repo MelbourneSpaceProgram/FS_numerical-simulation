@@ -42,8 +42,7 @@ public class SatelliteBody extends BoxAndSolarArraySpacecraft {
 	/**
 	 * Build the Satellite Body as a CubeSat (Cube with no Solar Arrays)
 	 * sensitive to drag and radiation.
-	 * @param cubeLength
-	 * @param Sun 
+	 * @param environment Instance of the Simulation
 	 */
 	public SatelliteBody(Environment environment) {
 		super(

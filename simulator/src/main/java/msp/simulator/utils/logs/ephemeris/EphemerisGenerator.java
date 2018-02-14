@@ -90,7 +90,6 @@ public class EphemerisGenerator {
 
 	/**
 	 * Create the ephemeris generator.
-	 * @param propagation
 	 */
 	public EphemerisGenerator() {
 		this(DEFAULT_PATH, DEFAULT_SIMU_NAME);
@@ -98,7 +97,6 @@ public class EphemerisGenerator {
 
 	/**
 	 * Create the ephemeris generator.
-	 * @param propagation
 	 * @param simuName Name of the simulation - Append to the ephemeris.
 	 */
 	public EphemerisGenerator(String simuName) {
@@ -107,7 +105,6 @@ public class EphemerisGenerator {
 
 	/**
 	 * Create the ephemeris generator.
-	 * @param propagation Propagation Engine
 	 * @param path Folder Path
 	 * @param simuName Name of the simulation - Append to the ephemeris.
 	 */
@@ -120,7 +117,6 @@ public class EphemerisGenerator {
 		this.simuName = simuName;
 		this.path = path;
 	}
-
 
 	/**
 	 * Initialize the ephemeris by creating the appropriate files
@@ -168,7 +164,6 @@ public class EphemerisGenerator {
 			e.printStackTrace();
 		}
 	}
-
 
 	/**
 	 * Append the line corresponding the current satellite step to the
@@ -263,11 +258,10 @@ public class EphemerisGenerator {
 	}
 
 
-
 	/**
 	 * Return the header of an AEM ephemeris.
-	 * @param objectName
-	 * @param simuIdentifier
+	 * @param objectName For the Satellite Object
+	 * @param simuIdentifier Current Simulation ID
 	 * @return Header as a string
 	 */
 	private String getAemHeader(String objectName, String simuIdentifier) {
@@ -307,7 +301,7 @@ public class EphemerisGenerator {
 
 	/**
 	 * Return the header of an OEM ephemeris.
-	 * @param objectName
+	 * @param objectName of the Satellite Object
 	 * @param simuIdentifier Unique identifier.
 	 * @return Header as a string
 	 */
@@ -342,5 +336,5 @@ public class EphemerisGenerator {
 		}
 		return null;
 	}
-
+	
 }

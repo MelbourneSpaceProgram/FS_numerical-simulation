@@ -24,7 +24,7 @@ public class Satellite {
 
 	/**
 	 * Build the intance of the Satellite in the simulation.
-	 * @param sun Sun instance in the simulation
+	 * @param environment Instance of the Simulation
 	 */
 	public Satellite(Environment environment) {
 		Satellite.logger.info(CustomLoggingTools.indentMsg(Satellite.logger,
