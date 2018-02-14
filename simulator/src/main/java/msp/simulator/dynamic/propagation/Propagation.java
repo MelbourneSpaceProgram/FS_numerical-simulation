@@ -38,16 +38,22 @@ import msp.simulator.utils.logs.CustomLoggingTools;
  * @author Florian CHAUBEYRE
  */
 public class Propagation {
+	
+	/* ******* Public Static Attributes ******* */
+	
+	/** Default Time Step in use for integration step calculation. (s) */
+	public static double integrationTimeStep = 0.1 ;
 
+	/* **************************************** */
+	
+	
+	
 	/** Instance of the Logger of the class. */
 	private static final Logger logger = LoggerFactory.getLogger(Propagation.class);
 
 	/** Instance of Integrator of the Propagator. */
 	private ODEIntegrator integrator ;
-
-	/** Time Step in use for integration step calculation. (s) */
-	public static final double integrationTimeStep = 0.1 ; /* Default value */ 
-
+	
 	/** Instance of Propagator in the simulation. */
 	private NumericalPropagator propagator;
 
@@ -79,6 +85,8 @@ public class Propagation {
 
 		try {
 			/* Creating the Instance of Propagator. */
+			System.out.println(integrationTimeStep);
+			
 			this.integrator = new ClassicalRungeKuttaIntegrator(Propagation.integrationTimeStep);
 			this.propagator = new NumericalPropagator(this.integrator);
 

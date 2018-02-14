@@ -47,6 +47,12 @@ public class NumericalSimulator {
 	private final LocalDateTime startDate;
 	private LocalDateTime endDate;
 
+	/** 
+	 * Time duration of the simulation : the double max value
+	 * states for an undefined duration.
+	 */
+	public static double simulationDuration = Double.MAX_VALUE;
+
 	public NumericalSimulator() {
 		this.startDate = LocalDateTime.now();
 
@@ -61,15 +67,22 @@ public class NumericalSimulator {
 			e.printStackTrace();
 		}
 
-		NumericalSimulator.logger.info("Launching the Simulation...");
+		NumericalSimulator.logger.info("Simulation Instance Created.");
 	}
 
+	/**
+	 * This method performs in order the initialization,
+	 * the processing and the exit of the simulation.
+	 */
 	public void launch() {
 		this.initialize();
 		this.process();
 		this.exit();
 	}
 
+	/**
+	 * Initialize the simulation.
+	 */
 	public void initialize() {
 		NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
 				"Initialization in Process..."));
@@ -112,20 +125,26 @@ public class NumericalSimulator {
 
 	}
 
+	/**
+	 * Launch the main processing of the simulation.
+	 */
 	public void process() {
 		if (this.executionStatus == 1) {
 			NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
 					"Processing the Simulation..."));
 		}
-		double duration = 10 ; /* s */
+
 		double currentOffset = 0;
 		AbsoluteDate startDate = 
 				this.satellite.getStates().getInitialState().getDate();
 
-		while (currentOffset <= duration ) {
-			
+		while ((simulationDuration == Double.MAX_VALUE)
+				||
+				currentOffset <= simulationDuration 
+				) {
+
 			//System.out.println("Summary at t = " + currentOffset + "--------");
-			
+
 			this.dynamic.getPropagation().propagate(startDate.shiftedBy(currentOffset));
 
 			/* Generate the related ephemeris line. */
@@ -134,13 +153,15 @@ public class NumericalSimulator {
 					);
 
 			/* Incrementing the ephemeris time step. */
-			
+
 			/* WARNING
-			 * TODO: the attitude "Wilcox" propagation step must strictly be
+			 * TODO: The attitude "Wilcox" propagation step must strictly be
 			 * the same as the integration step of the main propagator.
+			 * I would say we have to extend the NumericalSimulator
+			 * class and override the afterIntegration method.
 			 */
 			currentOffset = currentOffset + Propagation.integrationTimeStep ;
-			
+
 			//System.out.println("---------------------------------");
 		}
 
@@ -149,6 +170,9 @@ public class NumericalSimulator {
 				"Processing End."));
 	}
 
+	/**
+	 * Performs the exit processing of the simulation.
+	 */
 	public void exit() {
 		this.endDate = LocalDateTime.now();
 		NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,

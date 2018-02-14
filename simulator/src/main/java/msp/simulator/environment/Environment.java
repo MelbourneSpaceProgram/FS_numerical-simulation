@@ -3,6 +3,7 @@
 package msp.simulator.environment;
 
 import org.orekit.errors.OrekitException;
+import org.orekit.orbits.CircularOrbit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,8 +92,8 @@ public class Environment {
 	/**
 	 * @return the orbit
 	 */
-	public msp.simulator.environment.orbit.Orbit getOrbit() {
-		return orbit;
+	public CircularOrbit getOrbit() {
+		return this.orbit.getOrbit();
 	}
 
 	/**

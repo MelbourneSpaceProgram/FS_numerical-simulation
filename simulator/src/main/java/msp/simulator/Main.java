@@ -3,6 +3,7 @@
 package msp.simulator;
 
 import msp.simulator.NumericalSimulator;
+import msp.simulator.user.Dashboard;
 
 /**
  * @author Florian CHAUBEYRE
@@ -17,6 +18,7 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 		NumericalSimulator simulator = new NumericalSimulator();
+		Dashboard.setDefaultConfiguration();
 		simulator.launch();
 	}
 
