@@ -54,7 +54,7 @@ public class AutomaticGuidanceEngine {
 	 * @return Initial Attitude of the Automatic AttitudeProvider
 	 */
 	public Attitude getInitialAttitude(AttitudeProvider attitudeProvider) {
-		Attitude initialAttitude = this.satellite.getAssembly().getStates().getDefaultAttitude();
+		Attitude initialAttitude = this.satellite.getAssembly().getStates().getInitialAttitude();
 		try {
 			initialAttitude = attitudeProvider.getAttitude(
 					this.environment.getOrbit(),

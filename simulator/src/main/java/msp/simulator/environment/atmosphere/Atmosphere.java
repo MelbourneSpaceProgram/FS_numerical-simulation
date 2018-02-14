@@ -32,7 +32,7 @@ public final class Atmosphere extends HarrisPriester {
 	private static final long serialVersionUID = -1497026274240688235L;
 	
 	/** Logger of the instance of the class. */
-	private Logger logger;
+	private final static Logger logger = LoggerFactory.getLogger(Atmosphere.class);
 	
 	/**
 	 * Constructor of the instance of Earth atmosphere.
@@ -52,8 +52,8 @@ public final class Atmosphere extends HarrisPriester {
 				earth.getBodyShape(),
 				/* Cosine Exponent */ 5
 				);
-		this.logger = LoggerFactory.getLogger(this.getClass());
-		this.logger.info(CustomLoggingTools.indentMsg(this.logger, 
+		
+		logger.info(CustomLoggingTools.indentMsg(logger, 
 				"Building the Earth Atmosphere: success."));
 	}
 	

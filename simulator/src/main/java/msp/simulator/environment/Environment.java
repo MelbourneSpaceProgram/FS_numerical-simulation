@@ -28,8 +28,9 @@ import msp.simulator.utils.logs.CustomLoggingTools;
  */
 public class Environment {
 
-	/** Logger of the instance. */
-	private Logger logger = LoggerFactory.getLogger(this.getClass());
+	/** Logger of the class. */
+	private static final Logger logger = LoggerFactory.getLogger(
+			Environment.class);
 
 	/** Instance of the Solar System in the simulation. */
 	private msp.simulator.environment.solarSystem.SolarSystem solarSystem;
@@ -52,7 +53,7 @@ public class Environment {
 	 * @throws OrekitException
 	 */
 	public Environment() throws OrekitException {
-		this.logger.info(CustomLoggingTools.indentMsg(this.logger,
+		logger.info(CustomLoggingTools.indentMsg(logger,
 				"Building the Environment..."));
 
 		/* Building the Solar System. */

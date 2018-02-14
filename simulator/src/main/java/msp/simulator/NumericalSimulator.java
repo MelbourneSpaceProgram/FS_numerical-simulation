@@ -102,17 +102,11 @@ public class NumericalSimulator {
 					this.environment
 					);
 
-			/* Configure here a new initial state of the satellite
-			 * if needed.
-			 */
-			//this.satellite.getStates().setInitialState(newInitialState);
-			/* **************************** */
-
 			/* Building the Dynamic Module. */
 			this.dynamic = new msp.simulator.dynamic.Dynamic(
 					this.environment,
 					this.satellite
-					) ;
+					);
 
 			/* Ephemeris Generator Module */
 			this.ephemerisGenerator = new EphemerisGenerator();
@@ -121,7 +115,6 @@ public class NumericalSimulator {
 		} catch (OrekitException e) {
 			e.printStackTrace();
 		}
-
 
 	}
 
@@ -143,8 +136,6 @@ public class NumericalSimulator {
 				currentOffset <= simulationDuration 
 				) {
 
-			//System.out.println("Summary at t = " + currentOffset + "--------");
-
 			this.dynamic.getPropagation().propagate(startDate.shiftedBy(currentOffset));
 
 			/* Generate the related ephemeris line. */
@@ -152,22 +143,24 @@ public class NumericalSimulator {
 					this.satellite.getStates().getCurrentState()
 					);
 
+			/* ********************** WARNING *******************************	*
+			 * TODO: The attitude "Wilcox" propagation step must strictly be	*
+			 * the same as the integration step of the main propagator.		*
+			 * I would say we have to extend the NumericalSimulator			*
+			 * class and override the afterIntegration() method, so			*
+			 * we can have a different step for the ephemeris.				*
+			 * **************************************************************	*/
+			
 			/* Incrementing the ephemeris time step. */
-
-			/* WARNING
-			 * TODO: The attitude "Wilcox" propagation step must strictly be
-			 * the same as the integration step of the main propagator.
-			 * I would say we have to extend the NumericalSimulator
-			 * class and override the afterIntegration method.
-			 */
 			currentOffset = currentOffset + Propagation.integrationTimeStep ;
+			
+			/* **************************************************************	*/
 
-			//System.out.println("---------------------------------");
 		}
 
 		/* End of processing. */
 		logger.info(CustomLoggingTools.indentMsg(logger,
-				"Processing End."));
+				"End of Processing Stage."));
 	}
 
 	/**

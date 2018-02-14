@@ -15,9 +15,29 @@ import msp.simulator.utils.logs.CustomLoggingTools;
  * @author Florian CHAUBEYRE
  */
 public class SatelliteBody extends BoxAndSolarArraySpacecraft {
+	
+	/* ******* Public Static Attributes ******* */
+
+	/** Size of the satellite box in meters - (x, y, z) */
+	public static double[] satBoxSizeWithNoSolarPanel = new double[] {0.01, 0.01, 0.01} ;
+	
+	/* Note that the size of the solar panels is set to zero in the following
+	 * constructor.*/
+	
+	/** Mass of the satellite in kilogram. */
+	public static double satelliteMass = 1.04;
+	
+	/* **************************************** */
 
 	/** Logger of the class */
 	private static final Logger logger = LoggerFactory.getLogger(SatelliteBody.class);
+	
+	/** Satellite Box Size with no Solar Array. */
+	private double[] satBoxSize ;
+	
+	/** Mass of the satellite. */
+	private double satMass ;
+	
 	
 	/**
 	 * Build the Satellite Body as a CubeSat (Cube with no Solar Arrays)
@@ -27,14 +47,36 @@ public class SatelliteBody extends BoxAndSolarArraySpacecraft {
 	 */
 	public SatelliteBody(Environment environment) {
 		super(
-				Assembly.cs1_Length,	/* X Length of Body */
-				Assembly.cs1_Length,	/* Y Length of Body */
-				Assembly.cs1_Length,	/* Z Length of Body */
+				satBoxSizeWithNoSolarPanel[0],	/* X Length of Body */
+				satBoxSizeWithNoSolarPanel[1],	/* Y Length of Body */
+				satBoxSizeWithNoSolarPanel[2],	/* Z Length of Body */
 				environment.getSolarSystem().getSun()
 				.getPvCoordinateProvider(), /* Sun Coordinate Provider */
 				0, Vector3D.PLUS_I, 0, 0, 0 /* Solar Array Parameters: Zero */
 				);
+		
+		/* Copy the user value into a protected variable. */
+		this.satBoxSize = SatelliteBody.satBoxSizeWithNoSolarPanel;
+		this.satMass = SatelliteBody.satelliteMass;
+		
 		SatelliteBody.logger.info(CustomLoggingTools.indentMsg(SatelliteBody.logger, 
 				" -> Building the CubeSat body: Success."));
 	}
+
+
+	/**
+	 * @return The satellite size as a box without solar panel.
+	 */
+	public double[] getSatBoxSize() {
+		return satBoxSize;
+	}
+
+
+	/**
+	 * @return the satellite mass.
+	 */
+	public double getSatMass() {
+		return satMass;
+	}
+	
 }

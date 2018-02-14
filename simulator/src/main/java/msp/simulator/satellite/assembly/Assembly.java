@@ -16,15 +16,8 @@ import msp.simulator.utils.logs.CustomLoggingTools;
  */
 public class Assembly {
 
-	/* **************************************************************	*/
-	/* 				STATIC FIELD FOR CUBESAT PARAMETERS.				*/
-	/* **************************************************************	*/
+	/* ******* Public Static Attributes ******* */
 	
-	/** Static field describing the length of the sides of the cube body. */
-	public static double cs1_Length = 0.010; /* m */
-	
-	/** Static field describing the Satellite Body Mass. */
-	public static double cs1_Mass = 1.04 ; /* kg */
 	
 	/** Static field describing the satellite inertia matrix. */
 //	public static double[][] cs1_IMatrix =  /* kg.m^2 */ {
@@ -40,7 +33,7 @@ public class Assembly {
 		};
 
 	
-	/* **************************************************************	*/
+	/* *****************************************	*/
 	
 	/** Logger of the class */
 	private static final Logger logger = LoggerFactory.getLogger(Assembly.class);
@@ -62,7 +55,7 @@ public class Assembly {
 				"Assembly in process..."));
 		
 		this.satelliteBody = new SatelliteBody(environment);
-		this.satelliteStates = new SatelliteStates(environment);
+		this.satelliteStates = new SatelliteStates(environment, satelliteBody);
 	}
 	
 	/**

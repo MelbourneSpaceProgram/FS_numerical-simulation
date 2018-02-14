@@ -41,12 +41,10 @@ public class Propagation {
 	
 	/* ******* Public Static Attributes ******* */
 	
-	/** Default Time Step in use for integration step calculation. (s) */
+	/** Time Step in use for integration step calculation. (s) */
 	public static double integrationTimeStep = 0.1 ;
 
 	/* **************************************** */
-	
-	
 	
 	/** Instance of the Logger of the class. */
 	private static final Logger logger = LoggerFactory.getLogger(Propagation.class);
@@ -85,8 +83,6 @@ public class Propagation {
 
 		try {
 			/* Creating the Instance of Propagator. */
-			System.out.println(integrationTimeStep);
-			
 			this.integrator = new ClassicalRungeKuttaIntegrator(Propagation.integrationTimeStep);
 			this.propagator = new NumericalPropagator(this.integrator);
 

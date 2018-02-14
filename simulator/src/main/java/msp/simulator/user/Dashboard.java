@@ -2,15 +2,21 @@
 
 package msp.simulator.user;
 
+import org.hipparchus.complex.Quaternion;
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.util.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import msp.simulator.NumericalSimulator;
 import msp.simulator.dynamic.propagation.Propagation;
+import msp.simulator.environment.orbit.Orbit;
+import msp.simulator.environment.orbit.Orbit.OrbitalParameters;
+import msp.simulator.satellite.assembly.SatelliteBody;
+import msp.simulator.satellite.assembly.SatelliteStates;
 import msp.simulator.utils.logs.CustomLoggingTools;
 
 /**
- *
  * This class handles the user-configuration 
  * of the numerical simulator.
  * <p>
@@ -34,7 +40,7 @@ import msp.simulator.utils.logs.CustomLoggingTools;
  */
 public class Dashboard {	
 	
-	/** Logger of the instance. */
+	/** Logger of the class. */
 	private static final Logger logger = LoggerFactory.getLogger(
 			Dashboard.class);
 
@@ -42,11 +48,44 @@ public class Dashboard {
 	public static void setDefaultConfiguration() {
 		logger.info(CustomLoggingTools.indentMsg(logger, 
 				"Setting Default Configuration..."));
+
+		Dashboard.setIntegrationTimeStep(0.1);
+		Dashboard.setSimulationDuration(10.0);
+		Dashboard.setOrbitalParameters(new OrbitalParameters(
+				575000, 	
+				0,
+				0,
+				FastMath.toRadians(98),
+				FastMath.toRadians(269.939),
+				FastMath.toRadians(0),
+				"2018-12-21T22:23:00.000"
+						));
+		Dashboard.setSatBoxSizeWithNoSolarPanel(new double[] {0.01, 0.01, 0.01});
+		Dashboard.setInitialAttitudeQuaternion(1, 0, 0, 0);
+		Dashboard.setInitialSpin(new Vector3D(
+				FastMath.PI / 10. ,
+				0.0,
+				0.0	
+				));
+		Dashboard.setInitialRotAcceleration(new Vector3D(
+				0.0,
+				0.0,
+				0.0	
+				));
 		
-		Dashboard.setTimeIntegrationStep(1.0);
-		Dashboard.setSimulationDuration(100.0);
 	}
 
+
+	
+	/**
+	 * Set the integration time step of the different integrators
+	 * used on the simulation (Attitude and Main PVT)
+	 * @param step in seconds
+	 */
+	public static void setIntegrationTimeStep(double step) {
+		Propagation.integrationTimeStep = step;
+	}
+	
 	/**
 	 * Set the time duration of the simulation to process.
 	 * @param duration in seconds
@@ -56,12 +95,54 @@ public class Dashboard {
 	}
 	
 	/**
-	 * Set the integration time step of the different integrators
-	 * used on the simulation (Attitude and Main PVT)
-	 * @param step in seconds
+	 * Set the orbital parameters required to define the orbit in
+	 * the simulator.
+	 * @param param The appropriate orbital parameters
+	 * @see msp.simulator.environment.orbit.Orbit.OrbitalParameters
 	 */
-	public static void setTimeIntegrationStep(double step) {
-		Propagation.integrationTimeStep = step;
+	public static void setOrbitalParameters(OrbitalParameters param) {
+		Orbit.userOrbitalParameters = param;
 	}
 
+	/**
+	 * Set the size of the satellite box without solar panel.
+	 * @param xyzSize a three-dimension array (x, y, z) in meter.
+	 */
+	public static void setSatBoxSizeWithNoSolarPanel(double[] xyzSize) {
+		SatelliteBody.satBoxSizeWithNoSolarPanel = xyzSize;
+	}
+	
+	/**
+	 * Set the initial attitude quaternion. (Representing the rotation
+	 * from the inertial frame to the satellite frame).
+	 * @param q0 Scalar part
+	 * @param q1 First Vector Part
+	 * @param q2 Second Vector Part
+	 * @param q3 Third Vector Part
+	 */
+	public static void setInitialAttitudeQuaternion(
+			double q0, double q1, double q2, double q3) {
+		SatelliteStates.initialAttitudeQuaternion = new Quaternion(q0, q1, q2, q3);
+	}
+	
+	/**
+	 * Set the initial spin of the satellite.
+	 * @param spin Vector in the space.
+	 */
+	public static void setInitialSpin(Vector3D spin) {
+		SatelliteStates.initialSpin = spin;
+	}
+	
+	/**
+	 * Set the initial rotational acceleration of the satellite.
+	 * @param accRot Vector in the space.
+	 */
+	public static void setInitialRotAcceleration(Vector3D accRot) {
+		SatelliteStates.initialRotAcceleration = accRot;
+	}
+	
+	public static void setSatelliteMass(double mass) {
+		SatelliteBody.satelliteMass = mass;
+	}
+	
 }

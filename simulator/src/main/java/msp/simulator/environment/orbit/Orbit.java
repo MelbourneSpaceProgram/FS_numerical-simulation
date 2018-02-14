@@ -43,7 +43,8 @@ public class Orbit {
 
 
 	/** Logger of the class. */
-	Logger logger = LoggerFactory.getLogger(this.getClass());
+	private static final Logger logger = LoggerFactory.getLogger(
+			Orbit.class);
 
 	/** Instance of the orbit in the simulation. */
 	private CircularOrbit orbit;
@@ -106,7 +107,9 @@ public class Orbit {
 	 * @see CircularOrbit
 	 */
 	public Orbit(SolarSystem solarSystem) throws IllegalArgumentException, OrekitException {
-
+		logger.info(CustomLoggingTools.indentMsg(logger, 
+				"Building the Orbit..."));
+		
 		this.orbit = new CircularOrbit(
 				solarSystem.getEarth().getRadius() 
 				+ userOrbitalParameters.altitude,		/* Semi-Major Axis */
@@ -126,9 +129,6 @@ public class Orbit {
 
 		/* Creating the relating Local Orbital Frame. */
 		this.createLOF(this);
-
-		this.logger.info(CustomLoggingTools.indentMsg(this.logger, 
-				"Building the Orbit : Success."));
 	}
 
 	/** Get the Orbit of the simulation. */
