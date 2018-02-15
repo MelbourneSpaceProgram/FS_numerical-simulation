@@ -47,6 +47,12 @@ public class NumericalSimulator {
 	private final LocalDateTime startDate;
 	private LocalDateTime endDate;
 
+	/** 
+	 * Time duration of the simulation : the double max value
+	 * states for an "infinite loop" duration.
+	 */
+	public static double simulationDuration = Double.MAX_VALUE;
+
 	public NumericalSimulator() {
 		this.startDate = LocalDateTime.now();
 
@@ -61,15 +67,26 @@ public class NumericalSimulator {
 			e.printStackTrace();
 		}
 
-		NumericalSimulator.logger.info("Launching the Simulation...");
+		NumericalSimulator.logger.info("Simulation Instance Created.");
 	}
 
+	/**
+	 * This method performs in order the initialization,
+	 * the processing and the exit of the simulation.
+	 * <p>
+	 * NOTE: Any user defined settings for the simulation
+	 * should be registered prior the initialization/launch.
+	 * @see msp.simulator.user.Dashboard
+	 */
 	public void launch() {
 		this.initialize();
 		this.process();
 		this.exit();
 	}
 
+	/**
+	 * Initialize the simulation.
+	 */
 	public void initialize() {
 		NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
 				"Initialization in Process..."));
@@ -89,17 +106,11 @@ public class NumericalSimulator {
 					this.environment
 					);
 
-			/* Configure here a new initial state of the satellite
-			 * if needed.
-			 */
-			//this.satellite.getStates().setInitialState(newInitialState);
-			/* **************************** */
-
 			/* Building the Dynamic Module. */
 			this.dynamic = new msp.simulator.dynamic.Dynamic(
 					this.environment,
 					this.satellite
-					) ;
+					);
 
 			/* Ephemeris Generator Module */
 			this.ephemerisGenerator = new EphemerisGenerator();
@@ -109,23 +120,26 @@ public class NumericalSimulator {
 			e.printStackTrace();
 		}
 
-
 	}
 
+	/**
+	 * Launch the main processing of the simulation.
+	 */
 	public void process() {
 		if (this.executionStatus == 1) {
 			NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
 					"Processing the Simulation..."));
 		}
-		double duration = 10 ; /* s */
+
 		double currentOffset = 0;
 		AbsoluteDate startDate = 
 				this.satellite.getStates().getInitialState().getDate();
 
-		while (currentOffset <= duration ) {
-			
-			//System.out.println("Summary at t = " + currentOffset + "--------");
-			
+		while ((simulationDuration == Double.MAX_VALUE)
+				||
+				currentOffset <= simulationDuration 
+				) {
+
 			this.dynamic.getPropagation().propagate(startDate.shiftedBy(currentOffset));
 
 			/* Generate the related ephemeris line. */
@@ -133,22 +147,29 @@ public class NumericalSimulator {
 					this.satellite.getStates().getCurrentState()
 					);
 
-			/* Incrementing the ephemeris time step. */
+			/* ********************** WARNING *******************************	*
+			 * TODO: The attitude "Wilcox" propagation step must strictly be	*
+			 * the same as the integration step of the main propagator.		*
+			 * I would say we have to extend the NumericalSimulator			*
+			 * class and override the afterIntegration() method, so			*
+			 * we can have a different step for the ephemeris.				*
+			 * **************************************************************	*/
 			
-			/* WARNING
-			 * TODO: the attitude "Wilcox" propagation step must strictly be
-			 * the same as the integration step of the main propagator.
-			 */
+			/* Incrementing the ephemeris time step. */
 			currentOffset = currentOffset + Propagation.integrationTimeStep ;
 			
-			//System.out.println("---------------------------------");
+			/* **************************************************************	*/
+
 		}
 
 		/* End of processing. */
 		logger.info(CustomLoggingTools.indentMsg(logger,
-				"Processing End."));
+				"End of Processing Stage."));
 	}
 
+	/**
+	 * Performs the exit processing of the simulation.
+	 */
 	public void exit() {
 		this.endDate = LocalDateTime.now();
 		NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,

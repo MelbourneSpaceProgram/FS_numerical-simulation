@@ -38,16 +38,20 @@ import msp.simulator.utils.logs.CustomLoggingTools;
  * @author Florian CHAUBEYRE
  */
 public class Propagation {
+	
+	/* ******* Public Static Attributes ******* */
+	
+	/** Time Step in use for integration step calculation. (s) */
+	public static double integrationTimeStep = 0.1 ;
 
+	/* **************************************** */
+	
 	/** Instance of the Logger of the class. */
 	private static final Logger logger = LoggerFactory.getLogger(Propagation.class);
 
 	/** Instance of Integrator of the Propagator. */
 	private ODEIntegrator integrator ;
-
-	/** Time Step in use for integration step calculation. (s) */
-	public static final double integrationTimeStep = 0.1 ; /* Default value */ 
-
+	
 	/** Instance of Propagator in the simulation. */
 	private NumericalPropagator propagator;
 
@@ -60,10 +64,11 @@ public class Propagation {
 	/**
 	 * Create and Configure the Instance of Propagator
 	 * of the Simulation.
-	 * 
-	 * @param environment The Space Environment 
-	 * @param satellite The Satellite Object
-	 * @param forces The Forces Object of the Simulation
+	 * @param environment Instance of the Simulation
+	 * @param satellite Instance of the Simulation
+	 * @param forces Instance of the Simulation
+	 * @param torques Instance of the Simulation
+	 * @param guidance Instance of the Simulation
 	 */
 	public Propagation(Environment environment, Satellite satellite, 
 			Forces forces,
@@ -150,7 +155,7 @@ public class Propagation {
 	 * Compute and Update the satellite state at the next time step.
 	 * <p>
 	 * The dynamic computation is as follow: 
-	 * Torque -> Spin -> Attitude.
+	 * Torque -- Spin -- Attitude.
 	 * <p>
 	 * The main OreKit integration takes care of the orbital 
 	 * parameters and integrates the additional data - e.g. the 

@@ -2,6 +2,9 @@
 
 /**
  *
+ * Gather the tools and methods for a formal simulator
+ * architecture.
+ *
  * @author Florian CHAUBEYRE
  */
 package msp.simulator.utils.architecture;

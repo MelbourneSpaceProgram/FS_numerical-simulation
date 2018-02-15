@@ -22,7 +22,7 @@ java.util.logging.ConsoleHandler.filter    =
 java.util.logging.ConsoleHandler.formatter = java.util.logging.SimpleFormatter
 java.util.logging.ConsoleHandler.encoding  =
                               
-java.util.logging.StreamHandler.level     = WARNING
+java.util.logging.StreamHandler.level     =
 java.util.logging.StreamHandler.filter    =
 java.util.logging.StreamHandler.formatter =
 java.util.logging.StreamHandler.encoding  =

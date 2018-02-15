@@ -31,8 +31,8 @@ public class AutomaticGuidanceEngine {
 
 	/**
 	 * Build the Automatic Guidance Engine.
-	 * @param environment
-	 * @param satellite
+	 * @param environment Simulation Instance
+	 * @param satellite Simulation Instance
 	 */
 	public AutomaticGuidanceEngine(Environment environment, Satellite satellite) {
 		this.environment = environment;
@@ -50,11 +50,11 @@ public class AutomaticGuidanceEngine {
 	/**
 	 * Get the initial attitude of the registered automatic
 	 * attitude provider.
-	 * @param attitudeProvider
+	 * @param attitudeProvider Timestamped attitude provider
 	 * @return Initial Attitude of the Automatic AttitudeProvider
 	 */
 	public Attitude getInitialAttitude(AttitudeProvider attitudeProvider) {
-		Attitude initialAttitude = this.satellite.getAssembly().getStates().getDefaultAttitude();
+		Attitude initialAttitude = this.satellite.getAssembly().getStates().getInitialAttitude();
 		try {
 			initialAttitude = attitudeProvider.getAttitude(
 					this.environment.getOrbit(),

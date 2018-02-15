@@ -41,7 +41,9 @@ public class Torques {
 		this.torqueProvider = new AutomaticManoeuvre(
 				satellite.getAssembly().getStates().getInitialState().getDate());
 		
-		this.dynamicTorqueEquation = new TorqueToSpinEquation(this.torqueProvider);
+		this.dynamicTorqueEquation = new TorqueToSpinEquation(
+				satellite.getAssembly(),
+				this.torqueProvider);
 	}
 	
 	/**

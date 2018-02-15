@@ -16,6 +16,7 @@ public interface TorqueProvider {
 	/**
 	 * Provide a torque interaction on the satellite
 	 * in the satellite frame.
+	 * @param date Used to retrieve the appropriate torque in time.
 	 * @return Vector3D in Satellite Frame.
 	 */
 	public Vector3D getTorque(AbsoluteDate date);

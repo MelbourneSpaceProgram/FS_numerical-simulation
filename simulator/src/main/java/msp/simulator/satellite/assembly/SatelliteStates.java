@@ -4,6 +4,7 @@ package msp.simulator.satellite.assembly;
 
 import java.util.Map;
 
+import org.hipparchus.complex.Quaternion;
 import org.hipparchus.exception.MathIllegalStateException;
 import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
@@ -18,21 +19,46 @@ import msp.simulator.environment.Environment;
 import msp.simulator.utils.logs.CustomLoggingTools;
 
 /**
- *
+ * This class is responsible to store, maintain and
+ * provide tools to access the satellite state over 
+ * the time in the simulation.
+ * <p>
+ * Note that an OreKit Spacecraft state is immutable
+ * so any action on the satellite creates a new instance.
+ * Then this class focus on keeping up-to-date the right
+ * current state of the satellite in time.
+ * 
+ * @see SpacecraftState 
+ * 
  * @author Florian CHAUBEYRE
  */
 public class SatelliteStates {
 
+	/* ******* Public Static Attributes ******* */
+
+	public static Quaternion initialAttitudeQuaternion = 
+			new Quaternion(1,0,0,0);
+
+	/** Initial Spin of the satellite */
+	public static Vector3D initialSpin = new Vector3D(
+			0.0,
+			0.0,
+			0.0
+			);
+	/** Initial Rotation Acceleration of the satellite */
+	public static Vector3D initialRotAcceleration = new Vector3D(
+			0.0,
+			0.0,
+			0.0
+			);
+
+	/* **************************************** */
+
 	/** Logger of the class */
 	private static final Logger logger = LoggerFactory.getLogger(SatelliteStates.class);
 
-	/* 
-	 * ***************************************** * 
-	 * 	Any action on a SpacecraftState creates	*
-	 * 	a new instance, so we should update a	*
-	 * 	current SpacecraftState attribute.		*
-	 * *****************************************	* 
-	 */
+	/** Initial Attitude Object of the satellite. */
+	private Attitude initialAttitude;
 
 	/** Initial state of the satellite. */
 	private SpacecraftState initialState;
@@ -40,47 +66,42 @@ public class SatelliteStates {
 	/** Current state of the satellite. */
 	private SpacecraftState currentState;
 
-	private Attitude defaultAttitude; 
-
-	/** Initial Spin of the satellite */
-	private Vector3D initialSpin = new Vector3D(
-			0.31415,
-			0.0,
-			0.0
-			);
-	/** Initial Rotation Acceleration of the satellite */
-	private Vector3D initialRotAcceleration = new Vector3D(
-			0.0,
-			0.0,
-			0.0
-			);
-
 	/**
-	 * 
-	 * @param environment
-	 * @throws IllegalArgumentException
+	 * Create the instance of Satellite states.
+	 * @param environment  Instance of the Simulation
+	 * @param body of the satellite
+	 * @throws IllegalArgumentException if orbit and attitude dates or frames are not equal
 	 */
-	public SatelliteStates(Environment environment) {
+	public SatelliteStates(Environment environment, SatelliteBody body) {
 
 		SatelliteStates.logger.info(CustomLoggingTools.indentMsg(SatelliteStates.logger,
 				" -> Initializing the satellite states..."));
 
-		this.defaultAttitude = new Attitude(
+		/* Creates here the initial first attitude object of the satellite. */
+		Attitude initialAttitude = new Attitude(
 				environment.getOrbit().getDate(),
 				environment.getOrbit().getFrame(),
 				new AngularCoordinates(
-						new Rotation(1,0,0,0,true), 
-						this.initialSpin,
-						this.initialRotAcceleration
+						new Rotation(
+								SatelliteStates.initialAttitudeQuaternion.getQ0(),
+								SatelliteStates.initialAttitudeQuaternion.getQ1(),
+								SatelliteStates.initialAttitudeQuaternion.getQ2(),
+								SatelliteStates.initialAttitudeQuaternion.getQ3(),
+								true), 
+						SatelliteStates.initialSpin,
+						SatelliteStates.initialRotAcceleration
 						)
 				);
+
+		this.initialAttitude = initialAttitude;
 
 		this.initialState = new SpacecraftState(
 				environment.getOrbit(),
 				/* Default Attitude. The operating one should 
 				 * be brought by the Dynamic module. */
-				this.defaultAttitude,
-				Assembly.cs1_Mass);
+				initialAttitude,
+				body.getSatMass()
+				);
 
 		/* Add user-related additional states. */
 		/* Rotation Speed
@@ -89,9 +110,9 @@ public class SatelliteStates {
 		 */
 		this.initialState = this.initialState
 				.addAdditionalState("Spin", new double[]{
-						this.initialSpin.getX(),
-						this.initialSpin.getY(),
-						this.initialSpin.getZ() }
+						SatelliteStates.initialSpin.getX(),
+						SatelliteStates.initialSpin.getY(),
+						SatelliteStates.initialSpin.getZ() }
 						);
 
 		this.currentState = this.initialState;
@@ -114,8 +135,8 @@ public class SatelliteStates {
 
 	/**
 	 * Update the value of the state by the newState one.
-	 * @param state	The SpacecraftState to update
 	 * @param newState The new value for the state
+	 * @return The updated old-state.
 	 */
 	private SpacecraftState updateState(SpacecraftState newState) {
 		try {
@@ -147,7 +168,7 @@ public class SatelliteStates {
 	/**
 	 * Update the value of the initial state of the satellite.
 	 * A check is done on the compatibility of the additional states.
-	 * @param newInitialState
+	 * @param newInitialState The user defined initial state
 	 */
 	public void setInitialState(SpacecraftState newInitialState) {
 		this.initialState = this.updateState(newInitialState);
@@ -156,7 +177,7 @@ public class SatelliteStates {
 	/**
 	 * Update the value of the current state of the satellite.
 	 * A check is done on the compatibility of the additional states.
-	 * @param newCurrentState
+	 * @param newCurrentState the new -updated- satellite state
 	 */
 	public void setCurrentState(SpacecraftState newCurrentState) {
 		this.currentState = this.updateState(newCurrentState);
@@ -164,11 +185,13 @@ public class SatelliteStates {
 
 
 	/**
-	 * Use for automatic guidance.
-	 * @return the defaultAttitude
+	 * Get the initial Attitude object of the satellite.
+	 * @return Attitude
+	 * @see Attitude
 	 */
-	public Attitude getDefaultAttitude() {
-		return defaultAttitude;
+	public Attitude getInitialAttitude() {
+		return this.initialAttitude;
 	}	
+
 
 }

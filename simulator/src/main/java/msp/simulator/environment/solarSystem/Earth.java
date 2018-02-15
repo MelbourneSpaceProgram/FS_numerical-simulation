@@ -95,7 +95,7 @@ public class Earth {
 	
 	/**
 	 * Return the singleton instance of the Earth.
-	 * @return
+	 * @return Earth celestial body
 	 */
 	public CelestialBody getCelestialBody() {
 		return this.earthCelestialBody;
@@ -141,6 +141,6 @@ public class Earth {
 	}
 	
 	public PVCoordinatesProvider getPvCoordinateProvider() {
-		return ((PVCoordinatesProvider) this.earthCelestialBody) ;
+		return (this.earthCelestialBody) ;
 	}
 }

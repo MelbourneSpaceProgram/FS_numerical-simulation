@@ -13,7 +13,7 @@ import msp.simulator.utils.logs.CustomLoggingTools;
  * This class implements the force model attraction 
  * of a third body of the Solar System.
  * 
- * @see Moon
+ * @see msp.simulator.environment.solarSystem.Moon
  * @author Florian CHAUBEYRE
  */
 public class MoonThirdBodyAttraction extends ThirdBodyAttraction {
@@ -26,7 +26,7 @@ public class MoonThirdBodyAttraction extends ThirdBodyAttraction {
 	 * It currently takes into account the effect of the Moon.
 	 * 
 	 * @param environment The Space Environment of Simulation.
-	 * @see Moon
+	 * @see msp.simulator.environment.solarSystem.Moon
 	 */
 	public MoonThirdBodyAttraction(Environment environment) {
 		super(environment.getSolarSystem().getMoon().getMoonCelestialBody());

@@ -42,8 +42,10 @@ public class DynamicGuidance implements AttitudeProvider {
 	private SatelliteStates satelliteStates;
 
 	/**
-	 * 
-	 * @param satellite
+	 * Create the instance of dynamic guidance, i.e. torque driven,
+	 * in the simulation.
+	 * @param satellite Instance of the Simulation
+	 * @param torqueProvider The "torque-law-over-time" provider
 	 */
 	public DynamicGuidance (Satellite satellite, TorqueProvider torqueProvider) {
 		logger.info(CustomLoggingTools.indentMsg(logger, 
@@ -70,6 +72,7 @@ public class DynamicGuidance implements AttitudeProvider {
 	 * of the satellite but only an image used for linear forces
 	 * computation.
 	 */
+	@Override
 	public Attitude getAttitude(
 			PVCoordinatesProvider pvProv, 
 			AbsoluteDate date, 
@@ -85,6 +88,7 @@ public class DynamicGuidance implements AttitudeProvider {
 	/**
 	 * Do nothing and return null.
 	 */
+	@Override
 	public <T extends RealFieldElement<T>> FieldAttitude<T> getAttitude(
 			FieldPVCoordinatesProvider<T> pvProv,
 			FieldAbsoluteDate<T> date,
