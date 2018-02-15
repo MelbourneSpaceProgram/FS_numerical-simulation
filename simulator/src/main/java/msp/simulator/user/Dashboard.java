@@ -73,6 +73,20 @@ public class Dashboard {
 				0.0	
 				));
 		
+		@SuppressWarnings("unused")
+		double[][] trueSatInertiaMatrix =  /* kg.m^2 */ {
+				{1191.648 * 1.3e-6,           0       ,           0        },
+				{         0       ,  1169.506 * 1.3e-6,           0        },
+				{         0       ,           0       ,  1203.969 * 1.3e-6 },
+			};
+		
+		double[][] simpleBalancedInertiaMatrix = {
+				{ 1,   0,   0 },
+				{ 0,   1,   0 },
+				{ 0,   0,   1 }
+			};
+		Dashboard.setSatelliteInertiaMatrix(simpleBalancedInertiaMatrix);
+		
 	}
 
 	/**
@@ -139,8 +153,19 @@ public class Dashboard {
 		SatelliteStates.initialRotAcceleration = accRot;
 	}
 	
+	/**
+	 * Set the user-defined satellite mass.
+	 * @param mass in kilogram
+	 */
 	public static void setSatelliteMass(double mass) {
 		SatelliteBody.satelliteMass = mass;
 	}
 	
+	/**
+	 * Set the user-specified inertia matrix of the satellite.
+	 * @param iMatrix Inertia Matrix to be set
+	 */
+	public static void setSatelliteInertiaMatrix(double[][] iMatrix) {
+		SatelliteBody.satInertiaMatrix = iMatrix;
+	}
 }

@@ -36,15 +36,19 @@ public class TorqueToSpinEquation implements AdditionalEquations {
 
 	/** Instance of torque provider of the dynamic engine. */
 	private TorqueProvider torqueProvider;
-
+	
+	/** Satellite assembly object. */
+	private Assembly satelliteAssembly;
 
 	/**
 	 * Constructor of the equation.
+	 * @param assembly of the satellite object
 	 * @param torqueProvider The Provider of the overall
 	 * torque interaction on the satellite in the satellite
 	 * frame.
 	 */
-	public TorqueToSpinEquation(TorqueProvider torqueProvider) {
+	public TorqueToSpinEquation(Assembly assembly, TorqueProvider torqueProvider) {
+		this.satelliteAssembly = assembly;
 		this.torqueProvider = torqueProvider;
 	}
 
@@ -98,6 +102,9 @@ public class TorqueToSpinEquation implements AdditionalEquations {
 		
 		/* Extract the date of the current step. */
 		AbsoluteDate date = s.getDate();
+		
+		/* Extract the inertia matrix of the satellite. */
+		double[][] inertiaMatrix = this.satelliteAssembly.getBody().getInertiaMatrix();
 
 		/* Implementation of the equation.
 		 * 		wDot(t) = M(t) / I  	on each axis considering the inertia
@@ -106,9 +113,9 @@ public class TorqueToSpinEquation implements AdditionalEquations {
 		 * To integrate the coupling between the different axis, one can refer to 
 		 * the Euler Equation for a rotating rigid body.
 		 */
-		double wxDot = this.torqueProvider.getTorque(date).getX() / Assembly.cs1_IMatrix[0][0];
-		double wyDot = this.torqueProvider.getTorque(date).getY() / Assembly.cs1_IMatrix[1][1];
-		double wzDot = this.torqueProvider.getTorque(date).getZ() / Assembly.cs1_IMatrix[2][2];
+		double wxDot = this.torqueProvider.getTorque(date).getX() / inertiaMatrix[0][0];
+		double wyDot = this.torqueProvider.getTorque(date).getY() / inertiaMatrix[1][1];
+		double wzDot = this.torqueProvider.getTorque(date).getZ() / inertiaMatrix[2][2];
 
 		/* Updating the Reference.
 		 * NB: The following does not update the reference:
