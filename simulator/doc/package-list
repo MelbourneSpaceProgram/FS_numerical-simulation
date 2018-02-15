@@ -3,6 +3,7 @@ msp.simulator.dynamic
 msp.simulator.dynamic.forces
 msp.simulator.dynamic.guidance
 msp.simulator.dynamic.propagation
+msp.simulator.dynamic.test
 msp.simulator.dynamic.torques
 msp.simulator.environment
 msp.simulator.environment.atmosphere

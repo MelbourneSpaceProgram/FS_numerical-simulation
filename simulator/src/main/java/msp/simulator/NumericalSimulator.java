@@ -183,4 +183,11 @@ public class NumericalSimulator {
 				);
 	}
 
+	/**
+	 * @return the satellite
+	 */
+	public msp.simulator.satellite.Satellite getSatellite() {
+		return satellite;
+	}
+
 }

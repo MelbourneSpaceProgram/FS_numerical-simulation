@@ -63,7 +63,7 @@ public class Dashboard {
 		Dashboard.setSatBoxSizeWithNoSolarPanel(new double[] {0.01, 0.01, 0.01});
 		Dashboard.setInitialAttitudeQuaternion(1, 0, 0, 0);
 		Dashboard.setInitialSpin(new Vector3D(
-				FastMath.PI / 10. ,
+				0.0,
 				0.0,
 				0.0	
 				));
