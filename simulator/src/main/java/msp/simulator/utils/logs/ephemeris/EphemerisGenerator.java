@@ -37,17 +37,19 @@ public class EphemerisGenerator {
 			LoggerFactory.getLogger(EphemerisGenerator.class);
 
 	/* ****** Default Values **** */
-	
-	/** Default time step, i.e. time resolution, of the ephemeris. */
-	protected final static double DEFAULT_STEP = 1.0 ;
 
 	/** Default absolute path of the ephemeris folder. */
-	protected static final String DEFAULT_PATH =
-			"/Users/florianchaubeyre/Desktop/MSP/simulator/workspace/"
-					+ "simulator/src/main/resources/ephemeris/";
-
+	public static String DEFAULT_PATH =
+			System.getProperty("user.dir") + System.getProperty("file.separator") 
+			+ "src" + System.getProperty("file.separator")
+			+ "main" + System.getProperty("file.separator")
+			+ "resources" + System.getProperty("file.separator")
+			+ "ephemeris" + System.getProperty("file.separator")
+			;
+			
+	
 	/** Default Name of the Simulation. */
-	protected static final String DEFAULT_SIMU_NAME =
+	public static String DEFAULT_SIMU_NAME =
 			"MSP-SIM-V.0.1-" + 
 					/* Date Format. */
 					LocalDateTime.now().format(
@@ -55,13 +57,13 @@ public class EphemerisGenerator {
 					+ "-";
 	
 	/** New Line Symbol. */
-	protected final static String NL = "\n";
+	protected final static String LS = System.getProperty("line.separator");
 
 	/** Name of the orbital object. */
-	protected final static String OBJECT_NAME = "MSP_CubeSat_1";
+	public static String OBJECT_NAME = "MSP_CubeSat_1";
 
 	/** Name of the current Simulation. */
-	protected final static String SIMU_ID = "MSP_SIM_0.1";
+	public static String SIMU_ID = "MSP_SIM_0.1";
 
 	/* ************************* */
 
@@ -208,7 +210,7 @@ public class EphemerisGenerator {
 			.append(position.getZ() * 1e-3)
 			;
 
-			this.writerOEM.append(buff.toString() + NL);
+			this.writerOEM.append(buff.toString() + LS);
 			this.writerOEM.flush();
 
 			/* Writing the AEM ephemerides. */
@@ -232,7 +234,7 @@ public class EphemerisGenerator {
 			.append(inertialRotation.getQ3())
 			;
 
-			this.writerAEM.append(buff.toString() + NL);
+			this.writerAEM.append(buff.toString() + LS);
 			this.writerAEM.flush();
 
 			/* For DEBUG only. */
@@ -273,23 +275,23 @@ public class EphemerisGenerator {
 					TimeScalesFactory.getUTC()
 					);
 
-			headerAEM += "CIC_AEM_VERS = 1.0" + NL ;
+			headerAEM += "CIC_AEM_VERS = 1.0" + LS ;
 			headerAEM += ("CREATION_DATE = " + 
-					currentDate.toString(TimeScalesFactory.getUTC()) ) + NL ;
-			headerAEM += ("ORIGINATOR = ") + simuIdentifier + NL ;
-			headerAEM += ("     ") + NL ;
-			headerAEM += ("META_START") + NL ;
-			headerAEM += ("") + NL ;
-			headerAEM += ("OBJECT_NAME = ") + objectName + NL ;
-			headerAEM += ("OBJECT_ID = MSP001") + NL ;
-			headerAEM += ("CENTER_NAME = EARTH") + NL ;
-			headerAEM += ("REF_FRAME_A = EME2000") + NL ;
-			headerAEM += ("REF_FRAME_B = SC_BODY_1") + NL ;
-			headerAEM += ("ATTITUDE_DIR = A2B") + NL ;
-			headerAEM += ("TIME_SYSTEM = UTC") + NL ;
-			headerAEM += ("ATTITUDE_TYPE = QUATERNION") + NL ;
-			headerAEM += ("") + NL ;
-			headerAEM += ("META_STOP") + NL ;
+					currentDate.toString(TimeScalesFactory.getUTC()) ) + LS ;
+			headerAEM += ("ORIGINATOR = ") + simuIdentifier + LS ;
+			headerAEM += ("     ") + LS ;
+			headerAEM += ("META_START") + LS ;
+			headerAEM += ("") + LS ;
+			headerAEM += ("OBJECT_NAME = ") + objectName + LS ;
+			headerAEM += ("OBJECT_ID = MSP001") + LS ;
+			headerAEM += ("CENTER_NAME = EARTH") + LS ;
+			headerAEM += ("REF_FRAME_A = EME2000") + LS ;
+			headerAEM += ("REF_FRAME_B = SC_BODY_1") + LS ;
+			headerAEM += ("ATTITUDE_DIR = A2B") + LS ;
+			headerAEM += ("TIME_SYSTEM = UTC") + LS ;
+			headerAEM += ("ATTITUDE_TYPE = QUATERNION") + LS ;
+			headerAEM += ("") + LS ;
+			headerAEM += ("META_STOP") + LS ;
 
 			return headerAEM;
 
@@ -314,20 +316,20 @@ public class EphemerisGenerator {
 					TimeScalesFactory.getUTC()
 					);
 
-			headerOEM += "CIC_OEM_VERS = 2.0" + NL ;
+			headerOEM += "CIC_OEM_VERS = 2.0" + LS ;
 			headerOEM += ("CREATION_DATE = " + 
-					currentDate.toString(TimeScalesFactory.getUTC()) ) + NL ;
-			headerOEM += ("ORIGINATOR = ") + simuIdentifier + NL ;
-			headerOEM += ("     ") + NL ;
-			headerOEM += ("META_START") + NL ;
-			headerOEM += ("") + NL ;
-			headerOEM += ("OBJECT_NAME = ") + objectName + NL ;
-			headerOEM += ("OBJECT_ID = MSP001") + NL ;
-			headerOEM += ("CENTER_NAME = EARTH") + NL ;
-			headerOEM += ("REF_FRAME = EME2000") + NL ;
-			headerOEM += ("TIME_SYSTEM = UTC") + NL ;
-			headerOEM += ("") + NL ;
-			headerOEM += ("META_STOP") + NL ;
+					currentDate.toString(TimeScalesFactory.getUTC()) ) + LS ;
+			headerOEM += ("ORIGINATOR = ") + simuIdentifier + LS ;
+			headerOEM += ("     ") + LS ;
+			headerOEM += ("META_START") + LS ;
+			headerOEM += ("") + LS ;
+			headerOEM += ("OBJECT_NAME = ") + objectName + LS ;
+			headerOEM += ("OBJECT_ID = MSP001") + LS ;
+			headerOEM += ("CENTER_NAME = EARTH") + LS ;
+			headerOEM += ("REF_FRAME = EME2000") + LS ;
+			headerOEM += ("TIME_SYSTEM = UTC") + LS ;
+			headerOEM += ("") + LS ;
+			headerOEM += ("META_STOP") + LS ;
 
 			return headerOEM;
 

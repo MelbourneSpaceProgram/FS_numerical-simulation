@@ -15,6 +15,7 @@ import msp.simulator.environment.orbit.Orbit.OrbitalParameters;
 import msp.simulator.satellite.assembly.SatelliteBody;
 import msp.simulator.satellite.assembly.SatelliteStates;
 import msp.simulator.utils.logs.CustomLoggingTools;
+import msp.simulator.utils.logs.ephemeris.EphemerisGenerator;
 
 /**
  * This class handles the user-configuration 
@@ -60,6 +61,7 @@ public class Dashboard {
 				FastMath.toRadians(0),
 				"2018-12-21T22:23:00.000"
 						));
+		Dashboard.setEphemerisFilesPath(EphemerisGenerator.DEFAULT_PATH);
 		Dashboard.setSatBoxSizeWithNoSolarPanel(new double[] {0.01, 0.01, 0.01});
 		Dashboard.setInitialAttitudeQuaternion(1, 0, 0, 0);
 		Dashboard.setInitialSpin(new Vector3D(
@@ -167,5 +169,9 @@ public class Dashboard {
 	 */
 	public static void setSatelliteInertiaMatrix(double[][] iMatrix) {
 		SatelliteBody.satInertiaMatrix = iMatrix;
+	}
+	
+	public static void setEphemerisFilesPath(String newPath) {
+		EphemerisGenerator.DEFAULT_PATH = newPath;
 	}
 }

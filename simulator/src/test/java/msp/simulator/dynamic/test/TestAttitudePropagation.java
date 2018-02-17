@@ -76,7 +76,6 @@ public class TestAttitudePropagation {
 				expectedAttitudeArray, 
 				actualAttitudeArray,
 				delta);
-		
 	}
 	
 }

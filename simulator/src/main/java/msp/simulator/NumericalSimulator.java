@@ -2,6 +2,7 @@
 
 package msp.simulator;
 
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -58,9 +59,31 @@ public class NumericalSimulator {
 
 		/* Setting the configuration of the Logging Services. */
 		LogManager myLogManager = LogManager.getLogManager();
+		
+		/* Setting the configuration file location. */
 		System.setProperty(
 				"java.util.logging.config.file", 
-				"src/main/resources/config/log-config-file.txt");
+				System.getProperty("user.dir") + System.getProperty("file.separator") 
+				+ "src" + System.getProperty("file.separator")
+				+ "main" + System.getProperty("file.separator")
+				+ "resources" + System.getProperty("file.separator")
+				+ "config" + System.getProperty("file.separator")
+				+ "log-config-file.txt"
+				);
+		
+		/* Creating the log directory. */
+		File simuLogDir = new File(
+				System.getProperty("user.dir") + System.getProperty("file.separator") 
+				+ "src" + System.getProperty("file.separator")
+				+ "main" + System.getProperty("file.separator")
+				+ "resources" + System.getProperty("file.separator")
+				+ "logs" + System.getProperty("file.separator")
+				);
+		if (!simuLogDir.exists()) {
+			simuLogDir.mkdirs();
+		}
+
+		/* Reading the overall configuration for the logging services. */
 		try {
 			myLogManager.readConfiguration();
 		} catch (SecurityException | IOException e) {
@@ -154,10 +177,10 @@ public class NumericalSimulator {
 			 * class and override the afterIntegration() method, so			*
 			 * we can have a different step for the ephemeris.				*
 			 * **************************************************************	*/
-			
+
 			/* Incrementing the ephemeris time step. */
 			currentOffset = currentOffset + Propagation.integrationTimeStep ;
-			
+
 			/* **************************************************************	*/
 
 		}
