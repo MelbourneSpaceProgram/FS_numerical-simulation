@@ -19,6 +19,10 @@ import msp.simulator.satellite.assembly.Assembly;
  * It aims to compute, from the overall torque interaction on
  * the satellite at the instant t, the spin (or rotationnal
  * speed) of the satellite at the instant t+dt.
+ * <p>
+ * The overall torque being responsible for the rotational
+ * acceleration through the satellite inertia, this data is
+ * stored in the additional state "RotAcc".
  *
  * @author Florian CHAUBEYRE
  */
@@ -117,15 +121,18 @@ public class TorqueToSpinEquation implements AdditionalEquations {
 		double wyDot = this.torqueProvider.getTorque(date).getY() / inertiaMatrix[1][1];
 		double wzDot = this.torqueProvider.getTorque(date).getZ() / inertiaMatrix[2][2];
 
-		/* Updating the Reference.
-		 * NB: The following does not update the reference:
-		 * pDot = new double[] {wxDot, wyDot, wzDot};
+		/* Updating the rotational acceleration of the satellite state.
+		 * Note that this state is neither "provided" nor "differentiated", 
+		 * it is not managed in the sense of the propagator, just copied at 
+		 * each step.
 		 */
+		/* TODO */
+		
+		
+		/* Updating the Reference of the object. */
 		pDot[0] = wxDot;
 		pDot[1] = wyDot;
 		pDot[2] = wzDot;
-		
-		//System.out.println(Arrays.toString(pDot));
 
 		/* 
 		 * Return the potentially new updated main propagation state, i.e.
@@ -138,7 +145,8 @@ public class TorqueToSpinEquation implements AdditionalEquations {
 		 * 
 		 * As we do not update the main state through this computation
 		 * we return null.
-		 * A typical main change would a change of mass through gas consumption.
+		 * A typical main state change would be a change of mass through gas 
+		 * consumption.
 		 */
 		return null;
 	}

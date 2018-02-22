@@ -239,7 +239,7 @@ public class EphemerisGenerator {
 
 			/* For DEBUG only. */
 			logger.info(
-					"Satellite State after propagation\n" +
+					"Satellite State to store in the ephemeris:\n" +
 							"Offset: " +
 							newState.getDate().durationFrom(this.extractedStartDate) + 
 							"\n" +

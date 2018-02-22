@@ -41,7 +41,9 @@ public class Propagation {
 	
 	/* ******* Public Static Attributes ******* */
 	
-	/** Time Step in use for integration step calculation. (s) */
+	/** Time Step in use for integration step calculation. (s) 
+	 * <p>Default value is 0.1 s.
+	 * */
 	public static double integrationTimeStep = 0.1 ;
 
 	/* **************************************** */
@@ -87,6 +89,14 @@ public class Propagation {
 			this.integrator = new ClassicalRungeKuttaIntegrator(Propagation.integrationTimeStep);
 			this.propagator = new NumericalPropagator(this.integrator);
 
+			/* TODO */
+			StepHandler myTestStep = new StepHandler(this.satellite);
+			this.propagator.setMasterMode(
+					Propagation.integrationTimeStep, 
+					myTestStep
+					);
+			/* **** */
+			
 			/* Registering the implemented force models. */
 			Propagation.logger.info(CustomLoggingTools.indentMsg(Propagation.logger,
 					"-> Registering the implemented Linear Force Models..."));
@@ -118,141 +128,9 @@ public class Propagation {
 				"Propagator Configured."));
 	}
 
-	/**
-	 * Compute the Wilcox Algorithm.
-	 * <p>
-	 * This algorithm allows to propagate an initial quaternion
-	 * through a certain rotational speed during a small step
-	 * of time.
-	 * 
-	 * @param Qi Initial quaternion to propagate
-	 * @param spin Instant rotational speed
-	 * @param dt Step of time
-	 * @return Qj The final quaternion after the rotation due 
-	 * to the spin during the step of time.
-	 */
-	private Quaternion wilcox(Quaternion Qi, Vector3D spin, double dt) {
-
-		/* Vector Angle of Rotation: Theta = dt*W */
-		Vector3D theta = new Vector3D(dt, spin);
-
-		/* Compute the change-of-frame Quaternion dQ */
-		double dQ0 = 1. - 1./8. * theta.getNormSq();
-		double dQ1 = theta.getX() / 2. * (1. - 1./24. * theta.getNormSq());
-		double dQ2 = theta.getY() / 2. * (1. - 1./24. * theta.getNormSq());
-		double dQ3 = theta.getZ() / 2. * (1. - 1./24. * theta.getNormSq());
-
-		Quaternion dQ = new Quaternion(dQ0, dQ1, dQ2, dQ3);
-
-		/* Compute the final state Quaternion. */
-		Quaternion Qj = Qi.multiply(dQ);
-
-		return Qj ;
-	}
 
 
-	/**
-	 * Compute and Update the satellite state at the next time step.
-	 * <p>
-	 * The dynamic computation is as follow: 
-	 * Torque -- Spin -- Attitude.
-	 * <p>
-	 * The main OreKit integration takes care of the orbital 
-	 * parameters and integrates the additional data - e.g. the 
-	 * spin - where the secondary integration resolves the new 
-	 * attitude through the Wilcox algorithm.
-	 * <p>
-	 * This process is called "Propagation".
-	 * 
-	 * @param targetDate The target date. Note that the time
-	 * resolution is given by the integrator time step.
-	 * 
-	 * @see NumericalPropagator#propagate(AbsoluteDate)
-	 * 
-	 */
-	public void propagate(AbsoluteDate targetDate) {
-		try {
-			SpacecraftState mainPropagatedState;
 
-			/* Compute the main new state:
-			 * - Orbital Parameters
-			 * - Spin integrated from the Torque Provider. 
-			 * WARNING: this integration linearly shift the attitude.
-			 */
-			mainPropagatedState = this.propagator.propagate(targetDate);
-			
-			/* We need to take into account the non-integrated attitude from the
-			 * current satellite state to propagate.
-			 */
-			SpacecraftState currentSatState = this.satellite.getStates().getCurrentState();
-			
-			/* If this is not the initial step. */
-			if (!targetDate.equals(satellite.getStates().getInitialState().getDate())) {
-				/* Compute the Attitude from the new integrated spin. */
-				/*	-> Compute the current Acceleration Rate; */
-				double[] currentAccArray = new double[3];
 
-				/* The equation is computed again so we have the exact same
-				 * spin derivatives as the propagator. */
-				this.torques.getTorqueToSpinEquation().computeDerivatives(
-						currentSatState,
-						currentAccArray);
-
-				Vector3D currentAcc = new Vector3D(currentAccArray);
-				
-				/* Get the current satellite spin normally just integrated. */
-				Vector3D currentSpin = new Vector3D(
-						mainPropagatedState.getAdditionalState("Spin")
-						);
-
-				/* Compute the Attitude by propagating the current attitude
-				 * quaternion at the current spin with the Wilcox Algorithm. 
-				 */
-				Quaternion currentQuaternion = new Quaternion (
-						currentSatState.getAttitude().getRotation().getQ0(),
-						currentSatState.getAttitude().getRotation().getQ1(),
-						currentSatState.getAttitude().getRotation().getQ2(),
-						currentSatState.getAttitude().getRotation().getQ3()
-						);
-
-				Quaternion propagatedQuaternion = this.wilcox(
-						currentQuaternion, 
-						currentSpin, 
-						integrationTimeStep
-						);
-
-				Attitude finalAttitude = new Attitude(
-						mainPropagatedState.getDate(),
-						mainPropagatedState.getFrame(),
-						new AngularCoordinates(
-								new Rotation(
-										propagatedQuaternion.getQ0(),
-										propagatedQuaternion.getQ1(),
-										propagatedQuaternion.getQ2(),
-										propagatedQuaternion.getQ3(),
-										true
-										),
-								currentSpin,
-								currentAcc
-								)
-						);
-
-				/* Finally mounting the new propagated state. */
-				SpacecraftState secondaryPropagatedState = new SpacecraftState(
-						mainPropagatedState.getOrbit(),
-						finalAttitude,
-						mainPropagatedState.getMass(),
-						mainPropagatedState.getAdditionalStates()
-						);
-
-				/* Updating the satellite reference. */
-				this.satellite.getStates().setCurrentState(secondaryPropagatedState);
-			}
-
-		} catch (OrekitException e) {
-			e.printStackTrace();
-		}
-
-	}
 
 }

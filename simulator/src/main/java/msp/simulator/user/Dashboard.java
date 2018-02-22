@@ -92,15 +92,15 @@ public class Dashboard {
 		};
 		Dashboard.setSatelliteInertiaMatrix(simpleBalancedInertiaMatrix);
 
-		//ArrayList<AutomaticManoeuvre.Step> autoTorqueScenario = 
-		//		new ArrayList<AutomaticManoeuvre.Step>();
-		//autoTorqueScenario.add(new AutomaticManoeuvre.Step(1., 3., new Vector3D(1,0,0)));
-		//autoTorqueScenario.add(new AutomaticManoeuvre.Step(5., 3., new Vector3D(-1,0,0)));
-		//	autoTorqueScenario.add(new AutomaticManoeuvre.Step(55., 10., new Vector3D(1,2,3)));
-		//	autoTorqueScenario.add(new AutomaticManoeuvre.Step(70., 10., new Vector3D(-1,-2,-3)));
-		//Dashboard.setTorqueScenario(autoTorqueScenario);
+		ArrayList<AutomaticManoeuvre.Step> autoTorqueScenario = 
+				new ArrayList<AutomaticManoeuvre.Step>();
+		autoTorqueScenario.add(new AutomaticManoeuvre.Step(1., 3., new Vector3D(1,0,0)));
+		autoTorqueScenario.add(new AutomaticManoeuvre.Step(5., 3., new Vector3D(-1,0,0)));
+			autoTorqueScenario.add(new AutomaticManoeuvre.Step(55., 10., new Vector3D(1,2,3)));
+			autoTorqueScenario.add(new AutomaticManoeuvre.Step(70., 10., new Vector3D(-1,-2,-3)));
+		Dashboard.setTorqueScenario(autoTorqueScenario);
 
-		Dashboard.setTorqueScenario(new ArrayList<AutomaticManoeuvre.Step>());
+		//Dashboard.setTorqueScenario(new ArrayList<AutomaticManoeuvre.Step>());
 
 	}
 
