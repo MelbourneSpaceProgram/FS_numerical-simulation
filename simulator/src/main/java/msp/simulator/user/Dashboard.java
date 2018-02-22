@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import msp.simulator.NumericalSimulator;
 import msp.simulator.dynamic.propagation.Propagation;
-import msp.simulator.dynamic.torques.AutomaticManoeuvre;
+import msp.simulator.dynamic.torques.AutomaticTorqueLaw;
 import msp.simulator.environment.orbit.Orbit;
 import msp.simulator.environment.orbit.Orbit.OrbitalParameters;
 import msp.simulator.satellite.assembly.SatelliteBody;
@@ -92,12 +92,12 @@ public class Dashboard {
 		};
 		Dashboard.setSatelliteInertiaMatrix(simpleBalancedInertiaMatrix);
 
-		ArrayList<AutomaticManoeuvre.Step> autoTorqueScenario = 
-				new ArrayList<AutomaticManoeuvre.Step>();
-		autoTorqueScenario.add(new AutomaticManoeuvre.Step(1., 3., new Vector3D(1,0,0)));
-		autoTorqueScenario.add(new AutomaticManoeuvre.Step(5., 3., new Vector3D(-1,0,0)));
-			autoTorqueScenario.add(new AutomaticManoeuvre.Step(55., 10., new Vector3D(1,2,3)));
-			autoTorqueScenario.add(new AutomaticManoeuvre.Step(70., 10., new Vector3D(-1,-2,-3)));
+		ArrayList<AutomaticTorqueLaw.Step> autoTorqueScenario = 
+				new ArrayList<AutomaticTorqueLaw.Step>();
+		autoTorqueScenario.add(new AutomaticTorqueLaw.Step(1., 3., new Vector3D(1,0,0)));
+		autoTorqueScenario.add(new AutomaticTorqueLaw.Step(5., 3., new Vector3D(-1,0,0)));
+			autoTorqueScenario.add(new AutomaticTorqueLaw.Step(55., 10., new Vector3D(1,2,3)));
+			autoTorqueScenario.add(new AutomaticTorqueLaw.Step(70., 10., new Vector3D(-1,-2,-3)));
 		Dashboard.setTorqueScenario(autoTorqueScenario);
 
 		//Dashboard.setTorqueScenario(new ArrayList<AutomaticManoeuvre.Step>());
@@ -196,8 +196,8 @@ public class Dashboard {
 	 * Set the automatic torque provider to the user-defined one.
 	 * @param scenario steps of the torque law over time.
 	 */
-	public static void setTorqueScenario(ArrayList<AutomaticManoeuvre.Step> scenario) {
-		AutomaticManoeuvre.TORQUE_SCENARIO = new ArrayList<AutomaticManoeuvre.Step>(
+	public static void setTorqueScenario(ArrayList<AutomaticTorqueLaw.Step> scenario) {
+		AutomaticTorqueLaw.TORQUE_SCENARIO = new ArrayList<AutomaticTorqueLaw.Step>(
 				scenario);
 	}
 }

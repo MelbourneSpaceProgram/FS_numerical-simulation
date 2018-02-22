@@ -5,11 +5,8 @@ package msp.simulator.dynamic.torques;
 import org.orekit.errors.OrekitException;
 import org.orekit.propagation.SpacecraftState;
 import org.orekit.propagation.integration.AdditionalEquations;
-import org.orekit.time.AbsoluteDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import msp.simulator.satellite.assembly.Assembly;
 
 /**
  * This class implements an additional equation for the 
@@ -28,33 +25,25 @@ import msp.simulator.satellite.assembly.Assembly;
  */
 public class TorqueToSpinEquation implements AdditionalEquations {
 
-	/** Name of the addition equation matching
-	 * the additional state to differentiate.
-	 */
-	private static final String name = "Spin";
-
 	/** Instance of the Logger of the class. */
 	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(
 			TorqueToSpinEquation.class);
-
-	/** Instance of torque provider of the dynamic engine. */
-	private TorqueProvider torqueProvider;
 	
-	/** Satellite assembly object. */
-	private Assembly satelliteAssembly;
-
 	/**
-	 * Constructor of the equation.
-	 * @param assembly of the satellite object
-	 * @param torqueProvider The Provider of the overall
-	 * torque interaction on the satellite in the satellite
-	 * frame.
+	 * Name of the additional equation matching
+	 * the additional state to differentiate.
 	 */
-	public TorqueToSpinEquation(Assembly assembly, TorqueProvider torqueProvider) {
-		this.satelliteAssembly = assembly;
-		this.torqueProvider = torqueProvider;
+	private static final String name = "Spin";
+	
+	/** Provider of the rotationnal acceleration. */
+	private RotAccelerationProvider rotAccProvider;
+	
+	
+	public TorqueToSpinEquation(RotAccelerationProvider rotAccProvider) {
+		this.rotAccProvider = rotAccProvider;
 	}
+	
 
 	/** Name of the Equation.
 	 * <p>This name is directly related to the n-uplet of
@@ -78,11 +67,9 @@ public class TorqueToSpinEquation implements AdditionalEquations {
 	 * the orbital parameters (a, ex, ey, i, Omega, Alpha) if
 	 * it changed else null.
 	 * <p>
-	 * Model: wDot = RotAcc + Torque / I
-	 * <p>
 	 * NB: The Attitude doens't belong to the propagation state
 	 * and that's why we need to add ourselves the spin and 
-	 * compute on our own the new attitude quaternion.
+	 * compute our own new attitude quaternion.
 	 * 
 	 * @param s The current Spacecraft state provided by the Orekit core.
 	 * @param pDot Placeholder for the derivative of the additional
@@ -90,49 +77,17 @@ public class TorqueToSpinEquation implements AdditionalEquations {
 	 * of the each add. states in order as defined in the SpacecraftState.
 	 * The mathcing is actually done through the name of the equation /
 	 * the name of the related array of add. states. It behaves as an 
-	 * "output" fot the method.
+	 * "output" for the method.
 	 * 
 	 * @see org.orekit.propagation.integration.AdditionalEquations#computeDerivatives(org.orekit.propagation.SpacecraftState, double[])
 	 */
 	@Override
 	public double[] computeDerivatives(SpacecraftState s, double[] pDot) throws OrekitException {
-
-		/* ************************* Example ****************************	*
-		 * Extract the current rotational speed in the satellite frame:	*
-		 * 	double wx = s.getAdditionalState(this.getName())[0];			*
-		 * 	double wy = s.getAdditionalState(this.getName())[1];			*
-		 * 	double wz = s.getAdditionalState(this.getName())[2];			*
-		 * **************************************************************	*/
 		
-		/* Extract the date of the current step. */
-		AbsoluteDate date = s.getDate();
-		
-		/* Extract the inertia matrix of the satellite. */
-		double[][] inertiaMatrix = this.satelliteAssembly.getBody().getInertiaMatrix();
-
-		/* Implementation of the equation.
-		 * 		wDot(t) = M(t) / I  	on each axis considering the inertia
-		 * 							independent along the three axis (Hypotheses)
-		 * 
-		 * To integrate the coupling between the different axis, one can refer to 
-		 * the Euler Equation for a rotating rigid body.
-		 */
-		double wxDot = this.torqueProvider.getTorque(date).getX() / inertiaMatrix[0][0];
-		double wyDot = this.torqueProvider.getTorque(date).getY() / inertiaMatrix[1][1];
-		double wzDot = this.torqueProvider.getTorque(date).getZ() / inertiaMatrix[2][2];
-
-		/* Updating the rotational acceleration of the satellite state.
-		 * Note that this state is neither "provided" nor "differentiated", 
-		 * it is not managed in the sense of the propagator, just copied at 
-		 * each step.
-		 */
-		/* TODO */
-		
-		
-		/* Updating the Reference of the object. */
-		pDot[0] = wxDot;
-		pDot[1] = wyDot;
-		pDot[2] = wzDot;
+		/* Updating the Reference of the object as we already have the acceleration. */
+		pDot[0] = s.getAdditionalState(this.rotAccProvider.getName())[0];
+		pDot[1] = s.getAdditionalState(this.rotAccProvider.getName())[1];
+		pDot[2] = s.getAdditionalState(this.rotAccProvider.getName())[2];
 
 		/* 
 		 * Return the potentially new updated main propagation state, i.e.

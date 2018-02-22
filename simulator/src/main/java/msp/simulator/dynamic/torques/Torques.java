@@ -2,7 +2,6 @@
 
 package msp.simulator.dynamic.torques;
 
-import org.orekit.propagation.integration.AdditionalEquations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,11 +22,14 @@ public class Torques {
 	/** Instance of the Logger of the class. */
 	private static final Logger logger = LoggerFactory.getLogger(Torques.class);
 	
-	/** Instance of Torque Provider of the Engine. */
+	/** Instance of Torque Provider. */
 	private TorqueProvider torqueProvider;
 	
-	/** Instance of the additional equation */
-	private TorqueToSpinEquation dynamicTorqueEquation;
+	/** Instance of the rotational acceleration Provider. */
+	private RotAccelerationProvider rotAccProvider;
+	
+	/** Instance of the additional equations */
+	private TorqueToSpinEquation torque2spinEquation;
 	
 	/**
 	 * Build the Main Torque Provider of the dynamic module.
@@ -38,21 +40,22 @@ public class Torques {
 		logger.info(CustomLoggingTools.indentMsg(logger,
 				"Building the Torque Engine..."));
 		
-		this.torqueProvider = new AutomaticManoeuvre(
+		this.torqueProvider = new AutomaticTorqueLaw(
 				satellite.getAssembly().getStates().getInitialState().getDate());
 		
-		this.dynamicTorqueEquation = new TorqueToSpinEquation(
-				satellite.getAssembly(),
-				this.torqueProvider);
+		this.rotAccProvider = new RotAccelerationProvider(
+				this.torqueProvider,
+				satellite.getAssembly().getBody());
+		
+		this.torque2spinEquation = new TorqueToSpinEquation(
+				rotAccProvider);
 	}
-	
+
 	/**
-	 * Return the Additional Equation computing the acceleration rotation
-	 * rate from the torque interaction on the satellite.
-	 * @return The Additional Equation to link to the propagator
+	 * @return the torque2spinEquation
 	 */
-	public AdditionalEquations getTorqueToSpinEquation() {
-		return this.dynamicTorqueEquation;
+	public TorqueToSpinEquation getTorqueToSpinEquation() {
+		return torque2spinEquation;
 	}
 
 	/**

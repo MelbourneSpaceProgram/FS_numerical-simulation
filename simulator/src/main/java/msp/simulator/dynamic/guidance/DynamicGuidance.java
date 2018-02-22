@@ -15,15 +15,17 @@ import org.orekit.utils.PVCoordinatesProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import msp.simulator.dynamic.torques.TorqueProvider;
 import msp.simulator.satellite.Satellite;
 import msp.simulator.satellite.assembly.SatelliteStates;
 import msp.simulator.utils.logs.CustomLoggingTools;
 
 /**
  * This class provides a dynamic guidance engine.
- * The attitude is computed directly through the
- * equation of motion resulting of the torques.
+ * It means that it doesn't exit an attitude law
+ * over time but the attitude is actually computed
+ * dynamically through the torque data received at
+ * each new step. This class only forward the already
+ * computed attitude to any client that need it.
  * <p>
  * <i>Implements AttitudeProvider</i>
  *
@@ -47,7 +49,7 @@ public class DynamicGuidance implements AttitudeProvider {
 	 * @param satellite Instance of the Simulation
 	 * @param torqueProvider The "torque-law-over-time" provider
 	 */
-	public DynamicGuidance (Satellite satellite, TorqueProvider torqueProvider) {
+	public DynamicGuidance (Satellite satellite) {
 		logger.info(CustomLoggingTools.indentMsg(logger, 
 				"Implementing the Dynamic Guidance Engine..."));
 

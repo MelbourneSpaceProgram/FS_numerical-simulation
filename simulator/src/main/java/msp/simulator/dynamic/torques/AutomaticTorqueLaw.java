@@ -18,13 +18,13 @@ import org.orekit.time.AbsoluteDate;
  *
  * @author Florian CHAUBEYRE
  */
-public class AutomaticManoeuvre implements TorqueProvider {
+public class AutomaticTorqueLaw implements TorqueProvider {
 
 	/* ******* Public Static Elements ******* */
 
 	/** List of the torque steps over time. Default scenario is empty. */
 	public static ArrayList<Step> TORQUE_SCENARIO = 
-			new ArrayList<AutomaticManoeuvre.Step>();
+			new ArrayList<AutomaticTorqueLaw.Step>();
 
 	/**
 	 * This embedded class represents a step of the torque
@@ -65,8 +65,8 @@ public class AutomaticManoeuvre implements TorqueProvider {
 	 * Constructor with the torque scenario set as default.
 	 * @param startDate of the torque scenario over time
 	 */
-	public AutomaticManoeuvre(AbsoluteDate startDate) {
-		this(startDate, AutomaticManoeuvre.TORQUE_SCENARIO);
+	public AutomaticTorqueLaw(AbsoluteDate startDate) {
+		this(startDate, AutomaticTorqueLaw.TORQUE_SCENARIO);
 	}
 
 	/**
@@ -74,7 +74,7 @@ public class AutomaticManoeuvre implements TorqueProvider {
 	 * @param startDate Absolute date to start the scenario in the simulation
 	 * @param scenario List of the torque steps.
 	 */
-	public AutomaticManoeuvre(AbsoluteDate startDate, ArrayList<Step> scenario) {
+	public AutomaticTorqueLaw(AbsoluteDate startDate, ArrayList<Step> scenario) {
 		this.scenario = scenario;
 		this.startDate = startDate;
 	}

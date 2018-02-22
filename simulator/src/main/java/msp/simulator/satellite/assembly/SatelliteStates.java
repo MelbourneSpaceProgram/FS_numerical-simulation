@@ -105,15 +105,6 @@ public class SatelliteStates {
 
 		/* Add user-related additional states. */
 		this.initialState = this.initialState
-				/* Rotational Speed
-				 *  - Satellite frame
-				 *  - (rad/s) 
-				 */
-				.addAdditionalState("Spin", new double[]{
-						SatelliteStates.initialSpin.getX(),
-						SatelliteStates.initialSpin.getY(),
-						SatelliteStates.initialSpin.getZ() }
-						)
 				/* Rotational Acceleration
 				 *  - Satellite Frame
 				 *  - (rad/s^2)
@@ -122,6 +113,15 @@ public class SatelliteStates {
 						SatelliteStates.initialRotAcceleration.getX(),
 						SatelliteStates.initialRotAcceleration.getY(),
 						SatelliteStates.initialRotAcceleration.getZ() }
+						)
+				/* Rotational Speed
+				 *  - Satellite frame
+				 *  - (rad/s) 
+				 */
+				.addAdditionalState("Spin", new double[]{
+						SatelliteStates.initialSpin.getX(),
+						SatelliteStates.initialSpin.getY(),
+						SatelliteStates.initialSpin.getZ() }
 						);
 
 		/* Update the current state as the initial state. */
@@ -172,7 +172,7 @@ public class SatelliteStates {
 			 * state and the state it is about to return.
 			 */
 			state.ensureCompatibleAdditionalStates(newState);
-			
+
 			return state;
 
 		} catch (MathIllegalStateException | OrekitException e) {

@@ -2,18 +2,11 @@
 
 package msp.simulator.dynamic.propagation;
 
-import org.hipparchus.complex.Quaternion;
-import org.hipparchus.geometry.euclidean.threed.Rotation;
-import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.ode.ODEIntegrator;
 import org.hipparchus.ode.nonstiff.ClassicalRungeKuttaIntegrator;
-import org.orekit.attitudes.Attitude;
 import org.orekit.errors.OrekitException;
 import org.orekit.forces.ForceModel;
-import org.orekit.propagation.SpacecraftState;
 import org.orekit.propagation.numerical.NumericalPropagator;
-import org.orekit.time.AbsoluteDate;
-import org.orekit.utils.AngularCoordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,11 +83,11 @@ public class Propagation {
 			this.propagator = new NumericalPropagator(this.integrator);
 
 			/* TODO */
-			StepHandler myTestStep = new StepHandler(this.satellite);
-			this.propagator.setMasterMode(
-					Propagation.integrationTimeStep, 
-					myTestStep
-					);
+			//StepHandler myTestStep = new StepHandler(this.satellite, integrationTimeStep);
+			//this.propagator.setMasterMode(
+			//		Propagation.integrationTimeStep, 
+			//		myTestStep
+			//		);
 			/* **** */
 			
 			/* Registering the implemented force models. */
@@ -118,7 +111,7 @@ public class Propagation {
 
 			/* Registering the additional equations. */
 			/*  + Torque Dynamic 					*/
-			this.propagator.addAdditionalEquations(torques.getTorqueToSpinEquation());
+			this.propagator.addAdditionalEquations(this.torques.getTorqueToSpinEquation());
 
 		} catch (OrekitException e) {
 			e.printStackTrace();
