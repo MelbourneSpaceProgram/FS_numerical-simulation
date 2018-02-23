@@ -37,6 +37,9 @@ public class EphemerisGenerator {
 			LoggerFactory.getLogger(EphemerisGenerator.class);
 
 	/* ****** Default Values **** */
+	
+	/** Ephemeris time step in seconds. */
+	public static double ephemerisTimeStep = 1.0; /* seconds */
 
 	/** Default absolute path of the ephemeris folder. */
 	public static String DEFAULT_PATH =
@@ -88,8 +91,9 @@ public class EphemerisGenerator {
 	/** First Date known by the generator. */
 	private AbsoluteDate extractedStartDate;
 
+	/** Capture the first date of the ephemeris. */
 	boolean isStartDateCaptured = false;
-
+	
 	/**
 	 * Create the ephemeris generator.
 	 */

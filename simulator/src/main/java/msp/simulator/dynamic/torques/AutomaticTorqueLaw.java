@@ -8,7 +8,7 @@ import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.orekit.time.AbsoluteDate;
 
 /**
- * This class implements a simple torque manoeuvre 
+ * This class implements a simple torque maneuver 
  * over time in a MGT-like way: ON/OFF at the maximum
  * intensity torque, positive or negative.
  * <p>

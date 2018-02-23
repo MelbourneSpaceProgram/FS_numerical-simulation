@@ -48,12 +48,14 @@ public class Dashboard {
 	private static final Logger logger = LoggerFactory.getLogger(
 			Dashboard.class);
 
-	/** Set the Configuration of the Simulation to the default Settings. */
-	public static void setDefaultConfiguration() {
+	/** Set the Configuration of the Simulation to the default Settings. 
+	 * @throws Exception */
+	public static void setDefaultConfiguration() throws Exception {
 		logger.info(CustomLoggingTools.indentMsg(logger, 
 				"Setting Default Configuration..."));
 
 		Dashboard.setIntegrationTimeStep(0.1);
+		Dashboard.setEphemerisTimeStep(1.0);
 		Dashboard.setSimulationDuration(10.0);
 		Dashboard.setOrbitalParameters(new OrbitalParameters(
 				575000, 	
@@ -96,25 +98,48 @@ public class Dashboard {
 				new ArrayList<AutomaticTorqueLaw.Step>();
 		autoTorqueScenario.add(new AutomaticTorqueLaw.Step(1., 3., new Vector3D(1,0,0)));
 		autoTorqueScenario.add(new AutomaticTorqueLaw.Step(5., 3., new Vector3D(-1,0,0)));
-			autoTorqueScenario.add(new AutomaticTorqueLaw.Step(55., 10., new Vector3D(1,2,3)));
-			autoTorqueScenario.add(new AutomaticTorqueLaw.Step(70., 10., new Vector3D(-1,-2,-3)));
+		autoTorqueScenario.add(new AutomaticTorqueLaw.Step(55., 10., new Vector3D(1,2,3)));
+		autoTorqueScenario.add(new AutomaticTorqueLaw.Step(70., 10., new Vector3D(-1,-2,-3)));
 		Dashboard.setTorqueScenario(autoTorqueScenario);
 
 		//Dashboard.setTorqueScenario(new ArrayList<AutomaticManoeuvre.Step>());
-
+	
+		Dashboard.checkConfiguration();
 	}
 
 	/**
 	 * Set the integration time step of the different integrators
 	 * used on the simulation (Attitude and Main PVT)
-	 * @param step in seconds
+	 * @param step in seconds and strictly positive
 	 */
 	public static void setIntegrationTimeStep(double step) {
-		Propagation.integrationTimeStep = step;
+		if (step > 0) {
+			Propagation.integrationTimeStep = step;
+		} else {
+			logger.error("Wrong time step - need to be strictly positive."
+					+ " (value = " + step);
+		}
+	}
+	
+	/**
+	 * Set the ephemeris time step.
+	 * @param step in seconds and strictly positive.
+	 */
+	public static void setEphemerisTimeStep(double step) {
+		if (step > 0) {
+			EphemerisGenerator.ephemerisTimeStep = step;
+		}
+		else {
+			logger.error("Wrong time step - need to be strictly positive."
+					+ " (value = " + step);
+		}
 	}
 
 	/**
 	 * Set the time duration of the simulation to process.
+	 * <p>
+	 * The double max value <i>(Double.MAX_VALUE)</i> states
+	 * for an "infinite loop" duration.
 	 * @param duration in seconds
 	 */
 	public static void setSimulationDuration(double duration) {
@@ -142,6 +167,7 @@ public class Dashboard {
 	/**
 	 * Set the initial attitude quaternion. (Representing the rotation
 	 * from the inertial frame to the satellite frame).
+	 * This method normalize the quaternion.
 	 * @param q0 Scalar part
 	 * @param q1 First Vector Part
 	 * @param q2 Second Vector Part
@@ -149,7 +175,7 @@ public class Dashboard {
 	 */
 	public static void setInitialAttitudeQuaternion(
 			double q0, double q1, double q2, double q3) {
-		SatelliteStates.initialAttitudeQuaternion = new Quaternion(q0, q1, q2, q3);
+		SatelliteStates.initialAttitudeQuaternion = new Quaternion(q0, q1, q2, q3).normalize();
 	}
 
 	/**
@@ -199,5 +225,32 @@ public class Dashboard {
 	public static void setTorqueScenario(ArrayList<AutomaticTorqueLaw.Step> scenario) {
 		AutomaticTorqueLaw.TORQUE_SCENARIO = new ArrayList<AutomaticTorqueLaw.Step>(
 				scenario);
+	}
+	
+	/**
+	 * Check the user-defined configuration.
+	 * @throws Exception if an error is detected.
+	 */
+	public static void checkConfiguration() throws Exception {
+		boolean mainStatus = true;
+		boolean status = true;
+		
+		status = EphemerisGenerator.ephemerisTimeStep <= NumericalSimulator.simulationDuration;
+		if (!status) {
+			logger.error("The ephemeris time step should be inferior or equal than the "
+					+ "simulation duration."
+					+ "\n"
+					+ "\t\tEphemeris: {} s. > {} s. :Duration",
+					EphemerisGenerator.ephemerisTimeStep,
+					NumericalSimulator.simulationDuration);
+		}
+		mainStatus &= status;
+		status = true;
+		
+		
+		if (!mainStatus) {
+			logger.error("User Configuration Failed. Simulation Aborted.");
+			throw new Exception("Configuration Check Failed.");
+		}
 	}
 }

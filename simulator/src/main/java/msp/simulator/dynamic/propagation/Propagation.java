@@ -6,7 +6,9 @@ import org.hipparchus.ode.ODEIntegrator;
 import org.hipparchus.ode.nonstiff.ClassicalRungeKuttaIntegrator;
 import org.orekit.errors.OrekitException;
 import org.orekit.forces.ForceModel;
+import org.orekit.propagation.SpacecraftState;
 import org.orekit.propagation.numerical.NumericalPropagator;
+import org.orekit.time.AbsoluteDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,22 +33,22 @@ import msp.simulator.utils.logs.CustomLoggingTools;
  * @author Florian CHAUBEYRE
  */
 public class Propagation {
-	
+
 	/* ******* Public Static Attributes ******* */
-	
+
 	/** Time Step in use for integration step calculation. (s) 
 	 * <p>Default value is 0.1 s.
 	 * */
 	public static double integrationTimeStep = 0.1 ;
 
 	/* **************************************** */
-	
+
 	/** Instance of the Logger of the class. */
 	private static final Logger logger = LoggerFactory.getLogger(Propagation.class);
 
 	/** Instance of Integrator of the Propagator. */
 	private ODEIntegrator integrator ;
-	
+
 	/** Instance of Propagator in the simulation. */
 	private NumericalPropagator propagator;
 
@@ -82,14 +84,16 @@ public class Propagation {
 			this.integrator = new ClassicalRungeKuttaIntegrator(Propagation.integrationTimeStep);
 			this.propagator = new NumericalPropagator(this.integrator);
 
-			/* TODO */
-			//StepHandler myTestStep = new StepHandler(this.satellite, integrationTimeStep);
-			//this.propagator.setMasterMode(
-			//		Propagation.integrationTimeStep, 
-			//		myTestStep
-			//		);
-			/* **** */
-			
+			/* Configuring the step handler of the propagation services. */
+			StepHandler simulationStepHandler = new StepHandler(
+					this.satellite,
+					Propagation.integrationTimeStep
+					);
+
+			this.propagator.setMasterMode(
+					Propagation.integrationTimeStep, 
+					simulationStepHandler);
+
 			/* Registering the implemented force models. */
 			Propagation.logger.info(CustomLoggingTools.indentMsg(Propagation.logger,
 					"-> Registering the implemented Linear Force Models..."));
@@ -121,7 +125,24 @@ public class Propagation {
 				"Propagator Configured."));
 	}
 
-
+	/**
+	 * Ensure the propagation to the target date and update the satellite
+	 * state.
+	 * <p>
+	 * Note that the time resolution of the propagation is not given by the
+	 * target date but by the integration time step.
+	 * 
+	 * @param targetDate The date where the propagation processing ends.
+	 */
+	public void propagate(AbsoluteDate targetDate) {
+		try {
+			SpacecraftState propagatedState = this.propagator.propagate(targetDate);
+			this.satellite.getStates().setCurrentState(propagatedState);
+					
+		} catch (OrekitException e) {
+			e.printStackTrace();
+		}
+	}
 
 
 

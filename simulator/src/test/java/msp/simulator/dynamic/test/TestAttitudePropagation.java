@@ -20,7 +20,7 @@ import msp.simulator.user.Dashboard;
 public class TestAttitudePropagation {
 
 	/**
-	 * Process a simple rotation at constant spin to
+	 * Process a simple rotation of Pi at constant spin to
 	 * check the attitude quaternion propagation.
 	 * 
 	 * <p><b>Justification:</b><p>
@@ -37,22 +37,28 @@ public class TestAttitudePropagation {
 	 * + At the time t = dur, i.e. the end state:<p>
 	 *  Q = ( cos(Pi/2), sin(Pi/2).n )
 	 *    = ( 0, nx, ny, nz)
+	 * @throws Exception 
 	 * 
 	 */
 	@Test 
-	public void testSimpleRotation() {
+	public void testSimpleRotation() throws Exception {
+		
+		/* *** CONFIGURATION *** */
+		double rotationTime = 100;
+		Vector3D n = new Vector3D(1,0,0).normalize();
+		/* ********************* */
 		
 		NumericalSimulator simu = new NumericalSimulator();
 		Dashboard.setDefaultConfiguration();
 		
-		double rotationTime = 100;
-		Vector3D n = new Vector3D(1,2,3).normalize();
-		
-		Dashboard.setIntegrationTimeStep(1.0);
+		Dashboard.setIntegrationTimeStep(0.1);
+		Dashboard.setEphemerisTimeStep(1.0);
 		Dashboard.setSimulationDuration(rotationTime);
 		Dashboard.setInitialAttitudeQuaternion(1, 0, 0, 0);
 		Dashboard.setInitialSpin(new Vector3D(FastMath.PI / rotationTime, n));
 		Dashboard.setInitialRotAcceleration(new Vector3D(0,0,0));
+		
+		Dashboard.checkConfiguration();
 		
 		simu.launch();
 		

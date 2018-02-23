@@ -2,8 +2,6 @@
 
 package msp.simulator.dynamic.propagation;
 
-import java.util.Arrays;
-
 import org.hipparchus.complex.Quaternion;
 import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
@@ -13,6 +11,7 @@ import org.orekit.propagation.SpacecraftState;
 import org.orekit.propagation.numerical.NumericalPropagator;
 import org.orekit.propagation.sampling.OrekitFixedStepHandler;
 import org.orekit.time.AbsoluteDate;
+import org.orekit.time.TimeScalesFactory;
 import org.orekit.utils.AngularCoordinates;
 
 import msp.simulator.satellite.Satellite;
@@ -30,12 +29,16 @@ import msp.simulator.satellite.Satellite;
  */
 public class StepHandler implements OrekitFixedStepHandler {
 
+	public static int iterationNumber = 0;
+
 	/** Instance of the satellite in the simulation. */
 	private Satellite satellite;
 
 	/** Fixed integration time step of the propagation services. */
 	private double integrationTimeStep;
-	
+
+	private AbsoluteDate lastTargetDate;
+
 	/**
 	 * Build the additional step processing of the propagation services.
 	 * @param satellite Instance of the simulation.
@@ -44,6 +47,7 @@ public class StepHandler implements OrekitFixedStepHandler {
 	public StepHandler(Satellite satellite, double stepSize) {
 		this.satellite = satellite;
 		this.integrationTimeStep = stepSize;
+		this.lastTargetDate = satellite.getStates().getInitialState().getDate();
 	}
 
 	/**
@@ -56,30 +60,50 @@ public class StepHandler implements OrekitFixedStepHandler {
 	 * dynamic and ensures the synchronization between the main
 	 * propagation and our user-defined extra propagation.
 	 * 
-	 * @param currentState Satellite state after main propagation of the state.
+	 * @param mainPropagatedState Satellite state after the main propagation (orbit and additionals)
 	 * @param isLast True if this step is the last step of the propagation
-	 * from beginDate to endDate - discard here.
+	 * at the target date.
 	 * @throws OrekitException when the step fail to process.
 	 * @see org.orekit.propagation.sampling.OrekitFixedStepHandler
 	 */
 	@Override
-	public void handleStep(SpacecraftState currentState, boolean isLast) throws OrekitException {
-		/* We do not desire any additional processing at the end of the overall
-		 * propagation. This would induce the processing of another more step
-		 * over.
+	public void handleStep(SpacecraftState mainPropagatedState, boolean isLast) throws OrekitException {
+		/* 
+		 * Avoid that any date is processed twice. This can happen during the
+		 * propagation when the end date of a set of steps is computed as well 
+		 * as the first date of the next set - both are supposed to be equal.
+		 * Only the last step of the set (isLast is true) is computed instead
+		 * of the beginning step.
 		 */
-		if (isLast) {
-			return ;
+		
+		/* Create a new instance to avoid any numerical approximation leading to a false
+		 * comparison between dates.
+		 */
+		AbsoluteDate actualDate = new AbsoluteDate(
+				mainPropagatedState.getDate().toString(),
+				TimeScalesFactory.getUTC()
+				);
+		
+		/* Abort the attitude propagation if ... */
+		boolean abort = (this.lastTargetDate.compareTo(actualDate) >= 0) ;
+
+		if (!abort) {
+			/* ***** Handle the step. ******	*/
+			
+			this.propagateAttitude(mainPropagatedState);
+		
+			/* *****************************	*/
+		
 		}
 		
-		
-		
-		
-		
-		
+		/* Update the buffered date. */
+		this.lastTargetDate = new AbsoluteDate(
+				mainPropagatedState.getDate().toString(),
+				TimeScalesFactory.getUTC()
+				);
 	}
-	
-	
+
+
 	/**
 	 * Compute the Wilcox Algorithm.
 	 * <p>
@@ -111,7 +135,7 @@ public class StepHandler implements OrekitFixedStepHandler {
 
 		return Qj ;
 	}
-	
+
 	/**
 	 * Compute and Update the satellite state at the next time step.
 	 * <p>
@@ -131,77 +155,71 @@ public class StepHandler implements OrekitFixedStepHandler {
 	 * @see NumericalPropagator#propagate(AbsoluteDate)
 	 * 
 	 */
-	public void propagateAttitude(SpacecraftState currentState) {
+	public void propagateAttitude(SpacecraftState mainPropagatedState) {
 		try {
-			/* At that point
-			
-			/* We need to take into account the non-integrated attitude from the
-			 * current satellite state to propagate.
+			/* At that point the main propagation of the orbital parameters
+			 * and the additional states (spin and rotational acceleration)
+			 * is done and we have access to a SpacecraftState containing 
+			 * the current Attitude and the new integrated spin.
+			 * Thus we can compute the attitude at the next step.
 			 */
-			SpacecraftState currentSatState = this.satellite.getStates().getCurrentState();
-			
-			/* If this is not the initial step. */
-			if (!targetDate.equals(satellite.getStates().getInitialState().getDate())) {
-				/* Compute the Attitude from the new integrated spin. */
-				/*	-> Compute the current Acceleration Rate; */
-				double[] currentAccArray = new double[3];
 
-				/* The equation is computed again so we have the exact same
-				 * spin derivatives as the propagator. */
-				this.torques.getTorqueToSpinEquation().computeDerivatives(
-						currentSatState,
-						currentAccArray);
+			/* Determine the data of the rotation at the next step. 
+			 * The additional states are already updated.
+			 */
 
-				Vector3D currentAcc = new Vector3D(currentAccArray);
-				
-				/* Get the current satellite spin normally just integrated. */
-				Vector3D currentSpin = new Vector3D(
-						mainPropagatedState.getAdditionalState("Spin")
-						);
+			/* Rotational Acceleration */
+			Vector3D rotAcc = new Vector3D(mainPropagatedState.getAdditionalState("RotAcc"));
 
-				/* Compute the Attitude by propagating the current attitude
-				 * quaternion at the current spin with the Wilcox Algorithm. 
-				 */
-				Quaternion currentQuaternion = new Quaternion (
-						currentSatState.getAttitude().getRotation().getQ0(),
-						currentSatState.getAttitude().getRotation().getQ1(),
-						currentSatState.getAttitude().getRotation().getQ2(),
-						currentSatState.getAttitude().getRotation().getQ3()
-						);
+			/* Spin */
+			Vector3D spin = new Vector3D(mainPropagatedState.getAdditionalState("Spin"));
 
-				Quaternion propagatedQuaternion = this.wilcox(
-						currentQuaternion, 
-						currentSpin, 
-						integrationTimeStep
-						);
+			/* Attitude determination: it needs to be propagated. */
+			Attitude currentAttitude =
+					this.satellite.getStates().getCurrentState().getAttitude();
 
-				Attitude finalAttitude = new Attitude(
-						mainPropagatedState.getDate(),
-						mainPropagatedState.getFrame(),
-						new AngularCoordinates(
-								new Rotation(
-										propagatedQuaternion.getQ0(),
-										propagatedQuaternion.getQ1(),
-										propagatedQuaternion.getQ2(),
-										propagatedQuaternion.getQ3(),
-										true
-										),
-								currentSpin,
-								currentAcc
-								)
-						);
+			Quaternion currentQuaternion = new Quaternion (
+					currentAttitude.getRotation().getQ0(),
+					currentAttitude.getRotation().getQ1(),
+					currentAttitude.getRotation().getQ2(),
+					currentAttitude.getRotation().getQ3()
+					);
 
-				/* Finally mounting the new propagated state. */
-				SpacecraftState secondaryPropagatedState = new SpacecraftState(
-						mainPropagatedState.getOrbit(),
-						finalAttitude,
-						mainPropagatedState.getMass(),
-						mainPropagatedState.getAdditionalStates()
-						);
+			/* 		-> Propagate the attitude quaternion. */
+			Quaternion propagatedQuaternion =
+					this.wilcox(
+							currentQuaternion, 
+							spin, 
+							this.integrationTimeStep
+							);
 
-				/* Updating the satellite reference. */
-				this.satellite.getStates().setCurrentState(secondaryPropagatedState);
-			}
+			/* 		-> Build the final attitude. */
+			Attitude propagatedAttitude = new Attitude (
+					mainPropagatedState.getDate(),
+					mainPropagatedState.getFrame(),
+					new AngularCoordinates(
+							new Rotation(
+									propagatedQuaternion.getQ0(),
+									propagatedQuaternion.getQ1(),
+									propagatedQuaternion.getQ2(),
+									propagatedQuaternion.getQ3(),
+									false /* The quaternion should already be normalized. */
+									),
+							spin,
+							rotAcc
+							)
+					);
+
+			/* Finally mount the new propagated state: only the attitude is modified. */
+			SpacecraftState secondaryPropagatedState = new SpacecraftState(
+					mainPropagatedState.getOrbit(),
+					propagatedAttitude,
+					mainPropagatedState.getMass(),
+					mainPropagatedState.getAdditionalStates()
+					);
+
+			/* Updating the satellite reference at the end of the step. */
+			this.satellite.getStates().setCurrentState(secondaryPropagatedState);
 
 		} catch (OrekitException e) {
 			e.printStackTrace();
