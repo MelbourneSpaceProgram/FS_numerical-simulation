@@ -8,3 +8,10 @@ Simple Installation:
 
 Launch the Main method.
 
+Simple Test Execution:
+- In Eclipse, select the test to run
+- Run As > JUnit Test
+
+We can also run a user-defined configuration, so we can launch a set of tests (all project, package or files...)
+- In Eclipse, Run > Run Configuration...
+- Select JUnit and create a new configuration.

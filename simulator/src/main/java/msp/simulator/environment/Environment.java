@@ -3,6 +3,7 @@
 package msp.simulator.environment;
 
 import org.orekit.errors.OrekitException;
+import org.orekit.orbits.CircularOrbit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,8 +28,9 @@ import msp.simulator.utils.logs.CustomLoggingTools;
  */
 public class Environment {
 
-	/** Logger of the instance. */
-	private Logger logger = LoggerFactory.getLogger(this.getClass());
+	/** Logger of the class. */
+	private static final Logger logger = LoggerFactory.getLogger(
+			Environment.class);
 
 	/** Instance of the Solar System in the simulation. */
 	private msp.simulator.environment.solarSystem.SolarSystem solarSystem;
@@ -47,11 +49,10 @@ public class Environment {
 
 	/**
 	 * Constructor of the Space Environment of the Simulation.
-	 * @param simulatorLogMsg The logger of the simulator.
-	 * @throws OrekitException
+	 * @throws OrekitException if OreKit initialization failed
 	 */
 	public Environment() throws OrekitException {
-		this.logger.info(CustomLoggingTools.indentMsg(this.logger,
+		logger.info(CustomLoggingTools.indentMsg(logger,
 				"Building the Environment..."));
 
 		/* Building the Solar System. */
@@ -91,8 +92,8 @@ public class Environment {
 	/**
 	 * @return the orbit
 	 */
-	public msp.simulator.environment.orbit.Orbit getOrbit() {
-		return orbit;
+	public CircularOrbit getOrbit() {
+		return this.orbit.getOrbit();
 	}
 
 	/**

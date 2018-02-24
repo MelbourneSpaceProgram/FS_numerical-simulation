@@ -2,6 +2,7 @@
 
 package msp.simulator;
 
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -12,7 +13,6 @@ import org.orekit.time.AbsoluteDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import msp.simulator.dynamic.propagation.Propagation;
 import msp.simulator.utils.architecture.OrekitConfiguration;
 import msp.simulator.utils.logs.CustomLoggingTools;
 import msp.simulator.utils.logs.ephemeris.EphemerisGenerator;
@@ -47,29 +47,68 @@ public class NumericalSimulator {
 	private final LocalDateTime startDate;
 	private LocalDateTime endDate;
 
+	/** 
+	 * Time duration of the simulation : the double max value
+	 * states for an "infinite loop" duration.
+	 */
+	public static double simulationDuration = Double.MAX_VALUE;
+
 	public NumericalSimulator() {
 		this.startDate = LocalDateTime.now();
 
 		/* Setting the configuration of the Logging Services. */
 		LogManager myLogManager = LogManager.getLogManager();
+		
+		/* Setting the configuration file location. */
 		System.setProperty(
 				"java.util.logging.config.file", 
-				"src/main/resources/config/log-config-file.txt");
+				System.getProperty("user.dir") + System.getProperty("file.separator") 
+				+ "src" + System.getProperty("file.separator")
+				+ "main" + System.getProperty("file.separator")
+				+ "resources" + System.getProperty("file.separator")
+				+ "config" + System.getProperty("file.separator")
+				+ "log-config-file.txt"
+				);
+		
+		/* Creating the log directory. */
+		File simuLogDir = new File(
+				System.getProperty("user.dir") + System.getProperty("file.separator") 
+				+ "src" + System.getProperty("file.separator")
+				+ "main" + System.getProperty("file.separator")
+				+ "resources" + System.getProperty("file.separator")
+				+ "logs" + System.getProperty("file.separator")
+				);
+		if (!simuLogDir.exists()) {
+			simuLogDir.mkdirs();
+		}
+
+		/* Reading the overall configuration for the logging services. */
 		try {
 			myLogManager.readConfiguration();
 		} catch (SecurityException | IOException e) {
 			e.printStackTrace();
 		}
 
-		NumericalSimulator.logger.info("Launching the Simulation...");
+		NumericalSimulator.logger.info("Simulation Instance Created.");
 	}
 
+	/**
+	 * This method performs in order the initialization,
+	 * the processing and the exit of the simulation.
+	 * <p>
+	 * NOTE: Any user defined settings for the simulation
+	 * should be registered prior the initialization/launch.
+	 * @see msp.simulator.user.Dashboard
+	 */
 	public void launch() {
 		this.initialize();
 		this.process();
 		this.exit();
 	}
 
+	/**
+	 * Initialize the simulation.
+	 */
 	public void initialize() {
 		NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
 				"Initialization in Process..."));
@@ -89,17 +128,11 @@ public class NumericalSimulator {
 					this.environment
 					);
 
-			/* Configure here a new initial state of the satellite
-			 * if needed.
-			 */
-			//this.satellite.getStates().setInitialState(newInitialState);
-			/* **************************** */
-
 			/* Building the Dynamic Module. */
 			this.dynamic = new msp.simulator.dynamic.Dynamic(
 					this.environment,
 					this.satellite
-					) ;
+					);
 
 			/* Ephemeris Generator Module */
 			this.ephemerisGenerator = new EphemerisGenerator();
@@ -109,23 +142,26 @@ public class NumericalSimulator {
 			e.printStackTrace();
 		}
 
-
 	}
 
+	/**
+	 * Launch the main processing of the simulation.
+	 */
 	public void process() {
 		if (this.executionStatus == 1) {
 			NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
 					"Processing the Simulation..."));
 		}
-		double duration = 10 ; /* s */
+
 		double currentOffset = 0;
 		AbsoluteDate startDate = 
 				this.satellite.getStates().getInitialState().getDate();
 
-		while (currentOffset <= duration ) {
-			
-			//System.out.println("Summary at t = " + currentOffset + "--------");
-			
+		while ((simulationDuration == Double.MAX_VALUE)
+				||
+				currentOffset <= simulationDuration 
+				) {
+
 			this.dynamic.getPropagation().propagate(startDate.shiftedBy(currentOffset));
 
 			/* Generate the related ephemeris line. */
@@ -134,21 +170,21 @@ public class NumericalSimulator {
 					);
 
 			/* Incrementing the ephemeris time step. */
+			currentOffset = currentOffset + EphemerisGenerator.ephemerisTimeStep;
+
+			/* **************************************************************	*/
 			
-			/* WARNING
-			 * TODO: the attitude "Wilcox" propagation step must strictly be
-			 * the same as the integration step of the main propagator.
-			 */
-			currentOffset = currentOffset + Propagation.integrationTimeStep ;
-			
-			//System.out.println("---------------------------------");
 		}
 
 		/* End of processing. */
 		logger.info(CustomLoggingTools.indentMsg(logger,
-				"Processing End."));
+				"End of Processing Stage."));
+		
 	}
 
+	/**
+	 * Performs the exit processing of the simulation.
+	 */
 	public void exit() {
 		this.endDate = LocalDateTime.now();
 		NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
@@ -160,6 +196,13 @@ public class NumericalSimulator {
 						+ "s."
 				)
 				);
+	}
+
+	/**
+	 * @return the satellite
+	 */
+	public msp.simulator.satellite.Satellite getSatellite() {
+		return satellite;
 	}
 
 }

@@ -26,8 +26,9 @@ import msp.simulator.utils.logs.CustomLoggingTools;
  */
 public class EarthMagneticField {
 	
-	/** Logger of the class */
-	Logger logger = LoggerFactory.getLogger(this.getClass());
+	/** Logger of the class. */
+	private static final Logger logger = LoggerFactory.getLogger(
+			EarthMagneticField.class);
 	
 	/** Private instance of the GeoMagneticField. */
 	private GeoMagneticField geomagneticField;
@@ -38,7 +39,7 @@ public class EarthMagneticField {
 	 * the WMM data as the current Year.
 	 */
 	public EarthMagneticField() {
-		this.logger.info(CustomLoggingTools.indentMsg(this.logger,
+		logger.info(CustomLoggingTools.indentMsg(logger,
 				"Loading the Earth Magnetic Field..."));
 		try {
 			/* Create and link the instance of GeoMagnetic Field. */
