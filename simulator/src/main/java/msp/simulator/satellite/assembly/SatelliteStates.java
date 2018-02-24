@@ -93,28 +93,38 @@ public class SatelliteStates {
 						)
 				);
 
+		/* Store the user-defined or default initial attitude. */
 		this.initialAttitude = initialAttitude;
 
+		/* Finally creates the initial State of the satellite. */
 		this.initialState = new SpacecraftState(
 				environment.getOrbit(),
-				/* Default Attitude. The operating one should 
-				 * be brought by the Dynamic module. */
 				initialAttitude,
 				body.getSatMass()
 				);
 
 		/* Add user-related additional states. */
-		/* Rotation Speed
-		 *  - Satellite frame
-		 *  - (rad/s) 
-		 */
 		this.initialState = this.initialState
+				/* Rotational Acceleration
+				 *  - Satellite Frame
+				 *  - (rad/s^2)
+				 */
+				.addAdditionalState("RotAcc",  new double[]{
+						SatelliteStates.initialRotAcceleration.getX(),
+						SatelliteStates.initialRotAcceleration.getY(),
+						SatelliteStates.initialRotAcceleration.getZ() }
+						)
+				/* Rotational Speed
+				 *  - Satellite frame
+				 *  - (rad/s) 
+				 */
 				.addAdditionalState("Spin", new double[]{
 						SatelliteStates.initialSpin.getX(),
 						SatelliteStates.initialSpin.getY(),
 						SatelliteStates.initialSpin.getZ() }
 						);
 
+		/* Update the current state as the initial state. */
 		this.currentState = this.initialState;
 	}
 
@@ -135,6 +145,8 @@ public class SatelliteStates {
 
 	/**
 	 * Update the value of the state by the newState one.
+	 * This method is generic regarding all of the additional
+	 * states of the satellite.
 	 * @param newState The new value for the state
 	 * @return The updated old-state.
 	 */
@@ -156,7 +168,11 @@ public class SatelliteStates {
 						entry.getValue()
 						);
 			}
+			/* Check the additional states compatibility between the desired
+			 * state and the state it is about to return.
+			 */
 			state.ensureCompatibleAdditionalStates(newState);
+
 			return state;
 
 		} catch (MathIllegalStateException | OrekitException e) {
@@ -185,8 +201,8 @@ public class SatelliteStates {
 
 
 	/**
-	 * Get the initial Attitude object of the satellite.
-	 * @return Attitude
+	 * Get the initial Attitude of the satellite.
+	 * @return Attitude at the initial state
 	 * @see Attitude
 	 */
 	public Attitude getInitialAttitude() {

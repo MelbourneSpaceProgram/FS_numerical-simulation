@@ -13,7 +13,6 @@ import org.orekit.time.AbsoluteDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import msp.simulator.dynamic.propagation.Propagation;
 import msp.simulator.utils.architecture.OrekitConfiguration;
 import msp.simulator.utils.logs.CustomLoggingTools;
 import msp.simulator.utils.logs.ephemeris.EphemerisGenerator;
@@ -170,24 +169,17 @@ public class NumericalSimulator {
 					this.satellite.getStates().getCurrentState()
 					);
 
-			/* ********************** WARNING *******************************	*
-			 * TODO: The attitude "Wilcox" propagation step must strictly be	*
-			 * the same as the integration step of the main propagator.		*
-			 * I would say we have to extend the NumericalSimulator			*
-			 * class and override the afterIntegration() method, so			*
-			 * we can have a different step for the ephemeris.				*
-			 * **************************************************************	*/
-
 			/* Incrementing the ephemeris time step. */
-			currentOffset = currentOffset + Propagation.integrationTimeStep ;
+			currentOffset = currentOffset + EphemerisGenerator.ephemerisTimeStep;
 
 			/* **************************************************************	*/
-
+			
 		}
 
 		/* End of processing. */
 		logger.info(CustomLoggingTools.indentMsg(logger,
 				"End of Processing Stage."));
+		
 	}
 
 	/**

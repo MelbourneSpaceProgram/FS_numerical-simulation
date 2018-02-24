@@ -8,7 +8,7 @@ import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.orekit.time.AbsoluteDate;
 
 /**
- * This class implements a simple torque manoeuvre 
+ * This class implements a simple torque maneuver 
  * over time in a MGT-like way: ON/OFF at the maximum
  * intensity torque, positive or negative.
  * <p>
@@ -18,7 +18,13 @@ import org.orekit.time.AbsoluteDate;
  *
  * @author Florian CHAUBEYRE
  */
-public class AutomaticManoeuvre implements TorqueProvider {
+public class AutomaticTorqueLaw implements TorqueProvider {
+
+	/* ******* Public Static Elements ******* */
+
+	/** List of the torque steps over time. Default scenario is empty. */
+	public static ArrayList<Step> TORQUE_SCENARIO = 
+			new ArrayList<AutomaticTorqueLaw.Step>();
 
 	/**
 	 * This embedded class represents a step of the torque
@@ -29,12 +35,12 @@ public class AutomaticManoeuvre implements TorqueProvider {
 	 *
 	 * @author Florian CHAUBEYRE
 	 */
-	private class Step {
+	public static class Step {
 		private double start;
 		private double duration;
 		private Vector3D vector;
 
-		private Step(double start, double duration, Vector3D vector){
+		public Step(double start, double duration, Vector3D vector){
 			this.start = start;
 			this.duration = duration;
 			this.vector = vector;
@@ -43,32 +49,48 @@ public class AutomaticManoeuvre implements TorqueProvider {
 		private double getDuration() {return duration;}
 		private Vector3D getVector() {return vector;}
 	}
-
+	
+	/* **************************************** */
+	
+	/** Absolute start date of  the scenario in the simulation. */
 	private AbsoluteDate startDate;
-	private ArrayList<Step> scenario;
 
-	/* Default torque intensity to apply to the satellite. */
+	/** List of the torque steps over time. */
+	private ArrayList<Step> scenario = null;
+
+	/** Default torque intensity to apply to the satellite. */
 	private static final double maxTorqueIntensity = 1e-1 /* N.m */ ;
 
-	/** Default Scenario of control of the satellite. */
-	private static ArrayList<Step> DEFAULT_SCENARIO = new ArrayList<Step>();
-
-	public AutomaticManoeuvre(AbsoluteDate startDate) {
-		this(startDate, DEFAULT_SCENARIO);
+	/**
+	 * Constructor with the torque scenario set as default.
+	 * @param startDate of the torque scenario over time
+	 */
+	public AutomaticTorqueLaw(AbsoluteDate startDate) {
+		this(startDate, AutomaticTorqueLaw.TORQUE_SCENARIO);
 	}
 
-	public AutomaticManoeuvre(AbsoluteDate startDate, ArrayList<Step> scenario) {
-		/* Building the Default Scenario. */
-		//DEFAULT_SCENARIO.add(new Step(0, 20, Vector3D.PLUS_I));
-//		DEFAULT_SCENARIO.add(new Step(25, 20, Vector3D.MINUS_I));
-//		DEFAULT_SCENARIO.add(new Step(50, 10, new Vector3D(1,1,1).normalize()));
-//		DEFAULT_SCENARIO.add(new Step(65, 10, new Vector3D(-1,-1,-1).normalize()));		
-		
-		this.startDate = startDate;
+	/**
+	 * Set the torque scenario over time.
+	 * @param startDate Absolute date to start the scenario in the simulation
+	 * @param scenario List of the torque steps.
+	 */
+	public AutomaticTorqueLaw(AbsoluteDate startDate, ArrayList<Step> scenario) {
 		this.scenario = scenario;
+		this.startDate = startDate;
 	}
 
+	/**
+	 * Add a torque step to the scenario over time.
+	 * @param startOffset Offset from the beginning of the scenario (start date)
+	 * @param duration of the step
+	 * @param nRotation Torque Vector / Rotation vector.
+	 * @return true (as specified by Collection.add)
+	 */
+	public boolean addStep(double startOffset, double duration, Vector3D nRotation) {
+		return this.scenario.add(new Step(startOffset, duration, nRotation));
+	}
 
+	/** {@inheritDoc} */
 	@Override
 	public Vector3D getTorque(AbsoluteDate currentDate) {
 		Vector3D torque;
@@ -81,7 +103,7 @@ public class AutomaticManoeuvre implements TorqueProvider {
 			/* If we find a currently operating step, it's a success. */
 			if (	    (step.getStart() <= offset)
 					&&
-					(step.getStart() + step.getDuration() >= offset)) 
+					(step.getStart() + step.getDuration() > offset)) 
 			{
 				success = true;
 				break;
@@ -94,9 +116,5 @@ public class AutomaticManoeuvre implements TorqueProvider {
 		}
 		return torque;
 	}
-
-
-
-
 
 }

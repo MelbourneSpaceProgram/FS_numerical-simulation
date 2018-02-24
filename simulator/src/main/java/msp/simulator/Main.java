@@ -18,7 +18,12 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 		NumericalSimulator simulator = new NumericalSimulator();
-		Dashboard.setDefaultConfiguration();
+		try {
+			Dashboard.setDefaultConfiguration();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return;
+		}
 		simulator.launch();
 	}
 
