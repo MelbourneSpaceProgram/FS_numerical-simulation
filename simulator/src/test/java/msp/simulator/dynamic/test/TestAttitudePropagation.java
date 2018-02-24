@@ -7,6 +7,7 @@ import org.hipparchus.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
 import org.orekit.attitudes.Attitude;
+import org.orekit.propagation.SpacecraftState;
 
 import msp.simulator.NumericalSimulator;
 import msp.simulator.user.Dashboard;
@@ -45,7 +46,7 @@ public class TestAttitudePropagation {
 		
 		/* *** CONFIGURATION *** */
 		double rotationTime = 100;
-		Vector3D n = new Vector3D(1,0,0).normalize();
+		Vector3D n = new Vector3D(1,2,3).normalize();
 		/* ********************* */
 		
 		NumericalSimulator simu = new NumericalSimulator();
@@ -82,6 +83,47 @@ public class TestAttitudePropagation {
 				expectedAttitudeArray, 
 				actualAttitudeArray,
 				delta);
+	}
+	
+	@Test
+	public void testSimpleAcceleration() throws Exception {
+		
+		/* *** CONFIGURATION *** */
+		double accelerationTime = 100;
+		Vector3D initialSpin = new Vector3D(2.7, -1.5, 0.3);
+		Vector3D fixedRateAcceleration = new Vector3D(0.01, 0.02, -0.03);
+		/* ********************* */
+		
+		NumericalSimulator simu = new NumericalSimulator();
+		Dashboard.setDefaultConfiguration();
+		
+		Dashboard.setIntegrationTimeStep(0.1);
+		Dashboard.setEphemerisTimeStep(1.0);
+		Dashboard.setSimulationDuration(accelerationTime);
+		
+		Dashboard.setInitialSpin(initialSpin);
+		Dashboard.setInitialRotAcceleration(fixedRateAcceleration);
+		
+		Dashboard.checkConfiguration();
+		
+		/* Launching the simulation. */
+		simu.launch();
+		
+		/* Extracting final state. */
+		SpacecraftState finalState = simu.getSatellite().getStates().getCurrentState();
+		
+		/* Checking Rotational Acceleration. */
+		Assert.assertArrayEquals(
+				fixedRateAcceleration.toArray(), 
+				finalState.getAdditionalState("RotAcc"), 
+				0.0);
+		
+		/* Checking Spin */
+		Assert.assertArrayEquals(
+				initialSpin.add(fixedRateAcceleration.scalarMultiply(accelerationTime)).toArray(), 
+				finalState.getAdditionalState("Spin"), 
+				1e-9);
+		
 	}
 	
 }
