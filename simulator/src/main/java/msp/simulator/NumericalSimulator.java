@@ -13,6 +13,7 @@ import org.orekit.time.AbsoluteDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import msp.simulator.user.Dashboard;
 import msp.simulator.utils.architecture.OrekitConfiguration;
 import msp.simulator.utils.logs.CustomLoggingTools;
 import msp.simulator.utils.logs.ephemeris.EphemerisGenerator;
@@ -98,9 +99,10 @@ public class NumericalSimulator {
 	 * <p>
 	 * NOTE: Any user defined settings for the simulation
 	 * should be registered prior the initialization/launch.
+	 * @throws Exception 
 	 * @see msp.simulator.user.Dashboard
 	 */
-	public void launch() {
+	public void launch() throws Exception {
 		this.initialize();
 		this.process();
 		this.exit();
@@ -108,10 +110,14 @@ public class NumericalSimulator {
 
 	/**
 	 * Initialize the simulation.
+	 * @throws Exception 
 	 */
-	public void initialize() {
+	public void initialize() throws Exception {
 		NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
 				"Initialization in Process..."));
+		
+		/* Checking the user configuration first. */
+		Dashboard.checkConfiguration();
 
 		/* Instance of the Simulator. */
 		this.executionStatus = 1;

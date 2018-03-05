@@ -59,8 +59,6 @@ public class TestAttitudePropagation {
 		Dashboard.setInitialSpin(new Vector3D(FastMath.PI / rotationTime, n));
 		Dashboard.setInitialRotAcceleration(new Vector3D(0,0,0));
 		
-		Dashboard.checkConfiguration();
-		
 		simu.launch();
 		
 		/* Actual end state of the satellite. */
@@ -103,6 +101,16 @@ public class TestAttitudePropagation {
 		
 		Dashboard.setInitialSpin(initialSpin);
 		Dashboard.setInitialRotAcceleration(fixedRateAcceleration);
+		
+		/*
+		ArrayList<AutomaticTorqueLaw.Step> autoTorqueScenario = 
+				new ArrayList<AutomaticTorqueLaw.Step>();
+		autoTorqueScenario.add(new AutomaticTorqueLaw.Step(1., 3., new Vector3D(1,0,0)));
+		autoTorqueScenario.add(new AutomaticTorqueLaw.Step(5., 3., new Vector3D(-1,0,0)));
+		autoTorqueScenario.add(new AutomaticTorqueLaw.Step(55., 10., new Vector3D(1,2,3)));
+		autoTorqueScenario.add(new AutomaticTorqueLaw.Step(70., 10., new Vector3D(-1,-2,-3)));
+		Dashboard.setTorqueScenario(autoTorqueScenario);
+		 */
 		
 		Dashboard.checkConfiguration();
 		

@@ -49,7 +49,7 @@ public final class Atmosphere extends HarrisPriester {
 		 * - Cosine Exponent : 2 (low inclinaison) to 6 (Polar Orbit)
 		 */
 		super(	sun.getPvCoordinateProvider(),
-				earth.getBodyShape(),
+				earth.getEllipsoid(),
 				/* Cosine Exponent */ 5
 				);
 		

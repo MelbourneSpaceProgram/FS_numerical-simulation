@@ -17,6 +17,7 @@ import msp.simulator.environment.orbit.Orbit;
 import msp.simulator.environment.orbit.Orbit.OrbitalParameters;
 import msp.simulator.satellite.assembly.SatelliteBody;
 import msp.simulator.satellite.assembly.SatelliteStates;
+import msp.simulator.satellite.sensors.Magnetometer;
 import msp.simulator.utils.logs.CustomLoggingTools;
 import msp.simulator.utils.logs.ephemeris.EphemerisGenerator;
 
@@ -48,9 +49,8 @@ public class Dashboard {
 	private static final Logger logger = LoggerFactory.getLogger(
 			Dashboard.class);
 
-	/** Set the Configuration of the Simulation to the default Settings. 
-	 * @throws Exception */
-	public static void setDefaultConfiguration() throws Exception {
+	/** Set the Configuration of the Simulation to the default Settings. */
+	public static void setDefaultConfiguration() {
 		logger.info(CustomLoggingTools.indentMsg(logger, 
 				"Setting Default Configuration..."));
 
@@ -93,18 +93,15 @@ public class Dashboard {
 				{ 0,   0,   1 }
 		};
 		Dashboard.setSatelliteInertiaMatrix(simpleBalancedInertiaMatrix);
+		Dashboard.setTorqueScenario(new ArrayList<AutomaticTorqueLaw.Step>());
 
-		ArrayList<AutomaticTorqueLaw.Step> autoTorqueScenario = 
-				new ArrayList<AutomaticTorqueLaw.Step>();
-		autoTorqueScenario.add(new AutomaticTorqueLaw.Step(1., 3., new Vector3D(1,0,0)));
-		autoTorqueScenario.add(new AutomaticTorqueLaw.Step(5., 3., new Vector3D(-1,0,0)));
-		autoTorqueScenario.add(new AutomaticTorqueLaw.Step(55., 10., new Vector3D(1,2,3)));
-		autoTorqueScenario.add(new AutomaticTorqueLaw.Step(70., 10., new Vector3D(-1,-2,-3)));
-		Dashboard.setTorqueScenario(autoTorqueScenario);
-
-		//Dashboard.setTorqueScenario(new ArrayList<AutomaticManoeuvre.Step>());
-	
-		Dashboard.checkConfiguration();
+		Dashboard.setMagnetometerNoiseIntensity(1e-2);
+		
+		try {
+			Dashboard.checkConfiguration();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -120,7 +117,7 @@ public class Dashboard {
 					+ " (value = " + step);
 		}
 	}
-	
+
 	/**
 	 * Set the ephemeris time step.
 	 * @param step in seconds and strictly positive.
@@ -226,6 +223,19 @@ public class Dashboard {
 		AutomaticTorqueLaw.TORQUE_SCENARIO = new ArrayList<AutomaticTorqueLaw.Step>(
 				scenario);
 	}
+
+	/**
+	 * Set the normally distributed noise intensity of the magnetometer.
+	 * @param noiseIntensity order of intensity
+	 */
+	public static void setMagnetometerNoiseIntensity(double noiseIntensity) {
+		Magnetometer.normalNoiseIntensity = noiseIntensity;
+	}
+
+	
+	/* ********************************************************* */
+	/* *****************		CHECK METHODS	 ****************** */
+	/* ********************************************************* */
 	
 	/**
 	 * Check the user-defined configuration.
@@ -234,7 +244,8 @@ public class Dashboard {
 	public static void checkConfiguration() throws Exception {
 		boolean mainStatus = true;
 		boolean status = true;
-		
+
+		/* Check n°1 */
 		status = EphemerisGenerator.ephemerisTimeStep <= NumericalSimulator.simulationDuration;
 		if (!status) {
 			logger.error("The ephemeris time step should be inferior or equal than the "
@@ -246,11 +257,12 @@ public class Dashboard {
 		}
 		mainStatus &= status;
 		status = true;
-		
-		
+
+
+		/* Overall check status. */
 		if (!mainStatus) {
-			logger.error("User Configuration Failed. Simulation Aborted.");
-			throw new Exception("Configuration Check Failed.");
+			logger.error("User Configuration Check Failed.");
+			throw new Exception("User Configuration Check Failed.");
 		}
 	}
 }

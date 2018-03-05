@@ -40,16 +40,16 @@ public class Earth {
 	 */
 	
 	/** Earth Celestial Body. */
-	private CelestialBody earthCelestialBody = null;
+	private CelestialBody celestialBody = null;
 	
 	/** Earth-centered and rotating frame. */
 	private FactoryManagedFrame rotatingFrame;
 	
 	/** Body Shape of the Earth Celestial Body. */
-	private OneAxisEllipsoid earthEllipsoidBodyShape = null;
+	private OneAxisEllipsoid ellipsoid = null;
 	
 	/** The Earth Radius. */
-	private double earthRadius;
+	private double radius;
 	
 	/** Earth Attraction Coefficient. ~ 3.986e14 m³/s² */
 	private double attractCoeff_mu;
@@ -71,20 +71,20 @@ public class Earth {
 			/* Building the shape of the Earth body. 	*/
 			
 			/*  -> Celestial Body: linking the singleton.*/
-			this.earthCelestialBody = CelestialBodyFactory.getEarth();
+			this.celestialBody = CelestialBodyFactory.getEarth();
 			
 			/*  -> Attraction Coefficient mu				*/
 			this.attractCoeff_mu = Constants.WGS84_EARTH_MU;
 			
 			/*	-> Radius								*/
-			this.earthRadius = Constants.WGS84_EARTH_EQUATORIAL_RADIUS;
+			this.radius = Constants.WGS84_EARTH_EQUATORIAL_RADIUS;
 			
 			/*  -> Earth Rotating Frame. */
 			this.rotatingFrame = FramesFactory.getITRF(IERSConventions.IERS_2010, true);
 			
 			/*	-> Ellipsoid								*/
-			this.earthEllipsoidBodyShape = new OneAxisEllipsoid (
-				this.earthRadius,
+			this.ellipsoid = new OneAxisEllipsoid (
+				this.radius,
 				Constants.WGS84_EARTH_FLATTENING,
 				this.rotatingFrame
 					);
@@ -98,16 +98,16 @@ public class Earth {
 	 * @return Earth celestial body
 	 */
 	public CelestialBody getCelestialBody() {
-		return this.earthCelestialBody;
+		return this.celestialBody;
 	}
 	
 	/**
-	 * Return the Earth Body Shape as an OneAxisEllipsoid
+	 * Return the Earth body as a OneAxisEllipsoid
 	 * according to the defined convention. (e.g. WGS84...)
 	 * @return OneAxisEllipsoid
 	 */
-	public OneAxisEllipsoid getBodyShape() {
-		return this.earthEllipsoidBodyShape;
+	public OneAxisEllipsoid getEllipsoid() {
+		return this.ellipsoid;
 	}
 	
 	/**
@@ -117,7 +117,7 @@ public class Earth {
 	 * @return The Earth radius in m.
 	 */
 	public double getRadius() {
-		return this.earthRadius;
+		return this.radius;
 	}
 	
 	/**
@@ -141,6 +141,6 @@ public class Earth {
 	}
 	
 	public PVCoordinatesProvider getPvCoordinateProvider() {
-		return (this.earthCelestialBody) ;
+		return (this.celestialBody) ;
 	}
 }

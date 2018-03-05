@@ -56,7 +56,7 @@ public class EarthMagneticField {
 	 * @return GeoMagneticField
 	 * @see GeoMagneticField
 	 */
-	public GeoMagneticField getMagField() {
+	public GeoMagneticField getField() {
 		return this.geomagneticField;
 	}
 	
