@@ -3,6 +3,7 @@
 package msp.simulator.satellite.sensors;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
 import org.orekit.models.earth.GeoMagneticElements;
@@ -26,11 +27,14 @@ public class Magnetometer {
 	
 	/* ******* Public Static Attributes ******* */
 
-	public static double normalNoiseIntensity = 1e-2 ;
+	/** This intensity is used to generate a random number to be
+	 * added to each components of the true magnetic field. 
+	 * (nanoTesla)
+	 */
+	public static double defaultNoiseIntensity = 1e2 ;
 
 	/* **************************************** */
 
-	
 	/** Logger of the class. */
 	private static final Logger logger = LoggerFactory.getLogger(
 			Magnetometer.class);
@@ -57,16 +61,14 @@ public class Magnetometer {
 		this.assembly = assembly;
 
 		/* Initializing the class. */
-		this.noiseIntensity = Magnetometer.normalNoiseIntensity;
-
-		this.retrieveNoisyMeasurement();
+		this.noiseIntensity = Magnetometer.defaultNoiseIntensity;
 	}
 
 	/**
-	 * Return a measurement normally disturbing.
+	 * Return a measurement disturbed by a random noise.
 	 * The intensity of the noise factor can be modified at
 	 * initialization.
-	 * @return GeoMagneticElements
+	 * @return GeoMagneticElements (where field vector is expressed in nT)
 	 * @see #retrievePerfectMeasurement()
 	 */
 	public GeoMagneticElements retrieveNoisyMeasurement() {
@@ -75,9 +77,9 @@ public class Magnetometer {
 
 		/* Normally distributed random noise contribution. */
 		Vector3D noise = new Vector3D ( new double[] { 
-				2 * (Math.random() - 0.5) * this.noiseIntensity,
-				2 * (Math.random() - 0.5) * this.noiseIntensity,
-				2 * (Math.random() - 0.5) * this.noiseIntensity
+				2 * (FastMath.random() - 0.5) * this.noiseIntensity,
+				2 * (FastMath.random() - 0.5) * this.noiseIntensity,
+				2 * (FastMath.random() - 0.5) * this.noiseIntensity
 		});
 
 		/* Disturbing the perfect measurement. */
@@ -85,9 +87,12 @@ public class Magnetometer {
 				perfectMeasure.getFieldVector().add(noise);
 
 		/* Creating the noisy measure. */
-		GeoMagneticElements noisyMesure = new GeoMagneticElements(noisyFieldVector);
-
-		return noisyMesure;
+		GeoMagneticElements noisyMeasure = new GeoMagneticElements(noisyFieldVector);	
+		
+		logger.debug("Noisy Geo" + noisyMeasure.toString());
+		
+		
+		return noisyMeasure;
 	}
 
 
@@ -97,6 +102,7 @@ public class Magnetometer {
 	 * ideal measurement without any noise or interference.
 	 * 
 	 * @return GeoMagneticElements at the location of the satellite.
+	 * (where field vector is expressed in nT)
 	 * @see GeoMagneticElements 
 	 * @see org.orekit.bodies.OneAxisEllipsoid#transform(
 	 * org.orekit.utils.PVCoordinates, 
@@ -116,7 +122,7 @@ public class Magnetometer {
 
 		try {
 			/* The transformation from cartesian to geodetic coordinates is actually
-			 * not straight as it need to solve some 2-unknown non-linear equations.
+			 * not straight as it needs to solve some 2-unknowns non-linear equations.
 			 * So it needs a processing algorithm like the one presented by OreKit
 			 * in the following method.
 			 */
@@ -135,10 +141,16 @@ public class Magnetometer {
 		 * one.
 		 */
 		GeoMagneticElements trueMagField = this.geomagField.getField().calculateField(
-				geodeticPosition.getLatitude(), 
-				geodeticPosition.getLongitude(), 
-				satState.getA() - this.earth.getRadius()
-				/* geodeticPosition.getAltitude() */
+				FastMath.toDegrees(geodeticPosition.getLatitude()),	/* decimal deg */
+				FastMath.toDegrees(geodeticPosition.getLongitude()),	/* decimal deg */
+				(satState.getA() - this.earth.getRadius()) / 1e3		/* km */
+				);
+		
+		logger.debug("Magnetometer Measurement: \n" +
+				"Latitude: " + FastMath.toDegrees(geodeticPosition.getLatitude()) + " °\n" +
+				"Longitud: " + FastMath.toDegrees(geodeticPosition.getLongitude()) + " °\n" +
+				"Altitude: " + (satState.getA() - this.earth.getRadius()) / 1e3 + " km\n" +
+				"True Geo" + trueMagField.toString()
 				);
 
 		return trueMagField;

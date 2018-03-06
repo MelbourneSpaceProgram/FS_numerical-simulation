@@ -95,7 +95,7 @@ public class Dashboard {
 		Dashboard.setSatelliteInertiaMatrix(simpleBalancedInertiaMatrix);
 		Dashboard.setTorqueScenario(new ArrayList<AutomaticTorqueLaw.Step>());
 
-		Dashboard.setMagnetometerNoiseIntensity(1e-2);
+		Dashboard.setMagnetometerNoiseIntensity(Magnetometer.defaultNoiseIntensity);
 		
 		try {
 			Dashboard.checkConfiguration();
@@ -105,7 +105,7 @@ public class Dashboard {
 	}
 
 	/**
-	 * Set the integration time step of the different integrators
+	 * Set the integration time step of the different integrations
 	 * used on the simulation (Attitude and Main PVT)
 	 * @param step in seconds and strictly positive
 	 */
@@ -229,7 +229,7 @@ public class Dashboard {
 	 * @param noiseIntensity order of intensity
 	 */
 	public static void setMagnetometerNoiseIntensity(double noiseIntensity) {
-		Magnetometer.normalNoiseIntensity = noiseIntensity;
+		Magnetometer.defaultNoiseIntensity = noiseIntensity;
 	}
 
 	

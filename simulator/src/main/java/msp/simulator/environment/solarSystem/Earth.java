@@ -18,7 +18,10 @@ import msp.simulator.utils.logs.CustomLoggingTools;
 
 /**
  * This class represents the Earth in the simulation and provides access
- * and tools to the singleton instance created through OreKit.<p>
+ * and tools to the singleton instance created through OreKit.
+ * <p>
+ * The current model is the WGS84. Note that this model is specifically
+ * used for the calculation of the geomagnetic field by OreKit.
  * 
  * @see CelestialBodyFactory
  * 
@@ -36,7 +39,7 @@ public class Earth {
 	 * singleton created by OreKit.
 	 * 
 	 * Another justification is that this instance is model-
-	 * dependent, e.g. related here to the GRS80 Earth model.
+	 * dependent, e.g. related here to the WGS84 Earth model.
 	 */
 	
 	/** Earth Celestial Body. */
@@ -65,7 +68,7 @@ public class Earth {
 	public Earth() {
 		this.logger = LoggerFactory.getLogger(this.getClass());	
 		this.logger.info(CustomLoggingTools.indentMsg(this.logger,
-				"-> Building the Earth..."));
+				"-> Building the Earth (WGS84)..."));
 		
 		try {
 			/* Building the shape of the Earth body. 	*/
@@ -112,7 +115,7 @@ public class Earth {
 	
 	/**
 	 * Return the radius of the Earth body
-	 * following the same shape model. (e.g. WGS84...)
+	 * following the same shape model. (WGS84)
 	 * 
 	 * @return The Earth radius in m.
 	 */
@@ -122,7 +125,7 @@ public class Earth {
 	
 	/**
 	 * Return the Attraction Coefficient of the Earth
-	 * following the defined model. (e.g. WGS84...) 
+	 * following the defined model. (WGS84) 
 	 * (~ 3.986004418e14 m³/s²)
 	 * 
 	 * @return Attraction Coefficient 
