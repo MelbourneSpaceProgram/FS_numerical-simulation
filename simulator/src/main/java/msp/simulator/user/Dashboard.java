@@ -15,6 +15,7 @@ import msp.simulator.dynamic.propagation.Propagation;
 import msp.simulator.dynamic.torques.AutomaticTorqueLaw;
 import msp.simulator.environment.orbit.Orbit;
 import msp.simulator.environment.orbit.Orbit.OrbitalParameters;
+import msp.simulator.io.IO;
 import msp.simulator.satellite.assembly.SatelliteBody;
 import msp.simulator.satellite.assembly.SatelliteStates;
 import msp.simulator.satellite.sensors.Magnetometer;
@@ -96,6 +97,9 @@ public class Dashboard {
 		Dashboard.setTorqueScenario(new ArrayList<AutomaticTorqueLaw.Step>());
 
 		Dashboard.setMagnetometerNoiseIntensity(Magnetometer.defaultNoiseIntensity);
+		
+		/* **** IO Settings **** */
+		Dashboard.setMemCachedConnection(IO.connectMemCached, IO.memcachedSocketAddress);
 		
 		try {
 			Dashboard.checkConfiguration();
@@ -232,6 +236,22 @@ public class Dashboard {
 		Magnetometer.defaultNoiseIntensity = noiseIntensity;
 	}
 
+	/* ********************************************************* */
+	/* *****************		 IO SETTINGS		 ****************** */
+	/* ********************************************************* */
+	
+	/**
+	 * Setting the IO MemCached connection.
+	 * @param active True to setting up the connection.
+	 * Note that the MemCached server should be already running.
+	 * @param host Address of the socket.
+	 * The format should be "add.add.add.add:port"
+	 */
+	public static void setMemCachedConnection(boolean active, String host) {
+		IO.connectMemCached = active;
+		IO.memcachedSocketAddress = host;
+	}
+	
 	
 	/* ********************************************************* */
 	/* *****************		CHECK METHODS	 ****************** */
