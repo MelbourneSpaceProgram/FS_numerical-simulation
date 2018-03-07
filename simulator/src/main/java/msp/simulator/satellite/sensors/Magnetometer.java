@@ -156,4 +156,11 @@ public class Magnetometer {
 		return trueMagField;
 	}
 
+	/**
+	 * @return The noise intensity.
+	 */
+	public double getNoiseIntensity() {
+		return noiseIntensity;
+	}
+
 }
