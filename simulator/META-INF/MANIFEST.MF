@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.10.1
+Created-By: 1.8.0_101-b13 (Oracle Corporation)
+Implementation-Title: java memcached client
+Implementation-Version: 2.12.3
+Implementation-Vendor: 2006-2011 Dustin Sallings, Matt Ingenthron
+Copyright: 2006-2011 Dustin Sallings, Matt Ingenthron
+Main-Class: net.spy.memcached.BuildInfo
+

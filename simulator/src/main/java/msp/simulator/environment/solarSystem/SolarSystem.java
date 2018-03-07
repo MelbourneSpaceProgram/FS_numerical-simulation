@@ -25,8 +25,9 @@ import msp.simulator.utils.logs.CustomLoggingTools;
  */
 public class SolarSystem {
 	
-	/** Logger instance of the instance. */
-	private final Logger logger;
+	/** Logger of the class. */
+	private static final Logger logger = LoggerFactory.getLogger(
+			SolarSystem.class);
 	
 	/** Earth Instance of the Solar System in the simulation. */
 	private Earth earth;
@@ -41,8 +42,7 @@ public class SolarSystem {
 	 * Constructor of the SolarSystem
 	 */
 	public SolarSystem() {
-		this.logger = LoggerFactory.getLogger(this.getClass());
-		this.logger.info(CustomLoggingTools.indentMsg(this.logger,
+		logger.info(CustomLoggingTools.indentMsg(logger,
 				"Building the Solar System..."));
 		
 		this.earth = new Earth();

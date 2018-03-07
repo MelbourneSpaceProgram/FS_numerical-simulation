@@ -13,6 +13,8 @@ import org.orekit.time.AbsoluteDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import msp.simulator.io.IO;
+import msp.simulator.user.Dashboard;
 import msp.simulator.utils.architecture.OrekitConfiguration;
 import msp.simulator.utils.logs.CustomLoggingTools;
 import msp.simulator.utils.logs.ephemeris.EphemerisGenerator;
@@ -37,6 +39,9 @@ public class NumericalSimulator {
 
 	/** Dynamic Module of the Simulation. */
 	private msp.simulator.dynamic.Dynamic dynamic;
+	
+	/** IO Manager of the simulation. */
+	private msp.simulator.io.IO io;
 
 	/** Ephemeris Generator Instance of the simulator. */
 	private msp.simulator.utils.logs.ephemeris.EphemerisGenerator ephemerisGenerator;
@@ -98,9 +103,10 @@ public class NumericalSimulator {
 	 * <p>
 	 * NOTE: Any user defined settings for the simulation
 	 * should be registered prior the initialization/launch.
+	 * @throws Exception 
 	 * @see msp.simulator.user.Dashboard
 	 */
-	public void launch() {
+	public void launch() throws Exception {
 		this.initialize();
 		this.process();
 		this.exit();
@@ -108,10 +114,14 @@ public class NumericalSimulator {
 
 	/**
 	 * Initialize the simulation.
+	 * @throws Exception 
 	 */
-	public void initialize() {
+	public void initialize() throws Exception {
 		NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
 				"Initialization in Process..."));
+		
+		/* Checking the user configuration first. */
+		Dashboard.checkConfiguration();
 
 		/* Instance of the Simulator. */
 		this.executionStatus = 1;
@@ -137,6 +147,10 @@ public class NumericalSimulator {
 			/* Ephemeris Generator Module */
 			this.ephemerisGenerator = new EphemerisGenerator();
 			this.ephemerisGenerator.start();
+			
+			/* IO Manager Module. */
+			this.io = new IO();
+			this.io.start();
 
 		} catch (OrekitException e) {
 			e.printStackTrace();
@@ -179,13 +193,18 @@ public class NumericalSimulator {
 		/* End of processing. */
 		logger.info(CustomLoggingTools.indentMsg(logger,
 				"End of Processing Stage."));
-		
 	}
 
 	/**
 	 * Performs the exit processing of the simulation.
 	 */
 	public void exit() {
+		/* Properly closing the IO interfaces. */
+		NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
+				"Shutting down the IO interfaces."));
+		this.io.stop();
+		
+		/* End of execution statistics. */
 		this.endDate = LocalDateTime.now();
 		NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
 				"Simulation exits with execution status: "
@@ -203,6 +222,13 @@ public class NumericalSimulator {
 	 */
 	public msp.simulator.satellite.Satellite getSatellite() {
 		return satellite;
+	}
+
+	/**
+	 * @return the io manager
+	 */
+	public msp.simulator.io.IO getIo() {
+		return io;
 	}
 
 }
