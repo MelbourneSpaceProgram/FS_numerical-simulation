@@ -1,6 +1,6 @@
 /* Copyright 2017-2018 Melbourne Space Program */
 
-package msp.simulator.io;
+package msp.simulator.satellite.io;
 
 
 import java.io.IOException;
@@ -26,7 +26,7 @@ public class IO {
 	/* ******* Public Static Attributes ******* */
 
 	/** Flag to activate the connection to the MemCached server. */
-	public static boolean connectMemCached = false;
+	public static boolean connectMemCached = true;
 	
 	/** Address of the MemCached server.
 	 * The syntax is as follow: "add.add.add.add:port" (a split

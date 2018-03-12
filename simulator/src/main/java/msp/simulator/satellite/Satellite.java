@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import msp.simulator.environment.Environment;
 import msp.simulator.satellite.assembly.Assembly;
 import msp.simulator.satellite.assembly.SatelliteStates;
+import msp.simulator.satellite.io.IO;
 import msp.simulator.satellite.sensors.Sensors;
 import msp.simulator.utils.logs.CustomLoggingTools;
 
@@ -28,6 +29,9 @@ public class Satellite {
 	
 	/** Instance of the Sensors of the satellite. */
 	private Sensors sensors;
+	
+	/** Instance of the IO Manager of the satellite. */
+	private IO io;
 
 	/**
 	 * Build the intance of the Satellite in the simulation.
@@ -46,6 +50,11 @@ public class Satellite {
 		/* Building the sensors. */
 		this.sensors = new Sensors(this.environment, this.assembly);
 		
+		/* Build the IO Manager. */
+		this.io = new IO();
+		Satellite.logger.info(CustomLoggingTools.indentMsg(Satellite.logger,
+				"  -> Connecting to the IO modules..."));
+		this.io.start();
 		
 	}
 
@@ -73,7 +82,15 @@ public class Satellite {
 	 * @see msp.simulator.satellite.sensors.Sensors
 	 */
 	public Sensors getSensors() {
-		return sensors;
+		return this.sensors;
+	}
+	
+	/**
+	 * Return the satellite IO manager.
+	 * @return IO Instance of the satellite.
+	 */
+	public IO getIO() {
+		return this.io;
 	}
 
 }

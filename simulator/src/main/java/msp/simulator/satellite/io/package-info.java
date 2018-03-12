@@ -4,4 +4,4 @@
  *
  * @author Florian CHAUBEYRE
  */
-package msp.simulator.io;
+package msp.simulator.satellite.io;
