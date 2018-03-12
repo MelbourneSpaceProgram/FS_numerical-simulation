@@ -40,8 +40,10 @@ public class Torques {
 		logger.info(CustomLoggingTools.indentMsg(logger,
 				"Building the Torque Engine..."));
 		
-		this.torqueProvider = new AutomaticTorqueLaw(
-				satellite.getAssembly().getStates().getInitialState().getDate());
+		//this.torqueProvider = new AutomaticTorqueLaw(
+		//		satellite.getAssembly().getStates().getInitialState().getDate());
+		
+		this.torqueProvider = new MemCachedTorqueProvider(satellite);
 		
 		this.rotAccProvider = new RotAccelerationProvider(
 				this.torqueProvider,
@@ -63,6 +65,13 @@ public class Torques {
 	 */
 	public TorqueProvider getTorqueProvider() {
 		return torqueProvider;
+	}
+
+	/**
+	 * @return the rotAccProvider
+	 */
+	public RotAccelerationProvider getRotAccProvider() {
+		return rotAccProvider;
 	}
 
 }

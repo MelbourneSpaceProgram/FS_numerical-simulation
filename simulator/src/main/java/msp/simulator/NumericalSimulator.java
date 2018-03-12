@@ -13,7 +13,6 @@ import org.orekit.time.AbsoluteDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import msp.simulator.io.IO;
 import msp.simulator.user.Dashboard;
 import msp.simulator.utils.architecture.OrekitConfiguration;
 import msp.simulator.utils.logs.CustomLoggingTools;
@@ -39,9 +38,6 @@ public class NumericalSimulator {
 
 	/** Dynamic Module of the Simulation. */
 	private msp.simulator.dynamic.Dynamic dynamic;
-	
-	/** IO Manager of the simulation. */
-	private msp.simulator.io.IO io;
 
 	/** Ephemeris Generator Instance of the simulator. */
 	private msp.simulator.utils.logs.ephemeris.EphemerisGenerator ephemerisGenerator;
@@ -147,10 +143,6 @@ public class NumericalSimulator {
 			/* Ephemeris Generator Module */
 			this.ephemerisGenerator = new EphemerisGenerator();
 			this.ephemerisGenerator.start();
-			
-			/* IO Manager Module. */
-			this.io = new IO();
-			this.io.start();
 
 		} catch (OrekitException e) {
 			e.printStackTrace();
@@ -177,7 +169,7 @@ public class NumericalSimulator {
 				) {
 
 			this.dynamic.getPropagation().propagate(startDate.shiftedBy(currentOffset));
-
+			
 			/* Generate the related ephemeris line. */
 			this.ephemerisGenerator.writeStep(
 					this.satellite.getStates().getCurrentState()
@@ -201,8 +193,8 @@ public class NumericalSimulator {
 	public void exit() {
 		/* Properly closing the IO interfaces. */
 		NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
-				"Shutting down the IO interfaces."));
-		this.io.stop();
+				"Shutting down the Satellite IO interfaces."));
+		this.satellite.getIO().stop();
 		
 		/* End of execution statistics. */
 		this.endDate = LocalDateTime.now();
@@ -225,10 +217,11 @@ public class NumericalSimulator {
 	}
 
 	/**
-	 * @return the io manager
+	 * Return the Satellite IO Manager.
+	 * @return IO instance of the satellite.
 	 */
-	public msp.simulator.io.IO getIo() {
-		return io;
+	public msp.simulator.satellite.io.IO getIo() {
+		return satellite.getIO();
 	}
 
 }
