@@ -103,20 +103,24 @@ public class Propagation {
 						"   + " + forceModel.toString()));
 			}
 
-			/* Registering the initial state of the satellite. */
+			/* Configuring the initial state of the satellite. */
 			Propagation.logger.info(CustomLoggingTools.indentMsg(Propagation.logger,
-					"-> Registering the initial Satellite State..."));
+					"-> Configuring the initial state of the satellite..."));
 			this.propagator.setInitialState(
 					satellite.getStates().getInitialState());
 
-			/* Registering the Attitude Provider Engine. */
-			this.propagator.setAttitudeProvider(
-					guidance.getAttitudeProvider());
-
-			/* Registering the additional equations. */
-			/*  + Torque Dynamic 					*/
+			/* Registering the different state providers. */
+			
+			/*  + Attitude					*/
+			this.propagator.setAttitudeProvider(guidance.getAttitudeProvider());
+			
+			/*  + Torque Dynamic 			*/
 			this.propagator.addAdditionalEquations(this.torques.getTorqueToSpinEquation());
-
+			
+			/*  + Rotational Acceleration.	*/
+			this.propagator.addAdditionalStateProvider(this.torques.getRotAccProvider());
+		
+		
 		} catch (OrekitException e) {
 			e.printStackTrace();
 		}
