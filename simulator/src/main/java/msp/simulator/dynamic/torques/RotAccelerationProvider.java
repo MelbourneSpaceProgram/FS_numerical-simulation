@@ -43,27 +43,42 @@ public class RotAccelerationProvider implements AdditionalStateProvider {
 		return name;
 	}
 
+	/**
+	 * Reverse the differential equation of motion to provide the rotational
+	 * acceleration - i.e. the derivative of the spin.
+	 * <p>
+	 * The current algorithm uses the Euler equations of motion for a rotating 
+	 * rigid body to provide the spin derivative:
+	 */
 	@Override
 	public double[] getAdditionalState(SpacecraftState state) throws OrekitException {
-		/* Rotationnal Acceleration Array. */
+		/* Rotationnal acceleration array to complete. */
 		double[] rotAcc = new double[3];
+		
+		/* Rotational speed */
+		Vector3D spin = state.getAttitude().getSpin();
+		double W1 = spin.getX();
+		double W2 = spin.getY();
+		double W3 = spin.getZ();
 		
 		/* Torque interaction in the satellite frame. */
 		Vector3D torque = this.torqueProvider.getTorque(state.getDate());
+		double M1 = torque.getX();
+		double M2 = torque.getY();
+		double M3 = torque.getZ();
 		
 		/* Inertia Matrix of the satellite. */
 		double[][] inertiaMatrix = this.satelliteBody.getInertiaMatrix();
+		double I1 = inertiaMatrix[0][0];
+		double I2 = inertiaMatrix[1][1];
+		double I3 = inertiaMatrix[2][2];
 		
-		/* Implementation of the equation of motion.
-		 * 		wDot(t) = M(t) / I  	on each axis considering the inertia
-		 * 							independent along the three axis (Hypotheses)
-		 * 
-		 * To integrate the coupling between the different axis, one can refer to 
-		 * the Euler Equation for a rotating rigid body.
+		/* To explain the coupling between the different axis, one can refer to 
+		 * the Euler Equations of motion for a rotating rigid body. 
 		 */
-		rotAcc[0] = torque.getX() / inertiaMatrix[0][0]; 
-		rotAcc[1] = torque.getY() / inertiaMatrix[1][1]; 
-		rotAcc[2] = torque.getZ() / inertiaMatrix[2][2]; 
+		rotAcc[0] = (M1 - (I3 - I2) * W2 * W3) / I1 ;
+		rotAcc[1] = (M2 - (I1 - I3) * W3 * W1) / I1 ; 
+		rotAcc[2] = (M3 - (I2 - I1) * W1 * W2) / I1 ;
 		
 		return rotAcc;
 	}

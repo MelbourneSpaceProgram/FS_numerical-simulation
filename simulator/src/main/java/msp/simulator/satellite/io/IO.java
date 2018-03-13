@@ -26,7 +26,7 @@ public class IO {
 	/* ******* Public Static Attributes ******* */
 
 	/** Flag to activate the connection to the MemCached server. */
-	public static boolean connectMemCached = true;
+	public static boolean connectMemCached = false;
 	
 	/** Address of the MemCached server.
 	 * The syntax is as follow: "add.add.add.add:port" (a split

@@ -2,6 +2,8 @@
 
 package msp.simulator.dynamic.test;
 
+import java.util.ArrayList;
+
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
 import org.junit.Assert;
@@ -10,6 +12,7 @@ import org.orekit.attitudes.Attitude;
 import org.orekit.propagation.SpacecraftState;
 
 import msp.simulator.NumericalSimulator;
+import msp.simulator.dynamic.torques.TorqueOverTimeScenarioProvider;
 import msp.simulator.user.Dashboard;
 
 
@@ -102,15 +105,15 @@ public class TestAttitudePropagation {
 		Dashboard.setInitialSpin(initialSpin);
 		Dashboard.setInitialRotAcceleration(fixedRateAcceleration);
 		
-		/*
-		ArrayList<AutomaticTorqueLaw.Step> autoTorqueScenario = 
-				new ArrayList<AutomaticTorqueLaw.Step>();
-		autoTorqueScenario.add(new AutomaticTorqueLaw.Step(1., 3., new Vector3D(1,0,0)));
-		autoTorqueScenario.add(new AutomaticTorqueLaw.Step(5., 3., new Vector3D(-1,0,0)));
-		autoTorqueScenario.add(new AutomaticTorqueLaw.Step(55., 10., new Vector3D(1,2,3)));
-		autoTorqueScenario.add(new AutomaticTorqueLaw.Step(70., 10., new Vector3D(-1,-2,-3)));
+		
+		ArrayList<TorqueOverTimeScenarioProvider.Step> autoTorqueScenario = 
+				new ArrayList<TorqueOverTimeScenarioProvider.Step>();
+		autoTorqueScenario.add(new TorqueOverTimeScenarioProvider.Step(1., 3., new Vector3D(1,0,0)));
+		autoTorqueScenario.add(new TorqueOverTimeScenarioProvider.Step(5., 3., new Vector3D(-1,0,0)));
+		autoTorqueScenario.add(new TorqueOverTimeScenarioProvider.Step(55., 10., new Vector3D(1,2,3)));
+		autoTorqueScenario.add(new TorqueOverTimeScenarioProvider.Step(70., 10., new Vector3D(-1,-2,-3)));
 		Dashboard.setTorqueScenario(autoTorqueScenario);
-		 */
+		
 		
 		Dashboard.checkConfiguration();
 		

@@ -12,7 +12,10 @@ import org.slf4j.LoggerFactory;
 
 import msp.simulator.NumericalSimulator;
 import msp.simulator.dynamic.propagation.Propagation;
-import msp.simulator.dynamic.torques.AutomaticTorqueLaw;
+import msp.simulator.dynamic.torques.TorqueOverTimeScenarioProvider;
+import msp.simulator.dynamic.torques.MemCachedTorqueProvider;
+import msp.simulator.dynamic.torques.TorqueProviderEnum;
+import msp.simulator.dynamic.torques.Torques;
 import msp.simulator.environment.orbit.Orbit;
 import msp.simulator.environment.orbit.Orbit.OrbitalParameters;
 import msp.simulator.satellite.assembly.SatelliteBody;
@@ -94,13 +97,17 @@ public class Dashboard {
 				{ 0,   0,   1 }
 		};
 		Dashboard.setSatelliteInertiaMatrix(simpleBalancedInertiaMatrix);
-		Dashboard.setTorqueScenario(new ArrayList<AutomaticTorqueLaw.Step>());
 
 		Dashboard.setMagnetometerNoiseIntensity(Magnetometer.defaultNoiseIntensity);
+
+		Dashboard.setTorqueScenario(new ArrayList<TorqueOverTimeScenarioProvider.Step>());
+		Dashboard.setTorqueProvider(TorqueProviderEnum.MEMCACHED);
 		
 		/* **** IO Settings **** */
-		Dashboard.setMemCachedConnection(IO.connectMemCached, IO.memcachedSocketAddress);
-		
+		Dashboard.setMemCachedConnection(true, IO.memcachedSocketAddress);
+		//Dashboard.setMemCachedConnection(IO.connectMemCached, IO.memcachedSocketAddress);
+		Dashboard.setTorqueCommandKey("torque");
+
 		try {
 			Dashboard.checkConfiguration();
 		} catch (Exception e) {
@@ -220,11 +227,19 @@ public class Dashboard {
 	}
 
 	/**
-	 * Set the automatic torque provider to the user-defined one.
-	 * @param scenario steps of the torque law over time.
+	 * Set the torque provider to be use by the simulator.
+	 * @param torqueProviderInUse
 	 */
-	public static void setTorqueScenario(ArrayList<AutomaticTorqueLaw.Step> scenario) {
-		AutomaticTorqueLaw.TORQUE_SCENARIO = new ArrayList<AutomaticTorqueLaw.Step>(
+	public static void setTorqueProvider(TorqueProviderEnum torqueProviderInUse) {
+		Torques.activeTorqueProvider = torqueProviderInUse;
+	}
+
+	/**
+	 * Set the torque over time scenario provider.
+	 * @param scenario User defined steps of the torque law over time.
+	 */
+	public static void setTorqueScenario(ArrayList<TorqueOverTimeScenarioProvider.Step> scenario) {
+		TorqueOverTimeScenarioProvider.TORQUE_SCENARIO = new ArrayList<TorqueOverTimeScenarioProvider.Step>(
 				scenario);
 	}
 
@@ -239,7 +254,7 @@ public class Dashboard {
 	/* ********************************************************* */
 	/* *****************		 IO SETTINGS		 ****************** */
 	/* ********************************************************* */
-	
+
 	/**
 	 * Setting the IO MemCached connection.
 	 * @param active True to setting up the connection.
@@ -251,21 +266,30 @@ public class Dashboard {
 		IO.connectMemCached = active;
 		IO.memcachedSocketAddress = host;
 	}
-	
-	
+
+	/**
+	 * Set the MemCached hash table key corresponding to the torque command.
+	 * @param key Description of the value
+	 */
+	public static void setTorqueCommandKey(String key) {
+		MemCachedTorqueProvider.torqueCommandKey = key;
+	}
+
+
 	/* ********************************************************* */
 	/* *****************		CHECK METHODS	 ****************** */
 	/* ********************************************************* */
-	
+
 	/**
 	 * Check the user-defined configuration.
 	 * @throws Exception if an error is detected.
 	 */
 	public static void checkConfiguration() throws Exception {
 		boolean mainStatus = true;
-		boolean status = true;
+		boolean status;
 
 		/* Check n°1 */
+		/* The ephemeris time step should be inferior than the simulation duration. */
 		status = EphemerisGenerator.ephemerisTimeStep <= NumericalSimulator.simulationDuration;
 		if (!status) {
 			logger.error("The ephemeris time step should be inferior or equal than the "
@@ -276,8 +300,18 @@ public class Dashboard {
 					NumericalSimulator.simulationDuration);
 		}
 		mainStatus &= status;
-		status = true;
 
+		/* Check n°2 */
+		/* When a MemCached torque provider is set, the MemCached connection 
+		 * should be enable in the satellite IO. */
+		status = (Torques.activeTorqueProvider != TorqueProviderEnum.MEMCACHED)
+				||
+				IO.connectMemCached ;
+		if (!status) {
+			logger.error("Activating the MemCached torque provider failed: "
+					+ "The MemCached connection is not enable.");
+		}
+		mainStatus &= status;
 
 		/* Overall check status. */
 		if (!mainStatus) {

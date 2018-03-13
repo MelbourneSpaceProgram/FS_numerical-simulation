@@ -29,14 +29,13 @@ import msp.simulator.satellite.Satellite;
  */
 public class StepHandler implements OrekitFixedStepHandler {
 
-	public static int iterationNumber = 0;
-
 	/** Instance of the satellite in the simulation. */
 	private Satellite satellite;
 
 	/** Fixed integration time step of the propagation services. */
-	private double integrationTimeStep;
+	private final double integrationTimeStep;
 
+	/** Buffer for the last target date of propagation. */
 	private AbsoluteDate lastTargetDate;
 
 	/**
