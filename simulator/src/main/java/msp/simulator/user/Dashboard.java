@@ -3,6 +3,7 @@
 package msp.simulator.user;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.hipparchus.complex.Quaternion;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
@@ -14,6 +15,7 @@ import msp.simulator.NumericalSimulator;
 import msp.simulator.dynamic.propagation.Propagation;
 import msp.simulator.dynamic.torques.TorqueOverTimeScenarioProvider;
 import msp.simulator.dynamic.torques.MemCachedTorqueProvider;
+import msp.simulator.dynamic.torques.RotAccelerationProvider;
 import msp.simulator.dynamic.torques.TorqueProviderEnum;
 import msp.simulator.dynamic.torques.Torques;
 import msp.simulator.environment.orbit.Orbit;
@@ -101,11 +103,10 @@ public class Dashboard {
 		Dashboard.setMagnetometerNoiseIntensity(Magnetometer.defaultNoiseIntensity);
 
 		Dashboard.setTorqueScenario(new ArrayList<TorqueOverTimeScenarioProvider.Step>());
-		Dashboard.setTorqueProvider(TorqueProviderEnum.MEMCACHED);
-		
+		Dashboard.setTorqueProvider(TorqueProviderEnum.SCENARIO);
+
 		/* **** IO Settings **** */
-		Dashboard.setMemCachedConnection(true, IO.memcachedSocketAddress);
-		//Dashboard.setMemCachedConnection(IO.connectMemCached, IO.memcachedSocketAddress);
+		Dashboard.setMemCachedConnection(IO.connectMemCached, IO.memcachedSocketAddress);
 		Dashboard.setTorqueCommandKey("torque");
 
 		try {
@@ -188,7 +189,7 @@ public class Dashboard {
 
 	/**
 	 * Set the initial spin of the satellite.
-	 * @param spin Vector in the space.
+	 * @param spin Vector in the space
 	 */
 	public static void setInitialSpin(Vector3D spin) {
 		SatelliteStates.initialSpin = spin;
@@ -236,11 +237,34 @@ public class Dashboard {
 
 	/**
 	 * Set the torque over time scenario provider.
+	 * <p>
+	 * If the scenario directly begins at the start date of the simulation,
+	 * the initial acceleration is automatically updated.
+	 * <p>
+	 * NOTE: The user should prior set the initial spin and the inertia matrix
+	 * of the satellite.
 	 * @param scenario User defined steps of the torque law over time.
 	 */
 	public static void setTorqueScenario(ArrayList<TorqueOverTimeScenarioProvider.Step> scenario) {
-		TorqueOverTimeScenarioProvider.TORQUE_SCENARIO = new ArrayList<TorqueOverTimeScenarioProvider.Step>(
-				scenario);
+		TorqueOverTimeScenarioProvider.TORQUE_SCENARIO = 
+				new ArrayList<TorqueOverTimeScenarioProvider.Step>(scenario);
+
+		/* If the torque scenario strictly begins at the entry date of the simulation
+		 * we should correct the initial rotational acceleration of the satellite.
+		 */
+		if ( TorqueOverTimeScenarioProvider.TORQUE_SCENARIO.size() > 0
+				&&
+				TorqueOverTimeScenarioProvider.TORQUE_SCENARIO.get(0).getStart() == 0.)
+		{
+			Dashboard.setInitialRotAcceleration(
+					new Vector3D(RotAccelerationProvider.computeEulerEquations(
+							TorqueOverTimeScenarioProvider.TORQUE_SCENARIO.get(0).getRotVector()
+							.scalarMultiply(TorqueOverTimeScenarioProvider.getTorqueIntensity()), 
+							SatelliteStates.initialSpin, 
+							SatelliteBody.satInertiaMatrix)
+							)
+					);
+		}
 	}
 
 	/**
@@ -303,13 +327,54 @@ public class Dashboard {
 
 		/* Check n°2 */
 		/* When a MemCached torque provider is set, the MemCached connection 
-		 * should be enable in the satellite IO. */
+		 * should be enable in the satellite IO. 
+		 */
 		status = (Torques.activeTorqueProvider != TorqueProviderEnum.MEMCACHED)
 				||
 				IO.connectMemCached ;
 		if (!status) {
 			logger.error("Activating the MemCached torque provider failed: "
 					+ "The MemCached connection is not enable.");
+		}
+		mainStatus &= status;
+
+		/* Check n°3 */
+		/* In case the active torque provider is a scenario beginning at the initial
+		 * date of the simulation, the first step should provide a torque that match 
+		 * the initial rotational acceleration of the satellite.
+		 */
+		status = Torques.activeTorqueProvider != TorqueProviderEnum.SCENARIO
+				|| 
+				TorqueOverTimeScenarioProvider.TORQUE_SCENARIO.isEmpty()
+				||
+				((TorqueOverTimeScenarioProvider.TORQUE_SCENARIO.get(0).getStart() == 0.)
+						&&
+						Arrays.equals(
+								RotAccelerationProvider.computeEulerEquations(
+										TorqueOverTimeScenarioProvider.TORQUE_SCENARIO.get(0).getRotVector()
+										.scalarMultiply(TorqueOverTimeScenarioProvider.getTorqueIntensity()), 
+										SatelliteStates.initialSpin, 
+										SatelliteBody.satInertiaMatrix
+										), 
+								SatelliteStates.initialRotAcceleration.toArray()
+								)
+						)
+				;
+		if (!status) {
+			logger.error("Incoherent Torque Scenario: the initial rotational acceleration "
+					+ "does not match the initial scenario value."
+					+ "\n"
+					+ "Expected: " + Arrays.toString(
+							RotAccelerationProvider.computeEulerEquations(
+									TorqueOverTimeScenarioProvider.TORQUE_SCENARIO.get(0).getRotVector()
+									.scalarMultiply(TorqueOverTimeScenarioProvider.getTorqueIntensity()), 
+									SatelliteStates.initialSpin, 
+									SatelliteBody.satInertiaMatrix
+									)) 
+					+ "\n"
+					+ "Actual  : " + Arrays.toString(
+							SatelliteStates.initialRotAcceleration.toArray())
+					);
 		}
 		mainStatus &= status;
 

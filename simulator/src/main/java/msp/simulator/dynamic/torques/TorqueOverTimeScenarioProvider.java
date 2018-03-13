@@ -38,16 +38,21 @@ public class TorqueOverTimeScenarioProvider implements TorqueProvider {
 	public static class Step {
 		private double start;
 		private double duration;
-		private Vector3D vector;
+		private Vector3D rotVector;
 
 		public Step(double start, double duration, Vector3D vector){
 			this.start = start;
 			this.duration = duration;
-			this.vector = vector;
+			this.rotVector = vector;
 		}
-		private double getStart() {return start;}
-		private double getDuration() {return duration;}
-		private Vector3D getVector() {return vector;}
+		public double getStart() {return start;}
+		public double getDuration() {return duration;}
+		public Vector3D getRotVector() {return rotVector;}
+	}
+	
+	/** Return the default torque intensity of the scenario. */
+	public static double getTorqueIntensity() {
+		return maxTorqueIntensity;
 	}
 	
 	/* **************************************** */
@@ -110,11 +115,18 @@ public class TorqueOverTimeScenarioProvider implements TorqueProvider {
 			}
 		}
 		if (success) {
-			torque = step.getVector().scalarMultiply(maxTorqueIntensity);
+			torque = step.getRotVector().scalarMultiply(maxTorqueIntensity);
 		} else {
 			torque = Vector3D.ZERO;
 		}
 		return torque;
+	}
+
+	/**
+	 * @return the maxTorqueIntensity
+	 */
+	public double getMaxTorqueIntensity() {
+		return maxTorqueIntensity;
 	}
 
 }

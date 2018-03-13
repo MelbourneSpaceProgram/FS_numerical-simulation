@@ -224,4 +224,18 @@ public class NumericalSimulator {
 		return satellite.getIO();
 	}
 
+	/**
+	 * @return the environment
+	 */
+	public msp.simulator.environment.Environment getEnvironment() {
+		return environment;
+	}
+
+	/**
+	 * @return the dynamic
+	 */
+	public msp.simulator.dynamic.Dynamic getDynamic() {
+		return dynamic;
+	}
+
 }
