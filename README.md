@@ -1,17 +1,25 @@
 # FS_numerical-simulation
 
-Simple Installation:
-- Install Eclipse IDE for Java 8 or later
-- Install the Maven plugin for Eclipse (m2e)
-- In Eclipse > Import > New Maven Project
-- If necessary, Maven > Update Project > Update all projects
+Requirements:
+- Java 8 (preferred) or later
+- JUnit (version 4 or later)
 
-Launch the Main method.
+Optionnal:
+- MemCached (But advised)
+- Maven (if not already in the Eclipse package and that's the case for the latest versions.)
+
+Simple Installation:
+- Install Eclipse IDE for Java (e.g. Eclipse Oxygen)
+- In Eclipse > Import > New Maven Project > Deselect all
+- Import "simulator" and the top head of the other projects (hipparchus-1.2, orekit-9.1, slf4j-1.8.0-beta0 etc.)
+- Right click on simulator project > Maven > Update Project... > Select all > Force Update of Snapchots/Releases > OK
+
+The simulator project is now set up. You can launch the main method and some tests.
 
 Simple Test Execution:
-- In Eclipse, select the test to run
+- In Eclipse, select the test to run in src/test/java/msp/simulator
 - Run As > JUnit Test
 
-We can also run a user-defined configuration, so we can launch a set of tests (all project, package or files...)
-- In Eclipse, Run > Run Configuration...
-- Select JUnit and create a new configuration.
+Test Automation Execution:
+- In Eclipse, Run > Run Configuration > JUnit.
+- New Configuration > Run all tests in the select project > Ru;
