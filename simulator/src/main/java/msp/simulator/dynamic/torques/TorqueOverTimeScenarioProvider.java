@@ -18,13 +18,13 @@ import org.orekit.time.AbsoluteDate;
  *
  * @author Florian CHAUBEYRE
  */
-public class AutomaticTorqueLaw implements TorqueProvider {
+public class TorqueOverTimeScenarioProvider implements TorqueProvider {
 
 	/* ******* Public Static Elements ******* */
 
 	/** List of the torque steps over time. Default scenario is empty. */
 	public static ArrayList<Step> TORQUE_SCENARIO = 
-			new ArrayList<AutomaticTorqueLaw.Step>();
+			new ArrayList<TorqueOverTimeScenarioProvider.Step>();
 
 	/**
 	 * This embedded class represents a step of the torque
@@ -38,16 +38,21 @@ public class AutomaticTorqueLaw implements TorqueProvider {
 	public static class Step {
 		private double start;
 		private double duration;
-		private Vector3D vector;
+		private Vector3D rotVector;
 
 		public Step(double start, double duration, Vector3D vector){
 			this.start = start;
 			this.duration = duration;
-			this.vector = vector;
+			this.rotVector = vector;
 		}
-		private double getStart() {return start;}
-		private double getDuration() {return duration;}
-		private Vector3D getVector() {return vector;}
+		public double getStart() {return start;}
+		public double getDuration() {return duration;}
+		public Vector3D getRotVector() {return rotVector;}
+	}
+	
+	/** Return the default torque intensity of the scenario. */
+	public static double getTorqueIntensity() {
+		return maxTorqueIntensity;
 	}
 	
 	/* **************************************** */
@@ -65,8 +70,8 @@ public class AutomaticTorqueLaw implements TorqueProvider {
 	 * Constructor with the torque scenario set as default.
 	 * @param startDate of the torque scenario over time
 	 */
-	public AutomaticTorqueLaw(AbsoluteDate startDate) {
-		this(startDate, AutomaticTorqueLaw.TORQUE_SCENARIO);
+	public TorqueOverTimeScenarioProvider(AbsoluteDate startDate) {
+		this(startDate, TorqueOverTimeScenarioProvider.TORQUE_SCENARIO);
 	}
 
 	/**
@@ -74,7 +79,7 @@ public class AutomaticTorqueLaw implements TorqueProvider {
 	 * @param startDate Absolute date to start the scenario in the simulation
 	 * @param scenario List of the torque steps.
 	 */
-	public AutomaticTorqueLaw(AbsoluteDate startDate, ArrayList<Step> scenario) {
+	public TorqueOverTimeScenarioProvider(AbsoluteDate startDate, ArrayList<Step> scenario) {
 		this.scenario = scenario;
 		this.startDate = startDate;
 	}
@@ -110,11 +115,18 @@ public class AutomaticTorqueLaw implements TorqueProvider {
 			}
 		}
 		if (success) {
-			torque = step.getVector().scalarMultiply(maxTorqueIntensity);
+			torque = step.getRotVector().scalarMultiply(maxTorqueIntensity);
 		} else {
 			torque = Vector3D.ZERO;
 		}
 		return torque;
+	}
+
+	/**
+	 * @return the maxTorqueIntensity
+	 */
+	public double getMaxTorqueIntensity() {
+		return maxTorqueIntensity;
 	}
 
 }

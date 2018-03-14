@@ -18,19 +18,26 @@ import msp.simulator.utils.logs.CustomLoggingTools;
  * @author Florian CHAUBEYRE
  */
 public class Torques {
-	
+
+	/* ******* Public Static Attributes ******* */
+
+	/** Set the torque provider in use by the simulator. */
+	public static TorqueProviderEnum activeTorqueProvider = TorqueProviderEnum.SCENARIO;
+
+	/* **************************************** */
+
 	/** Instance of the Logger of the class. */
 	private static final Logger logger = LoggerFactory.getLogger(Torques.class);
-	
+
 	/** Instance of Torque Provider. */
 	private TorqueProvider torqueProvider;
-	
+
 	/** Instance of the rotational acceleration Provider. */
 	private RotAccelerationProvider rotAccProvider;
-	
+
 	/** Instance of the additional equations */
-	private TorqueToSpinEquation torque2spinEquation;
-	
+	private AccToSpinODE torque2spinEquation;
+
 	/**
 	 * Build the Main Torque Provider of the dynamic module.
 	 * @param environment The Environment of Simulation
@@ -39,22 +46,30 @@ public class Torques {
 	public Torques (Environment environment, Satellite satellite) {
 		logger.info(CustomLoggingTools.indentMsg(logger,
 				"Building the Torque Engine..."));
-		
-		this.torqueProvider = new AutomaticTorqueLaw(
-				satellite.getAssembly().getStates().getInitialState().getDate());
-		
+
+		/* Build the torque provider in use in the simulation. */
+		switch (Torques.activeTorqueProvider) {
+		case MEMCACHED:
+			this.torqueProvider = new MemCachedTorqueProvider(satellite);
+			break;
+		case SCENARIO:
+			this.torqueProvider = new TorqueOverTimeScenarioProvider(
+					satellite.getAssembly().getStates().getInitialState().getDate());
+			break;
+		}
+
 		this.rotAccProvider = new RotAccelerationProvider(
 				this.torqueProvider,
 				satellite.getAssembly().getBody());
-		
-		this.torque2spinEquation = new TorqueToSpinEquation(
+
+		this.torque2spinEquation = new AccToSpinODE(
 				rotAccProvider);
 	}
 
 	/**
 	 * @return the torque2spinEquation
 	 */
-	public TorqueToSpinEquation getTorqueToSpinEquation() {
+	public AccToSpinODE getTorqueToSpinEquation() {
 		return torque2spinEquation;
 	}
 
@@ -63,6 +78,13 @@ public class Torques {
 	 */
 	public TorqueProvider getTorqueProvider() {
 		return torqueProvider;
+	}
+
+	/**
+	 * @return the rotAccProvider
+	 */
+	public RotAccelerationProvider getRotAccProvider() {
+		return rotAccProvider;
 	}
 
 }

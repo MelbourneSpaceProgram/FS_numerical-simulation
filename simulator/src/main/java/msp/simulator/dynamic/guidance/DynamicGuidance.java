@@ -87,16 +87,18 @@ public class DynamicGuidance implements AttitudeProvider {
 			AbsoluteDate date, 
 			Frame frame) 
 					throws OrekitException {
-
+		
+		/* Small time shift between the intermediary integration step (cf. Runge Kutta 4) */
 		double shift = date.durationFrom(
 				this.satelliteStates.getCurrentState().getAttitude().getDate());
 
+		/* Shift slightly the attitude so the date match with the integration intermediary step. */
 		return this.satelliteStates.getCurrentState().getAttitude().shiftedBy(shift);
-
 	}
 
 	/**
 	 * Do nothing and return null.
+	 * @deprecated
 	 */
 	@Override
 	@Deprecated
@@ -106,7 +108,6 @@ public class DynamicGuidance implements AttitudeProvider {
 			Frame frame) 
 					throws OrekitException {
 
-		/** TODO: auto-generated method stub. */
 		return null;
 	}
 

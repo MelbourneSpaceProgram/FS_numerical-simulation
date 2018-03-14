@@ -15,7 +15,7 @@ import msp.simulator.utils.logs.CustomLoggingTools;
  * 
  * This class handles a set of sub-classes representing
  * the modules actually used for the accuracy of the environment.
- * E.g. Orbit, Atmosphere, GravitationalPotential, GeoMagneticField etc.
+ * E.g. OrbitWrapper, Atmosphere, GravitationalPotential, GeoMagneticField etc.
  * <p>
  * This class is responsible for creating and loading any object
  * or instance of such sub-classes and provides methods to access
@@ -38,8 +38,8 @@ public class Environment {
 	/** Instance of the Earth Atmosphere in the simulation. */
 	private msp.simulator.environment.atmosphere.Atmosphere atmosphere;
 
-	/** Instance of the Orbit in the simulation. */
-	private msp.simulator.environment.orbit.Orbit orbit;
+	/** Instance of the OrbitWrapper in the simulation. */
+	private msp.simulator.environment.orbit.OrbitWrapper orbit;
 
 	/** Instance of the Gravitational Potential. */
 	private msp.simulator.environment.gravitationalPotential.GravitationalPotential
@@ -64,7 +64,7 @@ public class Environment {
 				this.solarSystem.getSun());
 
 		/* Building the orbit. */
-		this.orbit = new msp.simulator.environment.orbit.Orbit(this.solarSystem);
+		this.orbit = new msp.simulator.environment.orbit.OrbitWrapper(this.solarSystem);
 	
 		/* Building the Earth Gravity Field (Potential) */
 		this.gravitationalPotential = new msp.simulator.environment.gravitationalPotential.

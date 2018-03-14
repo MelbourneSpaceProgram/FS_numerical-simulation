@@ -1,6 +1,6 @@
 /* Copyright 2017-2018 Melbourne Space Program */
 
-package msp.simulator.io;
+package msp.simulator.satellite.io;
 
 
 import java.io.IOException;
