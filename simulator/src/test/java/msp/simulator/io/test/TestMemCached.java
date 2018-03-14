@@ -2,13 +2,20 @@
 
 package msp.simulator.io.test;
 
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.junit.Assert;
 import org.junit.Test;
+import org.orekit.propagation.SpacecraftState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import msp.simulator.NumericalSimulator;
+import msp.simulator.dynamic.torques.RotAccelerationProvider;
+import msp.simulator.dynamic.torques.TorqueProviderEnum;
+import msp.simulator.satellite.assembly.SatelliteBody;
+import msp.simulator.satellite.assembly.SatelliteStates;
 import msp.simulator.user.Dashboard;
+import msp.simulator.utils.logs.CustomLoggingTools;
 
 /**
  *
@@ -38,14 +45,14 @@ public class TestMemCached {
 						"##### Be sure the MemCached server is up and running #####");
 			}
 			 */
-			
+
 			simu.initialize();
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		String message = "I am alive!";
+		String message = "- MemCached: \"I am alive!\" ";
 		double data = 1234.5678;
 
 		/* Write the data into the io. */
@@ -56,7 +63,7 @@ public class TestMemCached {
 		Assert.assertEquals(
 				message, 
 				simu.getIo().getMemcached().get("status"));
-		
+
 		logger.info((String) simu.getIo().getMemcached().get("status"));
 
 		Assert.assertArrayEquals(
@@ -72,6 +79,81 @@ public class TestMemCached {
 		/* Ending the simulation. */
 		simu.exit();
 	}
+
+	@Test
+	public void testTorqueDrivenSimulation() throws Exception {
+
+		/* **** Data of the test **** */
+		double accDuration = 80 ;
+		Vector3D rotVector = new Vector3D(1, 0, 0);
+		double torqueIntensity = 0.1 ;
+		String torqueKey = "torque";
+		/* ************************** */
+
+		NumericalSimulator simu = new NumericalSimulator();
+		Dashboard.setDefaultConfiguration();
+		Dashboard.setSimulationDuration(accDuration);
+		Dashboard.setIntegrationTimeStep(0.1);
+
+		Dashboard.setMemCachedConnection(true, "127.0.0.1:11211");
+		Dashboard.setTorqueProvider(TorqueProviderEnum.MEMCACHED);
+		Dashboard.setTorqueCommandKey(torqueKey);
+
+		Dashboard.setInitialRotAcceleration(
+				new Vector3D(RotAccelerationProvider.computeEulerEquations(
+						rotVector.scalarMultiply(torqueIntensity), 
+						SatelliteStates.initialSpin, 
+						SatelliteBody.satInertiaMatrix)
+						)
+				);
+
+		Dashboard.checkConfiguration();
+
+		/* Launching the simulation. */
+		simu.initialize();
+
+		logger.info(CustomLoggingTools.toString(
+				"Initial State of the satellite", 
+				simu.getSatellite().getStates().getInitialState()));
+
+		/* Set the torque value in the hash table as an array of double. */
+		simu.getIo().getMemcached().set(
+				torqueKey, 
+				0, 
+				rotVector.scalarMultiply(torqueIntensity).toArray()
+				);
+
+		simu.process();
+
+		logger.info(CustomLoggingTools.toString(
+				"Final State of the satellite", 
+				simu.getSatellite().getStates().getCurrentState()));
+
+		simu.exit();
+
+		/* Extracting final state. */
+		SpacecraftState finalState = simu.getSatellite().getStates().getCurrentState();
+
+		/* Computing the expected acceleration. */
+		double[] expectedRotAcc = RotAccelerationProvider.computeEulerEquations(
+				rotVector.scalarMultiply(torqueIntensity),
+				finalState.getAttitude().getSpin(), 
+				simu.getSatellite().getAssembly().getBody().getInertiaMatrix()
+				);
+
+		/* Checking Rotational Acceleration. */
+		Assert.assertArrayEquals(
+				expectedRotAcc,
+				finalState.getAdditionalState("RotAcc"), 
+				1e-9);
+
+		/* Checking Spin */
+		Assert.assertArrayEquals(
+				new Vector3D(expectedRotAcc).scalarMultiply(accDuration).toArray(), 
+				finalState.getAdditionalState("Spin"), 
+				1e-9);
+	}
+
 
 
 }
