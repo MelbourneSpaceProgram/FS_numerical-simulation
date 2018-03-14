@@ -23,12 +23,12 @@ import org.slf4j.LoggerFactory;
  *
  * @author Florian CHAUBEYRE
  */
-public class TorqueToSpinEquation implements AdditionalEquations {
+public class AccToSpinODE implements AdditionalEquations {
 
 	/** Instance of the Logger of the class. */
 	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(
-			TorqueToSpinEquation.class);
+			AccToSpinODE.class);
 	
 	/**
 	 * Name of the additional equation matching
@@ -40,7 +40,7 @@ public class TorqueToSpinEquation implements AdditionalEquations {
 	private RotAccelerationProvider rotAccProvider;
 	
 	
-	public TorqueToSpinEquation(RotAccelerationProvider rotAccProvider) {
+	public AccToSpinODE(RotAccelerationProvider rotAccProvider) {
 		this.rotAccProvider = rotAccProvider;
 	}
 	

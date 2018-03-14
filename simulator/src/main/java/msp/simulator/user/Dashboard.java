@@ -3,6 +3,7 @@
 package msp.simulator.user;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.hipparchus.complex.Quaternion;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
@@ -12,12 +13,16 @@ import org.slf4j.LoggerFactory;
 
 import msp.simulator.NumericalSimulator;
 import msp.simulator.dynamic.propagation.Propagation;
-import msp.simulator.dynamic.torques.AutomaticTorqueLaw;
-import msp.simulator.environment.orbit.Orbit;
-import msp.simulator.environment.orbit.Orbit.OrbitalParameters;
-import msp.simulator.io.IO;
+import msp.simulator.dynamic.torques.TorqueOverTimeScenarioProvider;
+import msp.simulator.dynamic.torques.MemCachedTorqueProvider;
+import msp.simulator.dynamic.torques.RotAccelerationProvider;
+import msp.simulator.dynamic.torques.TorqueProviderEnum;
+import msp.simulator.dynamic.torques.Torques;
+import msp.simulator.environment.orbit.OrbitWrapper;
+import msp.simulator.environment.orbit.OrbitWrapper.OrbitalParameters;
 import msp.simulator.satellite.assembly.SatelliteBody;
 import msp.simulator.satellite.assembly.SatelliteStates;
+import msp.simulator.satellite.io.IO;
 import msp.simulator.satellite.sensors.Magnetometer;
 import msp.simulator.utils.logs.CustomLoggingTools;
 import msp.simulator.utils.logs.ephemeris.EphemerisGenerator;
@@ -94,13 +99,16 @@ public class Dashboard {
 				{ 0,   0,   1 }
 		};
 		Dashboard.setSatelliteInertiaMatrix(simpleBalancedInertiaMatrix);
-		Dashboard.setTorqueScenario(new ArrayList<AutomaticTorqueLaw.Step>());
 
 		Dashboard.setMagnetometerNoiseIntensity(Magnetometer.defaultNoiseIntensity);
-		
+
+		Dashboard.setTorqueScenario(new ArrayList<TorqueOverTimeScenarioProvider.Step>());
+		Dashboard.setTorqueProvider(TorqueProviderEnum.SCENARIO);
+
 		/* **** IO Settings **** */
 		Dashboard.setMemCachedConnection(IO.connectMemCached, IO.memcachedSocketAddress);
-		
+		Dashboard.setTorqueCommandKey("torque");
+
 		try {
 			Dashboard.checkConfiguration();
 		} catch (Exception e) {
@@ -151,10 +159,10 @@ public class Dashboard {
 	 * Set the orbital parameters required to define the orbit in
 	 * the simulator.
 	 * @param param The appropriate orbital parameters
-	 * @see msp.simulator.environment.orbit.Orbit.OrbitalParameters
+	 * @see msp.simulator.environment.orbit.OrbitWrapper.OrbitalParameters
 	 */
 	public static void setOrbitalParameters(OrbitalParameters param) {
-		Orbit.userOrbitalParameters = param;
+		OrbitWrapper.userOrbitalParameters = param;
 	}
 
 	/**
@@ -181,7 +189,7 @@ public class Dashboard {
 
 	/**
 	 * Set the initial spin of the satellite.
-	 * @param spin Vector in the space.
+	 * @param spin Vector in the space
 	 */
 	public static void setInitialSpin(Vector3D spin) {
 		SatelliteStates.initialSpin = spin;
@@ -220,12 +228,43 @@ public class Dashboard {
 	}
 
 	/**
-	 * Set the automatic torque provider to the user-defined one.
-	 * @param scenario steps of the torque law over time.
+	 * Set the torque provider to be use by the simulator.
+	 * @param torqueProviderInUse
 	 */
-	public static void setTorqueScenario(ArrayList<AutomaticTorqueLaw.Step> scenario) {
-		AutomaticTorqueLaw.TORQUE_SCENARIO = new ArrayList<AutomaticTorqueLaw.Step>(
-				scenario);
+	public static void setTorqueProvider(TorqueProviderEnum torqueProviderInUse) {
+		Torques.activeTorqueProvider = torqueProviderInUse;
+	}
+
+	/**
+	 * Set the torque over time scenario provider.
+	 * <p>
+	 * If the scenario directly begins at the start date of the simulation,
+	 * the initial acceleration is automatically updated.
+	 * <p>
+	 * NOTE: The user should prior set the initial spin and the inertia matrix
+	 * of the satellite.
+	 * @param scenario User defined steps of the torque law over time.
+	 */
+	public static void setTorqueScenario(ArrayList<TorqueOverTimeScenarioProvider.Step> scenario) {
+		TorqueOverTimeScenarioProvider.TORQUE_SCENARIO = 
+				new ArrayList<TorqueOverTimeScenarioProvider.Step>(scenario);
+
+		/* If the torque scenario strictly begins at the entry date of the simulation
+		 * we should correct the initial rotational acceleration of the satellite.
+		 */
+		if ( TorqueOverTimeScenarioProvider.TORQUE_SCENARIO.size() > 0
+				&&
+				TorqueOverTimeScenarioProvider.TORQUE_SCENARIO.get(0).getStart() == 0.)
+		{
+			Dashboard.setInitialRotAcceleration(
+					new Vector3D(RotAccelerationProvider.computeEulerEquations(
+							TorqueOverTimeScenarioProvider.TORQUE_SCENARIO.get(0).getRotVector()
+							.scalarMultiply(TorqueOverTimeScenarioProvider.getTorqueIntensity()), 
+							SatelliteStates.initialSpin, 
+							SatelliteBody.satInertiaMatrix)
+							)
+					);
+		}
 	}
 
 	/**
@@ -239,7 +278,7 @@ public class Dashboard {
 	/* ********************************************************* */
 	/* *****************		 IO SETTINGS		 ****************** */
 	/* ********************************************************* */
-	
+
 	/**
 	 * Setting the IO MemCached connection.
 	 * @param active True to setting up the connection.
@@ -251,21 +290,30 @@ public class Dashboard {
 		IO.connectMemCached = active;
 		IO.memcachedSocketAddress = host;
 	}
-	
-	
+
+	/**
+	 * Set the MemCached hash table key corresponding to the torque command.
+	 * @param key Description of the value
+	 */
+	public static void setTorqueCommandKey(String key) {
+		MemCachedTorqueProvider.torqueCommandKey = key;
+	}
+
+
 	/* ********************************************************* */
 	/* *****************		CHECK METHODS	 ****************** */
 	/* ********************************************************* */
-	
+
 	/**
 	 * Check the user-defined configuration.
 	 * @throws Exception if an error is detected.
 	 */
 	public static void checkConfiguration() throws Exception {
 		boolean mainStatus = true;
-		boolean status = true;
+		boolean status;
 
 		/* Check n°1 */
+		/* The ephemeris time step should be inferior than the simulation duration. */
 		status = EphemerisGenerator.ephemerisTimeStep <= NumericalSimulator.simulationDuration;
 		if (!status) {
 			logger.error("The ephemeris time step should be inferior or equal than the "
@@ -276,8 +324,59 @@ public class Dashboard {
 					NumericalSimulator.simulationDuration);
 		}
 		mainStatus &= status;
-		status = true;
 
+		/* Check n°2 */
+		/* When a MemCached torque provider is set, the MemCached connection 
+		 * should be enable in the satellite IO. 
+		 */
+		status = (Torques.activeTorqueProvider != TorqueProviderEnum.MEMCACHED)
+				||
+				IO.connectMemCached ;
+		if (!status) {
+			logger.error("Activating the MemCached torque provider failed: "
+					+ "The MemCached connection is not enable.");
+		}
+		mainStatus &= status;
+
+		/* Check n°3 */
+		/* In case the active torque provider is a scenario beginning at the initial
+		 * date of the simulation, the first step should provide a torque that match 
+		 * the initial rotational acceleration of the satellite.
+		 */
+		status = Torques.activeTorqueProvider != TorqueProviderEnum.SCENARIO
+				|| 
+				TorqueOverTimeScenarioProvider.TORQUE_SCENARIO.isEmpty()
+				||
+				((TorqueOverTimeScenarioProvider.TORQUE_SCENARIO.get(0).getStart() == 0.)
+						&&
+						Arrays.equals(
+								RotAccelerationProvider.computeEulerEquations(
+										TorqueOverTimeScenarioProvider.TORQUE_SCENARIO.get(0).getRotVector()
+										.scalarMultiply(TorqueOverTimeScenarioProvider.getTorqueIntensity()), 
+										SatelliteStates.initialSpin, 
+										SatelliteBody.satInertiaMatrix
+										), 
+								SatelliteStates.initialRotAcceleration.toArray()
+								)
+						)
+				;
+		if (!status) {
+			logger.error("Incoherent Torque Scenario: the initial rotational acceleration "
+					+ "does not match the initial scenario value."
+					+ "\n"
+					+ "Expected: " + Arrays.toString(
+							RotAccelerationProvider.computeEulerEquations(
+									TorqueOverTimeScenarioProvider.TORQUE_SCENARIO.get(0).getRotVector()
+									.scalarMultiply(TorqueOverTimeScenarioProvider.getTorqueIntensity()), 
+									SatelliteStates.initialSpin, 
+									SatelliteBody.satInertiaMatrix
+									)) 
+					+ "\n"
+					+ "Actual  : " + Arrays.toString(
+							SatelliteStates.initialRotAcceleration.toArray())
+					);
+		}
+		mainStatus &= status;
 
 		/* Overall check status. */
 		if (!mainStatus) {

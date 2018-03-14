@@ -31,20 +31,20 @@ import msp.simulator.utils.logs.CustomLoggingTools;
  *
  * @author Florian CHAUBEYRE
  */
-public class Orbit {
+public class OrbitWrapper {
 
 
 	/* ******* Public Static Attributes ******* */
 
 	/** Orbital parameters in use for the construction of the orbit in the simulation. */
-	public static OrbitalParameters userOrbitalParameters = new Orbit.OrbitalParameters();
+	public static OrbitalParameters userOrbitalParameters = new OrbitWrapper.OrbitalParameters();
 
 	/* **************************************** */
 
 
 	/** Logger of the class. */
 	private static final Logger logger = LoggerFactory.getLogger(
-			Orbit.class);
+			OrbitWrapper.class);
 
 	/** Instance of the orbit in the simulation. */
 	private CircularOrbit orbit;
@@ -100,15 +100,15 @@ public class Orbit {
 	private LocalOrbitalFrame localOrbitalFrame;	
 
 	/**
-	 * Create the instance of Orbit in the simulation.
+	 * Create the instance of OrbitWrapper in the simulation.
 	 * @param solarSystem instance in the simulation
 	 * @throws IllegalArgumentException if eccentricity is s. superior to 1
 	 * @throws OrekitException if OreKit initialization failed
 	 * @see CircularOrbit
 	 */
-	public Orbit(SolarSystem solarSystem) throws IllegalArgumentException, OrekitException {
+	public OrbitWrapper(SolarSystem solarSystem) throws IllegalArgumentException, OrekitException {
 		logger.info(CustomLoggingTools.indentMsg(logger, 
-				"Building the Orbit..."));
+				"Building the OrbitWrapper..."));
 		
 		this.orbit = new CircularOrbit(
 				solarSystem.getEarth().getRadius() 
@@ -121,7 +121,7 @@ public class Orbit {
 				PositionAngle.TRUE,						/* Type of angle for previous */	
 				solarSystem.getIntertialFrame(),			/* Frame in use */
 				new AbsoluteDate(
-						userOrbitalParameters.dateUtc,	/* Orbit definition date */
+						userOrbitalParameters.dateUtc,	/* OrbitWrapper definition date */
 						TimeScalesFactory.getUTC() 		/* Winter Solstice*/
 						),
 				solarSystem.getEarth().getAttractCoeffMu() 	/* Earth Attraction Coeff */
@@ -130,14 +130,6 @@ public class Orbit {
 		/* Creating the relating Local Orbital Frame. */
 		this.createLOF(this);
 	}
-
-	/** Get the Orbit of the simulation.
-	 * @return orbit instance
-	 */
-	public CircularOrbit getOrbit() {
-		return this.orbit;
-	}
-
 
 	/**
 	 * This method creates an instance of the local orbital
@@ -150,14 +142,52 @@ public class Orbit {
 	 * @see org.orekit.frames.LOFType
 	 * @param orbit Instance of the Simulation
 	 */
-	private void createLOF(Orbit orbit) {
+	private void createLOF(OrbitWrapper orbit) {
 		this.localOrbitalFrame = new LocalOrbitalFrame (
 				FramesFactory.getEME2000(),
 				LOFType.VNC,
 				this.orbit,
 				"LOF");
 	}
-
+	
+	/**
+	 * This method clones the given orbit in order to change the time
+	 * stamped data.
+	 * @param orbit Orbit to clone
+	 * @param newDate New time stamped date
+	 * @return A new orbit object 
+	 */
+	public static CircularOrbit clone(CircularOrbit orbit, AbsoluteDate newDate) {
+		CircularOrbit timeUpdatedOrbit = new CircularOrbit (
+				orbit.getA(),
+				orbit.getCircularEx(),
+				orbit.getCircularEy(),
+				orbit.getI(),
+				orbit.getRightAscensionOfAscendingNode(),
+				orbit.getAlpha(PositionAngle.TRUE),
+				orbit.getADot(),
+				orbit.getCircularExDot(),
+				orbit.getCircularEyDot(),
+				orbit.getIDot(),
+				orbit.getRightAscensionOfAscendingNodeDot(),
+				orbit.getAlphaDot(PositionAngle.TRUE),
+				PositionAngle.TRUE,
+				orbit.getFrame(),
+				newDate,
+				orbit.getMu()
+				);
+		
+		return timeUpdatedOrbit;
+	}
+	
+	
+	/** Get the OrbitWrapper of the simulation.
+	 * @return orbit instance
+	 */
+	public CircularOrbit getOrbit() {
+		return this.orbit;
+	}
+	
 	/**
 	 * Get the Local Orbital Frame related to the orbit.
 	 * The convention used is VNC:<p>
