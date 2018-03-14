@@ -18,8 +18,8 @@ import msp.simulator.dynamic.torques.MemCachedTorqueProvider;
 import msp.simulator.dynamic.torques.RotAccelerationProvider;
 import msp.simulator.dynamic.torques.TorqueProviderEnum;
 import msp.simulator.dynamic.torques.Torques;
-import msp.simulator.environment.orbit.Orbit;
-import msp.simulator.environment.orbit.Orbit.OrbitalParameters;
+import msp.simulator.environment.orbit.OrbitWrapper;
+import msp.simulator.environment.orbit.OrbitWrapper.OrbitalParameters;
 import msp.simulator.satellite.assembly.SatelliteBody;
 import msp.simulator.satellite.assembly.SatelliteStates;
 import msp.simulator.satellite.io.IO;
@@ -159,10 +159,10 @@ public class Dashboard {
 	 * Set the orbital parameters required to define the orbit in
 	 * the simulator.
 	 * @param param The appropriate orbital parameters
-	 * @see msp.simulator.environment.orbit.Orbit.OrbitalParameters
+	 * @see msp.simulator.environment.orbit.OrbitWrapper.OrbitalParameters
 	 */
 	public static void setOrbitalParameters(OrbitalParameters param) {
-		Orbit.userOrbitalParameters = param;
+		OrbitWrapper.userOrbitalParameters = param;
 	}
 
 	/**

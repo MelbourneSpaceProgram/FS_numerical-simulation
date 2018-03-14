@@ -101,7 +101,7 @@ public class TestAttitudePropagation {
 		double[] expectedAttitudeArray = new double[] {0, n.getX(), n.getY(), n.getZ()} ;
 
 		/* Approximation error during the propagation. */
-		double delta = 1e-6 ;
+		double delta = 1e-9 ;
 
 		/* Testing the attitude of the satellite after the processing. */
 		Assert.assertArrayEquals(
@@ -114,14 +114,14 @@ public class TestAttitudePropagation {
 	public void testSimpleAcceleration() throws Exception {
 
 		/* **** Data of the test **** */
-		double accDuration = 42;
+		double accDuration = 100;
 		Vector3D rotVector = new Vector3D(1, 0, 0);
 		/* ************************** */
 
 		NumericalSimulator simu = new NumericalSimulator();
 		Dashboard.setDefaultConfiguration();
 		Dashboard.setSimulationDuration(accDuration);
-		Dashboard.setIntegrationTimeStep(1.0);
+		Dashboard.setIntegrationTimeStep(0.1);
 
 		Dashboard.setTorqueProvider(TorqueProviderEnum.SCENARIO);
 
@@ -155,7 +155,7 @@ public class TestAttitudePropagation {
 
 		/* Extracting final state. */
 		SpacecraftState finalState = simu.getSatellite().getStates().getCurrentState();
-
+		
 		/* Computing the expected acceleration. */
 		double[] expectedRotAcc = RotAccelerationProvider.computeEulerEquations(
 						rotVector.scalarMultiply(
@@ -168,7 +168,7 @@ public class TestAttitudePropagation {
 		Assert.assertArrayEquals(
 				expectedRotAcc,
 				finalState.getAdditionalState("RotAcc"), 
-				0.0);
+				1e-9);
 
 		/* Checking Spin */
 		Assert.assertArrayEquals(
