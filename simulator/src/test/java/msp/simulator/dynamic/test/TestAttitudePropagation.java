@@ -2,15 +2,24 @@
 
 package msp.simulator.dynamic.test;
 
+import java.util.ArrayList;
+
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
 import org.orekit.attitudes.Attitude;
 import org.orekit.propagation.SpacecraftState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import msp.simulator.NumericalSimulator;
+import msp.simulator.dynamic.torques.RotAccelerationProvider;
+import msp.simulator.dynamic.torques.TorqueOverTimeScenarioProvider;
+import msp.simulator.dynamic.torques.TorqueOverTimeScenarioProvider.Step;
+import msp.simulator.dynamic.torques.TorqueProviderEnum;
 import msp.simulator.user.Dashboard;
+import msp.simulator.utils.logs.CustomLoggingTools;
 
 
 /**
@@ -20,6 +29,10 @@ import msp.simulator.user.Dashboard;
  */
 public class TestAttitudePropagation {
 
+	/** Instance of the Logger of the class. */
+	private static final Logger logger = 
+			LoggerFactory.getLogger(TestAttitudePropagation.class);
+	
 	/**
 	 * Process a simple rotation of Pi at constant spin to
 	 * check the attitude quaternion propagation.
@@ -43,15 +56,17 @@ public class TestAttitudePropagation {
 	 */
 	@Test 
 	public void testSimpleRotation() throws Exception {
-		
+
 		/* *** CONFIGURATION *** */
 		double rotationTime = 100;
 		Vector3D n = new Vector3D(1,2,3).normalize();
 		/* ********************* */
-		
+
 		NumericalSimulator simu = new NumericalSimulator();
 		Dashboard.setDefaultConfiguration();
-		
+
+		Dashboard.setTorqueProvider(TorqueProviderEnum.SCENARIO);
+
 		Dashboard.setIntegrationTimeStep(0.1);
 		Dashboard.setEphemerisTimeStep(1.0);
 		Dashboard.setSimulationDuration(rotationTime);
@@ -59,9 +74,19 @@ public class TestAttitudePropagation {
 		Dashboard.setInitialSpin(new Vector3D(FastMath.PI / rotationTime, n));
 		Dashboard.setInitialRotAcceleration(new Vector3D(0,0,0));
 		
-		Dashboard.checkConfiguration();
+		simu.initialize();
 		
-		simu.launch();
+		logger.info(CustomLoggingTools.toString(
+				"Initial State of the satellite", 
+				simu.getSatellite().getStates().getInitialState()));
+
+		simu.process();
+		
+		logger.info(CustomLoggingTools.toString(
+				"Final State of the satellite", 
+				simu.getSatellite().getStates().getCurrentState()));
+
+		simu.exit();
 		
 		/* Actual end state of the satellite. */
 		Attitude endAttitude = simu.getSatellite().getStates().getCurrentState().getAttitude();
@@ -71,59 +96,86 @@ public class TestAttitudePropagation {
 				endAttitude.getRotation().getQ2(),
 				endAttitude.getRotation().getQ3(),
 		};
-		
+
 		/* Expected state of the satellite after the processing. */
 		double[] expectedAttitudeArray = new double[] {0, n.getX(), n.getY(), n.getZ()} ;
-		
+
 		/* Approximation error during the propagation. */
-		double delta = 1e-6 ;
-		
+		double delta = 1e-9 ;
+
 		/* Testing the attitude of the satellite after the processing. */
 		Assert.assertArrayEquals(
 				expectedAttitudeArray, 
 				actualAttitudeArray,
 				delta);
 	}
-	
+
 	@Test
 	public void testSimpleAcceleration() throws Exception {
-		
-		/* *** CONFIGURATION *** */
-		double accelerationTime = 100;
-		Vector3D initialSpin = new Vector3D(2.7, -1.5, 0.3);
-		Vector3D fixedRateAcceleration = new Vector3D(0.01, 0.02, -0.03);
-		/* ********************* */
-		
+
+		/* **** Data of the test **** */
+		double accDuration = 100;
+		Vector3D rotVector = new Vector3D(1, 0, 0);
+		/* ************************** */
+
 		NumericalSimulator simu = new NumericalSimulator();
 		Dashboard.setDefaultConfiguration();
-		
+		Dashboard.setSimulationDuration(accDuration);
 		Dashboard.setIntegrationTimeStep(0.1);
-		Dashboard.setEphemerisTimeStep(1.0);
-		Dashboard.setSimulationDuration(accelerationTime);
-		
-		Dashboard.setInitialSpin(initialSpin);
-		Dashboard.setInitialRotAcceleration(fixedRateAcceleration);
-		
+
+		Dashboard.setTorqueProvider(TorqueProviderEnum.SCENARIO);
+
+		/* Writing the torque scenario. */
+		ArrayList<TorqueOverTimeScenarioProvider.Step> torqueScenario = 
+				new ArrayList<TorqueOverTimeScenarioProvider.Step>();
+		torqueScenario.add(new Step(0., accDuration + 1, rotVector));
+
+		//torqueScenario.add(new Step(5., 3., new Vector3D(-1,0,0)));
+		//torqueScenario.add(new Step(55., 10., new Vector3D(1,2,3)));
+		//torqueScenario.add(new Step(70., 10., new Vector3D(-1,-2,-3)));
+
+		Dashboard.setTorqueScenario(torqueScenario);
+
 		Dashboard.checkConfiguration();
-		
+
 		/* Launching the simulation. */
-		simu.launch();
+		simu.initialize();
 		
+		logger.info(CustomLoggingTools.toString(
+				"Initial State of the satellite", 
+				simu.getSatellite().getStates().getInitialState()));
+
+		simu.process();
+		
+		logger.info(CustomLoggingTools.toString(
+				"Final State of the satellite", 
+				simu.getSatellite().getStates().getCurrentState()));
+
+		simu.exit();
+
 		/* Extracting final state. */
 		SpacecraftState finalState = simu.getSatellite().getStates().getCurrentState();
 		
+		/* Computing the expected acceleration. */
+		double[] expectedRotAcc = RotAccelerationProvider.computeEulerEquations(
+						rotVector.scalarMultiply(
+								TorqueOverTimeScenarioProvider.getTorqueIntensity()),
+						finalState.getAttitude().getSpin(), 
+						simu.getSatellite().getAssembly().getBody().getInertiaMatrix()
+						);
+
 		/* Checking Rotational Acceleration. */
 		Assert.assertArrayEquals(
-				fixedRateAcceleration.toArray(), 
+				expectedRotAcc,
 				finalState.getAdditionalState("RotAcc"), 
-				0.0);
-		
+				1e-9);
+
 		/* Checking Spin */
 		Assert.assertArrayEquals(
-				initialSpin.add(fixedRateAcceleration.scalarMultiply(accelerationTime)).toArray(), 
+				new Vector3D(expectedRotAcc).scalarMultiply(accDuration).toArray(), 
 				finalState.getAdditionalState("Spin"), 
 				1e-9);
-		
+
 	}
-	
+
 }

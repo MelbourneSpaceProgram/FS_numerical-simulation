@@ -80,4 +80,11 @@ public class Dynamic {
 		return guidance;
 	}
 
+	/**
+	 * @return the torques
+	 */
+	public Torques getTorques() {
+		return torques;
+	}
+
 }

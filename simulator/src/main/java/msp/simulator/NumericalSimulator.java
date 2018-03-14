@@ -13,6 +13,7 @@ import org.orekit.time.AbsoluteDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import msp.simulator.user.Dashboard;
 import msp.simulator.utils.architecture.OrekitConfiguration;
 import msp.simulator.utils.logs.CustomLoggingTools;
 import msp.simulator.utils.logs.ephemeris.EphemerisGenerator;
@@ -58,7 +59,7 @@ public class NumericalSimulator {
 
 		/* Setting the configuration of the Logging Services. */
 		LogManager myLogManager = LogManager.getLogManager();
-		
+
 		/* Setting the configuration file location. */
 		System.setProperty(
 				"java.util.logging.config.file", 
@@ -69,7 +70,7 @@ public class NumericalSimulator {
 				+ "config" + System.getProperty("file.separator")
 				+ "log-config-file.txt"
 				);
-		
+
 		/* Creating the log directory. */
 		File simuLogDir = new File(
 				System.getProperty("user.dir") + System.getProperty("file.separator") 
@@ -98,9 +99,10 @@ public class NumericalSimulator {
 	 * <p>
 	 * NOTE: Any user defined settings for the simulation
 	 * should be registered prior the initialization/launch.
+	 * @throws Exception 
 	 * @see msp.simulator.user.Dashboard
 	 */
-	public void launch() {
+	public void launch() throws Exception {
 		this.initialize();
 		this.process();
 		this.exit();
@@ -108,10 +110,14 @@ public class NumericalSimulator {
 
 	/**
 	 * Initialize the simulation.
+	 * @throws Exception 
 	 */
-	public void initialize() {
+	public void initialize() throws Exception {
 		NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
 				"Initialization in Process..."));
+
+		/* Checking the user configuration first. */
+		Dashboard.checkConfiguration();
 
 		/* Instance of the Simulator. */
 		this.executionStatus = 1;
@@ -162,6 +168,11 @@ public class NumericalSimulator {
 				currentOffset <= simulationDuration 
 				) {
 
+			logger.debug("#### PROPAGATION STEP: " 
+					+ this.satellite.getStates().getCurrentState().getDate().toString()
+					+ " ---> "
+					+ startDate.shiftedBy(currentOffset).toString()) ;
+
 			this.dynamic.getPropagation().propagate(startDate.shiftedBy(currentOffset));
 
 			/* Generate the related ephemeris line. */
@@ -173,19 +184,24 @@ public class NumericalSimulator {
 			currentOffset = currentOffset + EphemerisGenerator.ephemerisTimeStep;
 
 			/* **************************************************************	*/
-			
+
 		}
 
 		/* End of processing. */
 		logger.info(CustomLoggingTools.indentMsg(logger,
 				"End of Processing Stage."));
-		
 	}
 
 	/**
 	 * Performs the exit processing of the simulation.
 	 */
 	public void exit() {
+		/* Properly closing the IO interfaces. */
+		NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
+				"Shutting down the Satellite IO interfaces."));
+		this.satellite.getIO().stop();
+
+		/* End of execution statistics. */
 		this.endDate = LocalDateTime.now();
 		NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
 				"Simulation exits with execution status: "
@@ -203,6 +219,28 @@ public class NumericalSimulator {
 	 */
 	public msp.simulator.satellite.Satellite getSatellite() {
 		return satellite;
+	}
+
+	/**
+	 * Return the Satellite IO Manager.
+	 * @return IO instance of the satellite.
+	 */
+	public msp.simulator.satellite.io.IO getIo() {
+		return satellite.getIO();
+	}
+
+	/**
+	 * @return the environment
+	 */
+	public msp.simulator.environment.Environment getEnvironment() {
+		return environment;
+	}
+
+	/**
+	 * @return the dynamic
+	 */
+	public msp.simulator.dynamic.Dynamic getDynamic() {
+		return dynamic;
 	}
 
 }

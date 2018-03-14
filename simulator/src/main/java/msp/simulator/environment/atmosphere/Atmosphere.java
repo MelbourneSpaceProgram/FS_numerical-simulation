@@ -46,10 +46,10 @@ public final class Atmosphere extends HarrisPriester {
 		/* Harris-Priester Model 
 		 * - Sun Coordinate Provider
 		 * - Earth One Axis Ellipsoid
-		 * - Cosine Exponent : 2 (low inclinaison) to 6 (Polar Orbit)
+		 * - Cosine Exponent : 2 (low inclinaison) to 6 (Polar OrbitWrapper)
 		 */
 		super(	sun.getPvCoordinateProvider(),
-				earth.getBodyShape(),
+				earth.getEllipsoid(),
 				/* Cosine Exponent */ 5
 				);
 		
