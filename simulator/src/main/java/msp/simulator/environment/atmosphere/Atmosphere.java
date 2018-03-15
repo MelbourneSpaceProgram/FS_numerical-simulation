@@ -32,28 +32,28 @@ public final class Atmosphere extends HarrisPriester {
 	private static final long serialVersionUID = -1497026274240688235L;
 	
 	/** Logger of the instance of the class. */
-	private Logger logger;
+	private final static Logger logger = LoggerFactory.getLogger(Atmosphere.class);
 	
 	/**
 	 * Constructor of the instance of Earth atmosphere.
 	 * @param earth The Earth Instance of the simulation.
 	 * @param sun The Sun Instance of the simulation.
 	 * 
-	 * @throws OrekitException 
+	 * @throws OrekitException If OreKit initialization fails
 	 */
 	public Atmosphere(Earth earth, Sun sun) throws OrekitException {
 		
 		/* Harris-Priester Model 
 		 * - Sun Coordinate Provider
 		 * - Earth One Axis Ellipsoid
-		 * - Cosine Exponent : 2 (low inclinaison) to 6 (Polar Orbit)
+		 * - Cosine Exponent : 2 (low inclinaison) to 6 (Polar OrbitWrapper)
 		 */
 		super(	sun.getPvCoordinateProvider(),
-				earth.getBodyShape(),
+				earth.getEllipsoid(),
 				/* Cosine Exponent */ 5
 				);
-		this.logger = LoggerFactory.getLogger(this.getClass());
-		this.logger.info(CustomLoggingTools.indentMsg(this.logger, 
+		
+		logger.info(CustomLoggingTools.indentMsg(logger, 
 				"Building the Earth Atmosphere: success."));
 	}
 	

@@ -2,6 +2,9 @@
 
 /**
  *
+ * Gather all of the guidance services and processing method,
+ * i.e. the attitude law of the satellite over time.
+ * 
  * @author Florian CHAUBEYRE
  */
 package msp.simulator.dynamic.guidance;

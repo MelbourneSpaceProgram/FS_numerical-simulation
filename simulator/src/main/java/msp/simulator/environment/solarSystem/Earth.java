@@ -18,7 +18,10 @@ import msp.simulator.utils.logs.CustomLoggingTools;
 
 /**
  * This class represents the Earth in the simulation and provides access
- * and tools to the singleton instance created through OreKit.<p>
+ * and tools to the singleton instance created through OreKit.
+ * <p>
+ * The current model is the WGS84. Note that this model is specifically
+ * used for the calculation of the geomagnetic field by OreKit.
  * 
  * @see CelestialBodyFactory
  * 
@@ -36,20 +39,20 @@ public class Earth {
 	 * singleton created by OreKit.
 	 * 
 	 * Another justification is that this instance is model-
-	 * dependent, e.g. related here to the GRS80 Earth model.
+	 * dependent, e.g. related here to the WGS84 Earth model.
 	 */
 	
 	/** Earth Celestial Body. */
-	private CelestialBody earthCelestialBody = null;
+	private CelestialBody celestialBody = null;
 	
 	/** Earth-centered and rotating frame. */
 	private FactoryManagedFrame rotatingFrame;
 	
 	/** Body Shape of the Earth Celestial Body. */
-	private OneAxisEllipsoid earthEllipsoidBodyShape = null;
+	private OneAxisEllipsoid ellipsoid = null;
 	
 	/** The Earth Radius. */
-	private double earthRadius;
+	private double radius;
 	
 	/** Earth Attraction Coefficient. ~ 3.986e14 m³/s² */
 	private double attractCoeff_mu;
@@ -65,26 +68,26 @@ public class Earth {
 	public Earth() {
 		this.logger = LoggerFactory.getLogger(this.getClass());	
 		this.logger.info(CustomLoggingTools.indentMsg(this.logger,
-				"-> Building the Earth..."));
+				"-> Building the Earth (WGS84)..."));
 		
 		try {
 			/* Building the shape of the Earth body. 	*/
 			
 			/*  -> Celestial Body: linking the singleton.*/
-			this.earthCelestialBody = CelestialBodyFactory.getEarth();
+			this.celestialBody = CelestialBodyFactory.getEarth();
 			
 			/*  -> Attraction Coefficient mu				*/
 			this.attractCoeff_mu = Constants.WGS84_EARTH_MU;
 			
 			/*	-> Radius								*/
-			this.earthRadius = Constants.WGS84_EARTH_EQUATORIAL_RADIUS;
+			this.radius = Constants.WGS84_EARTH_EQUATORIAL_RADIUS;
 			
 			/*  -> Earth Rotating Frame. */
 			this.rotatingFrame = FramesFactory.getITRF(IERSConventions.IERS_2010, true);
 			
 			/*	-> Ellipsoid								*/
-			this.earthEllipsoidBodyShape = new OneAxisEllipsoid (
-				this.earthRadius,
+			this.ellipsoid = new OneAxisEllipsoid (
+				this.radius,
 				Constants.WGS84_EARTH_FLATTENING,
 				this.rotatingFrame
 					);
@@ -95,34 +98,34 @@ public class Earth {
 	
 	/**
 	 * Return the singleton instance of the Earth.
-	 * @return
+	 * @return Earth celestial body
 	 */
 	public CelestialBody getCelestialBody() {
-		return this.earthCelestialBody;
+		return this.celestialBody;
 	}
 	
 	/**
-	 * Return the Earth Body Shape as an OneAxisEllipsoid
+	 * Return the Earth body as a OneAxisEllipsoid
 	 * according to the defined convention. (e.g. WGS84...)
 	 * @return OneAxisEllipsoid
 	 */
-	public OneAxisEllipsoid getBodyShape() {
-		return this.earthEllipsoidBodyShape;
+	public OneAxisEllipsoid getEllipsoid() {
+		return this.ellipsoid;
 	}
 	
 	/**
 	 * Return the radius of the Earth body
-	 * following the same shape model. (e.g. WGS84...)
+	 * following the same shape model. (WGS84)
 	 * 
 	 * @return The Earth radius in m.
 	 */
 	public double getRadius() {
-		return this.earthRadius;
+		return this.radius;
 	}
 	
 	/**
 	 * Return the Attraction Coefficient of the Earth
-	 * following the defined model. (e.g. WGS84...) 
+	 * following the defined model. (WGS84) 
 	 * (~ 3.986004418e14 m³/s²)
 	 * 
 	 * @return Attraction Coefficient 
@@ -141,6 +144,6 @@ public class Earth {
 	}
 	
 	public PVCoordinatesProvider getPvCoordinateProvider() {
-		return ((PVCoordinatesProvider) this.earthCelestialBody) ;
+		return (this.celestialBody) ;
 	}
 }

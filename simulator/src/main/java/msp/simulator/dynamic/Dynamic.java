@@ -38,9 +38,10 @@ public class Dynamic {
 	/** Instance of Propagation of the dynamic. */
 	private Propagation propagation;
 
-	
 	/**
-	 * 
+	 * Create the instance of the dynamic engine of the simulation.
+	 * @param environment Simulation Instance
+	 * @param satellite Simulation Instance
 	 */
 	public Dynamic(Environment environment, Satellite satellite) {
 		Dynamic.logger.info(CustomLoggingTools.indentMsg(logger, 
@@ -48,7 +49,7 @@ public class Dynamic {
 
 		this.forces = new Forces(environment, satellite);
 		this.torques = new Torques(environment, satellite);
-		this.guidance = new Guidance(environment, satellite, torques.getTorqueProvider());
+		this.guidance = new Guidance(environment, satellite);
 		this.propagation = new Propagation(
 				environment,
 				satellite, 
@@ -77,6 +78,13 @@ public class Dynamic {
 	 */
 	public Guidance getGuidance() {
 		return guidance;
+	}
+
+	/**
+	 * @return the torques
+	 */
+	public Torques getTorques() {
+		return torques;
 	}
 
 }

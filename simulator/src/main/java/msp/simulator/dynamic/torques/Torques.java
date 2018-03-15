@@ -2,7 +2,6 @@
 
 package msp.simulator.dynamic.torques;
 
-import org.orekit.propagation.integration.AdditionalEquations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,16 +18,26 @@ import msp.simulator.utils.logs.CustomLoggingTools;
  * @author Florian CHAUBEYRE
  */
 public class Torques {
-	
+
+	/* ******* Public Static Attributes ******* */
+
+	/** Set the torque provider in use by the simulator. */
+	public static TorqueProviderEnum activeTorqueProvider = TorqueProviderEnum.SCENARIO;
+
+	/* **************************************** */
+
 	/** Instance of the Logger of the class. */
 	private static final Logger logger = LoggerFactory.getLogger(Torques.class);
-	
-	/** Instance of Torque Provider of the Engine. */
+
+	/** Instance of Torque Provider. */
 	private TorqueProvider torqueProvider;
-	
-	/** Instance of the additional equation */
-	private TorqueToSpinEquation dynamicTorqueEquation;
-	
+
+	/** Instance of the rotational acceleration Provider. */
+	private RotAccelerationProvider rotAccProvider;
+
+	/** Instance of the additional equations */
+	private AccToSpinODE torque2spinEquation;
+
 	/**
 	 * Build the Main Torque Provider of the dynamic module.
 	 * @param environment The Environment of Simulation
@@ -37,20 +46,31 @@ public class Torques {
 	public Torques (Environment environment, Satellite satellite) {
 		logger.info(CustomLoggingTools.indentMsg(logger,
 				"Building the Torque Engine..."));
-		
-		this.torqueProvider = new AutomaticManoeuvre(
-				satellite.getAssembly().getStates().getInitialState().getDate());
-		
-		this.dynamicTorqueEquation = new TorqueToSpinEquation(this.torqueProvider);
+
+		/* Build the torque provider in use in the simulation. */
+		switch (Torques.activeTorqueProvider) {
+		case MEMCACHED:
+			this.torqueProvider = new MemCachedTorqueProvider(satellite);
+			break;
+		case SCENARIO:
+			this.torqueProvider = new TorqueOverTimeScenarioProvider(
+					satellite.getAssembly().getStates().getInitialState().getDate());
+			break;
+		}
+
+		this.rotAccProvider = new RotAccelerationProvider(
+				this.torqueProvider,
+				satellite.getAssembly().getBody());
+
+		this.torque2spinEquation = new AccToSpinODE(
+				rotAccProvider);
 	}
-	
+
 	/**
-	 * Return the Additional Equation computing the acceleration rotation
-	 * rate from the torque interaction on the satellite.
-	 * @return The Additional Equation to link to the propagator
+	 * @return the torque2spinEquation
 	 */
-	public AdditionalEquations getTorqueToSpinEquation() {
-		return this.dynamicTorqueEquation;
+	public AccToSpinODE getTorqueToSpinEquation() {
+		return torque2spinEquation;
 	}
 
 	/**
@@ -58,6 +78,13 @@ public class Torques {
 	 */
 	public TorqueProvider getTorqueProvider() {
 		return torqueProvider;
+	}
+
+	/**
+	 * @return the rotAccProvider
+	 */
+	public RotAccelerationProvider getRotAccProvider() {
+		return rotAccProvider;
 	}
 
 }

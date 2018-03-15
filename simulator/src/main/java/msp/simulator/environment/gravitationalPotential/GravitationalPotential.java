@@ -25,14 +25,14 @@ import msp.simulator.utils.logs.CustomLoggingTools;
  */
 public class GravitationalPotential {
 
-	/** Logger of the Class */
-	Logger logger = LoggerFactory.getLogger(this.getClass());
+	/** Logger of the class. */
+	private static final Logger logger = LoggerFactory.getLogger(
+			GravitationalPotential.class);
 
 	private NormalizedSphericalHarmonicsProvider spericalHarmonicProvider;
 
 	public GravitationalPotential() {
-
-		this.logger.info(CustomLoggingTools.indentMsg(this.logger,
+		logger.info(CustomLoggingTools.indentMsg(logger,
 				"Loading the Earth Potential Gravity Field..."));
 		
 		/* Loading the Earth Gravity Field in OreKit. */

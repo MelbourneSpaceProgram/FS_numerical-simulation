@@ -3,6 +3,7 @@
 package msp.simulator.environment;
 
 import org.orekit.errors.OrekitException;
+import org.orekit.orbits.CircularOrbit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +15,7 @@ import msp.simulator.utils.logs.CustomLoggingTools;
  * 
  * This class handles a set of sub-classes representing
  * the modules actually used for the accuracy of the environment.
- * E.g. Orbit, Atmosphere, GravitationalPotential, GeoMagneticField etc.
+ * E.g. OrbitWrapper, Atmosphere, GravitationalPotential, GeoMagneticField etc.
  * <p>
  * This class is responsible for creating and loading any object
  * or instance of such sub-classes and provides methods to access
@@ -27,8 +28,9 @@ import msp.simulator.utils.logs.CustomLoggingTools;
  */
 public class Environment {
 
-	/** Logger of the instance. */
-	private Logger logger = LoggerFactory.getLogger(this.getClass());
+	/** Logger of the class. */
+	private static final Logger logger = LoggerFactory.getLogger(
+			Environment.class);
 
 	/** Instance of the Solar System in the simulation. */
 	private msp.simulator.environment.solarSystem.SolarSystem solarSystem;
@@ -36,8 +38,8 @@ public class Environment {
 	/** Instance of the Earth Atmosphere in the simulation. */
 	private msp.simulator.environment.atmosphere.Atmosphere atmosphere;
 
-	/** Instance of the Orbit in the simulation. */
-	private msp.simulator.environment.orbit.Orbit orbit;
+	/** Instance of the OrbitWrapper in the simulation. */
+	private msp.simulator.environment.orbit.OrbitWrapper orbit;
 
 	/** Instance of the Gravitational Potential. */
 	private msp.simulator.environment.gravitationalPotential.GravitationalPotential
@@ -47,11 +49,10 @@ public class Environment {
 
 	/**
 	 * Constructor of the Space Environment of the Simulation.
-	 * @param simulatorLogMsg The logger of the simulator.
-	 * @throws OrekitException
+	 * @throws OrekitException if OreKit initialization failed
 	 */
 	public Environment() throws OrekitException {
-		this.logger.info(CustomLoggingTools.indentMsg(this.logger,
+		logger.info(CustomLoggingTools.indentMsg(logger,
 				"Building the Environment..."));
 
 		/* Building the Solar System. */
@@ -63,7 +64,7 @@ public class Environment {
 				this.solarSystem.getSun());
 
 		/* Building the orbit. */
-		this.orbit = new msp.simulator.environment.orbit.Orbit(this.solarSystem);
+		this.orbit = new msp.simulator.environment.orbit.OrbitWrapper(this.solarSystem);
 	
 		/* Building the Earth Gravity Field (Potential) */
 		this.gravitationalPotential = new msp.simulator.environment.gravitationalPotential.
@@ -91,8 +92,8 @@ public class Environment {
 	/**
 	 * @return the orbit
 	 */
-	public msp.simulator.environment.orbit.Orbit getOrbit() {
-		return orbit;
+	public CircularOrbit getOrbit() {
+		return this.orbit.getOrbit();
 	}
 
 	/**

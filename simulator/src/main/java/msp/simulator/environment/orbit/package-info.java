@@ -1,7 +1,7 @@
 /* Copyright 2017-2018 Melbourne Space Program */
 
 /**
- * The package Orbit gathers the different classes
+ * The package OrbitWrapper gathers the different classes
  * of the simulator responsible for building any instance 
  * of the orbit around a planet. This is especially necessary
  * for the Earth.

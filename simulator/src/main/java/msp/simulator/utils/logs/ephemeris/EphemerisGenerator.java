@@ -38,16 +38,21 @@ public class EphemerisGenerator {
 
 	/* ****** Default Values **** */
 	
-	/** Default time step, i.e. time resolution, of the ephemeris. */
-	protected final static double DEFAULT_STEP = 1.0 ;
+	/** Ephemeris time step in seconds. */
+	public static double ephemerisTimeStep = 1.0; /* seconds */
 
 	/** Default absolute path of the ephemeris folder. */
-	protected static final String DEFAULT_PATH =
-			"/Users/florianchaubeyre/Desktop/MSP/simulator/workspace/"
-					+ "simulator/src/main/resources/ephemeris/";
-
+	public static String DEFAULT_PATH =
+			System.getProperty("user.dir") + System.getProperty("file.separator") 
+			+ "src" + System.getProperty("file.separator")
+			+ "main" + System.getProperty("file.separator")
+			+ "resources" + System.getProperty("file.separator")
+			+ "ephemeris" + System.getProperty("file.separator")
+			;
+			
+	
 	/** Default Name of the Simulation. */
-	protected static final String DEFAULT_SIMU_NAME =
+	public static String DEFAULT_SIMU_NAME =
 			"MSP-SIM-V.0.1-" + 
 					/* Date Format. */
 					LocalDateTime.now().format(
@@ -55,13 +60,13 @@ public class EphemerisGenerator {
 					+ "-";
 	
 	/** New Line Symbol. */
-	protected final static String NL = "\n";
+	protected final static String LS = System.getProperty("line.separator");
 
 	/** Name of the orbital object. */
-	protected final static String OBJECT_NAME = "MSP_CubeSat_1";
+	public static String OBJECT_NAME = "MSP_CubeSat_1";
 
 	/** Name of the current Simulation. */
-	protected final static String SIMU_ID = "MSP_SIM_0.1";
+	public static String SIMU_ID = "MSP_SIM_0.1";
 
 	/* ************************* */
 
@@ -71,7 +76,7 @@ public class EphemerisGenerator {
 	/** Common name of the ephemeris. */
 	private String simuName;
 
-	/** Orbit OEM ephemeris. */
+	/** OrbitWrapper OEM ephemeris. */
 	private File fileOEM;
 
 	/** Attitude AEM ephemeris. */
@@ -80,17 +85,17 @@ public class EphemerisGenerator {
 	/** Attitude AEM File Writer. */
 	private FileWriter writerAEM;
 
-	/** Orbit OEM File Writer */
+	/** OrbitWrapper OEM File Writer */
 	private FileWriter writerOEM;
 
 	/** First Date known by the generator. */
 	private AbsoluteDate extractedStartDate;
 
+	/** Capture the first date of the ephemeris. */
 	boolean isStartDateCaptured = false;
-
+	
 	/**
 	 * Create the ephemeris generator.
-	 * @param propagation
 	 */
 	public EphemerisGenerator() {
 		this(DEFAULT_PATH, DEFAULT_SIMU_NAME);
@@ -98,7 +103,6 @@ public class EphemerisGenerator {
 
 	/**
 	 * Create the ephemeris generator.
-	 * @param propagation
 	 * @param simuName Name of the simulation - Append to the ephemeris.
 	 */
 	public EphemerisGenerator(String simuName) {
@@ -107,7 +111,6 @@ public class EphemerisGenerator {
 
 	/**
 	 * Create the ephemeris generator.
-	 * @param propagation Propagation Engine
 	 * @param path Folder Path
 	 * @param simuName Name of the simulation - Append to the ephemeris.
 	 */
@@ -120,7 +123,6 @@ public class EphemerisGenerator {
 		this.simuName = simuName;
 		this.path = path;
 	}
-
 
 	/**
 	 * Initialize the ephemeris by creating the appropriate files
@@ -169,7 +171,6 @@ public class EphemerisGenerator {
 		}
 	}
 
-
 	/**
 	 * Append the line corresponding the current satellite step to the
 	 * ephemeris file.
@@ -213,7 +214,7 @@ public class EphemerisGenerator {
 			.append(position.getZ() * 1e-3)
 			;
 
-			this.writerOEM.append(buff.toString() + NL);
+			this.writerOEM.append(buff.toString() + LS);
 			this.writerOEM.flush();
 
 			/* Writing the AEM ephemerides. */
@@ -237,12 +238,12 @@ public class EphemerisGenerator {
 			.append(inertialRotation.getQ3())
 			;
 
-			this.writerAEM.append(buff.toString() + NL);
+			this.writerAEM.append(buff.toString() + LS);
 			this.writerAEM.flush();
 
 			/* For DEBUG only. */
-			logger.info(
-					"Satellite State after propagation\n" +
+			logger.debug(
+					"Satellite State to store in the ephemeris:\n" +
 							"Offset: " +
 							newState.getDate().durationFrom(this.extractedStartDate) + 
 							"\n" +
@@ -263,11 +264,10 @@ public class EphemerisGenerator {
 	}
 
 
-
 	/**
 	 * Return the header of an AEM ephemeris.
-	 * @param objectName
-	 * @param simuIdentifier
+	 * @param objectName For the Satellite Object
+	 * @param simuIdentifier Current Simulation ID
 	 * @return Header as a string
 	 */
 	private String getAemHeader(String objectName, String simuIdentifier) {
@@ -279,23 +279,23 @@ public class EphemerisGenerator {
 					TimeScalesFactory.getUTC()
 					);
 
-			headerAEM += "CIC_AEM_VERS = 1.0" + NL ;
+			headerAEM += "CIC_AEM_VERS = 1.0" + LS ;
 			headerAEM += ("CREATION_DATE = " + 
-					currentDate.toString(TimeScalesFactory.getUTC()) ) + NL ;
-			headerAEM += ("ORIGINATOR = ") + simuIdentifier + NL ;
-			headerAEM += ("     ") + NL ;
-			headerAEM += ("META_START") + NL ;
-			headerAEM += ("") + NL ;
-			headerAEM += ("OBJECT_NAME = ") + objectName + NL ;
-			headerAEM += ("OBJECT_ID = MSP001") + NL ;
-			headerAEM += ("CENTER_NAME = EARTH") + NL ;
-			headerAEM += ("REF_FRAME_A = EME2000") + NL ;
-			headerAEM += ("REF_FRAME_B = SC_BODY_1") + NL ;
-			headerAEM += ("ATTITUDE_DIR = A2B") + NL ;
-			headerAEM += ("TIME_SYSTEM = UTC") + NL ;
-			headerAEM += ("ATTITUDE_TYPE = QUATERNION") + NL ;
-			headerAEM += ("") + NL ;
-			headerAEM += ("META_STOP") + NL ;
+					currentDate.toString(TimeScalesFactory.getUTC()) ) + LS ;
+			headerAEM += ("ORIGINATOR = ") + simuIdentifier + LS ;
+			headerAEM += ("     ") + LS ;
+			headerAEM += ("META_START") + LS ;
+			headerAEM += ("") + LS ;
+			headerAEM += ("OBJECT_NAME = ") + objectName + LS ;
+			headerAEM += ("OBJECT_ID = MSP001") + LS ;
+			headerAEM += ("CENTER_NAME = EARTH") + LS ;
+			headerAEM += ("REF_FRAME_A = EME2000") + LS ;
+			headerAEM += ("REF_FRAME_B = SC_BODY_1") + LS ;
+			headerAEM += ("ATTITUDE_DIR = A2B") + LS ;
+			headerAEM += ("TIME_SYSTEM = UTC") + LS ;
+			headerAEM += ("ATTITUDE_TYPE = QUATERNION") + LS ;
+			headerAEM += ("") + LS ;
+			headerAEM += ("META_STOP") + LS ;
 
 			return headerAEM;
 
@@ -307,7 +307,7 @@ public class EphemerisGenerator {
 
 	/**
 	 * Return the header of an OEM ephemeris.
-	 * @param objectName
+	 * @param objectName of the Satellite Object
 	 * @param simuIdentifier Unique identifier.
 	 * @return Header as a string
 	 */
@@ -320,20 +320,20 @@ public class EphemerisGenerator {
 					TimeScalesFactory.getUTC()
 					);
 
-			headerOEM += "CIC_OEM_VERS = 2.0" + NL ;
+			headerOEM += "CIC_OEM_VERS = 2.0" + LS ;
 			headerOEM += ("CREATION_DATE = " + 
-					currentDate.toString(TimeScalesFactory.getUTC()) ) + NL ;
-			headerOEM += ("ORIGINATOR = ") + simuIdentifier + NL ;
-			headerOEM += ("     ") + NL ;
-			headerOEM += ("META_START") + NL ;
-			headerOEM += ("") + NL ;
-			headerOEM += ("OBJECT_NAME = ") + objectName + NL ;
-			headerOEM += ("OBJECT_ID = MSP001") + NL ;
-			headerOEM += ("CENTER_NAME = EARTH") + NL ;
-			headerOEM += ("REF_FRAME = EME2000") + NL ;
-			headerOEM += ("TIME_SYSTEM = UTC") + NL ;
-			headerOEM += ("") + NL ;
-			headerOEM += ("META_STOP") + NL ;
+					currentDate.toString(TimeScalesFactory.getUTC()) ) + LS ;
+			headerOEM += ("ORIGINATOR = ") + simuIdentifier + LS ;
+			headerOEM += ("     ") + LS ;
+			headerOEM += ("META_START") + LS ;
+			headerOEM += ("") + LS ;
+			headerOEM += ("OBJECT_NAME = ") + objectName + LS ;
+			headerOEM += ("OBJECT_ID = MSP001") + LS ;
+			headerOEM += ("CENTER_NAME = EARTH") + LS ;
+			headerOEM += ("REF_FRAME = EME2000") + LS ;
+			headerOEM += ("TIME_SYSTEM = UTC") + LS ;
+			headerOEM += ("") + LS ;
+			headerOEM += ("META_STOP") + LS ;
 
 			return headerOEM;
 
@@ -342,5 +342,5 @@ public class EphemerisGenerator {
 		}
 		return null;
 	}
-
+	
 }

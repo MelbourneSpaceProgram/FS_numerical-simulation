@@ -46,7 +46,7 @@ public class Sun {
 	}
 	
 	public PVCoordinatesProvider getPvCoordinateProvider() {
-		return ((PVCoordinatesProvider) this.sunCelestialBody) ;
+		return (this.sunCelestialBody) ;
 	}
 
 }
