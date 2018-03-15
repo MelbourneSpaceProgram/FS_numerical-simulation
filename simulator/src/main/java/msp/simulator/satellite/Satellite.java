@@ -20,9 +20,6 @@ public class Satellite {
 
 	/** Logger of the class */
 	private static final Logger logger = LoggerFactory.getLogger(Satellite.class);
-
-	/** Instance of environment of the simulation. */
-	private Environment environment;
 	
 	/** Instance of Assembly of the Satellite. */
 	private Assembly assembly;
@@ -40,15 +37,12 @@ public class Satellite {
 	public Satellite(Environment environment) {
 		Satellite.logger.info(CustomLoggingTools.indentMsg(Satellite.logger,
 				"Building the Satellite..."));
-		
-		/* Linking the satellite module to the simulation. */
-		this.environment = environment;
 
 		/* Building the Assembly of the Satellite. */
-		this.assembly = new Assembly(this.environment);
+		this.assembly = new Assembly(environment);
 		
 		/* Building the sensors. */
-		this.sensors = new Sensors(this.environment, this.assembly);
+		this.sensors = new Sensors(environment, assembly);
 		
 		/* Build the IO Manager. */
 		this.io = new IO();

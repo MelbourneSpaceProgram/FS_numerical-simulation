@@ -76,7 +76,7 @@ public class EphemerisGenerator {
 	/** Common name of the ephemeris. */
 	private String simuName;
 
-	/** Orbit OEM ephemeris. */
+	/** OrbitWrapper OEM ephemeris. */
 	private File fileOEM;
 
 	/** Attitude AEM ephemeris. */
@@ -85,7 +85,7 @@ public class EphemerisGenerator {
 	/** Attitude AEM File Writer. */
 	private FileWriter writerAEM;
 
-	/** Orbit OEM File Writer */
+	/** OrbitWrapper OEM File Writer */
 	private FileWriter writerOEM;
 
 	/** First Date known by the generator. */
@@ -242,7 +242,7 @@ public class EphemerisGenerator {
 			this.writerAEM.flush();
 
 			/* For DEBUG only. */
-			logger.info(
+			logger.debug(
 					"Satellite State to store in the ephemeris:\n" +
 							"Offset: " +
 							newState.getDate().durationFrom(this.extractedStartDate) + 

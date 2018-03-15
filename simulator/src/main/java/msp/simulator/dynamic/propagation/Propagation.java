@@ -6,6 +6,7 @@ import org.hipparchus.ode.ODEIntegrator;
 import org.hipparchus.ode.nonstiff.ClassicalRungeKuttaIntegrator;
 import org.orekit.errors.OrekitException;
 import org.orekit.forces.ForceModel;
+import org.orekit.orbits.OrbitType;
 import org.orekit.propagation.SpacecraftState;
 import org.orekit.propagation.numerical.NumericalPropagator;
 import org.orekit.time.AbsoluteDate;
@@ -17,6 +18,7 @@ import msp.simulator.dynamic.guidance.Guidance;
 import msp.simulator.dynamic.torques.Torques;
 import msp.simulator.environment.Environment;
 import msp.simulator.satellite.Satellite;
+import msp.simulator.satellite.assembly.SatelliteStates;
 import msp.simulator.utils.logs.CustomLoggingTools;
 
 /**
@@ -53,10 +55,13 @@ public class Propagation {
 	private NumericalPropagator propagator;
 
 	/** Instance of the satellite in the simulation. */
-	private Satellite satellite;
+	private SatelliteStates satelliteStates;
 
 	/** Instance of the Torques Manager. */
 	private Torques torques;
+	
+	/** Type of the orbit in the simulation. */
+	private OrbitType orbitType;
 
 	/**
 	 * Create and Configure the Instance of Propagator
@@ -76,23 +81,30 @@ public class Propagation {
 				"Registering to the Propagation Services..."));
 
 		/* Linking the main simulation objects. */
-		this.satellite = satellite;
+		this.satelliteStates = satellite.getStates();
 		this.torques = torques;
+		this.orbitType = environment.getOrbit().getType();
 
 		try {
-			/* Creating the Instance of Propagator. */
+			/* Creating the Instance of Propagator. 
+			 * Be aware that this new instance will be configured by default.
+			 * The user needs to configure it afterwards.
+			 */
 			this.integrator = new ClassicalRungeKuttaIntegrator(Propagation.integrationTimeStep);
 			this.propagator = new NumericalPropagator(this.integrator);
 
 			/* Configuring the step handler of the propagation services. */
 			StepHandler simulationStepHandler = new StepHandler(
-					this.satellite,
+					satelliteStates,
 					Propagation.integrationTimeStep
 					);
 
 			this.propagator.setMasterMode(
 					Propagation.integrationTimeStep, 
 					simulationStepHandler);
+			
+			/* Set the orbit type. */
+			this.propagator.setOrbitType(this.orbitType);
 
 			/* Registering the implemented force models. */
 			Propagation.logger.info(CustomLoggingTools.indentMsg(Propagation.logger,
@@ -107,7 +119,7 @@ public class Propagation {
 			Propagation.logger.info(CustomLoggingTools.indentMsg(Propagation.logger,
 					"-> Configuring the initial state of the satellite..."));
 			this.propagator.setInitialState(
-					satellite.getStates().getInitialState());
+					satelliteStates.getInitialState());
 
 			/* Registering the different state providers. */
 			
@@ -141,7 +153,7 @@ public class Propagation {
 	public void propagate(AbsoluteDate targetDate) {
 		try {
 			SpacecraftState propagatedState = this.propagator.propagate(targetDate);
-			this.satellite.getStates().setCurrentState(propagatedState);
+			this.satelliteStates.setCurrentState(propagatedState);
 					
 		} catch (OrekitException e) {
 			e.printStackTrace();

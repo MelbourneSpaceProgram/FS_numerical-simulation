@@ -59,7 +59,7 @@ public class NumericalSimulator {
 
 		/* Setting the configuration of the Logging Services. */
 		LogManager myLogManager = LogManager.getLogManager();
-		
+
 		/* Setting the configuration file location. */
 		System.setProperty(
 				"java.util.logging.config.file", 
@@ -70,7 +70,7 @@ public class NumericalSimulator {
 				+ "config" + System.getProperty("file.separator")
 				+ "log-config-file.txt"
 				);
-		
+
 		/* Creating the log directory. */
 		File simuLogDir = new File(
 				System.getProperty("user.dir") + System.getProperty("file.separator") 
@@ -115,7 +115,7 @@ public class NumericalSimulator {
 	public void initialize() throws Exception {
 		NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
 				"Initialization in Process..."));
-		
+
 		/* Checking the user configuration first. */
 		Dashboard.checkConfiguration();
 
@@ -168,8 +168,13 @@ public class NumericalSimulator {
 				currentOffset <= simulationDuration 
 				) {
 
+			logger.debug("#### PROPAGATION STEP: " 
+					+ this.satellite.getStates().getCurrentState().getDate().toString()
+					+ " ---> "
+					+ startDate.shiftedBy(currentOffset).toString()) ;
+
 			this.dynamic.getPropagation().propagate(startDate.shiftedBy(currentOffset));
-			
+
 			/* Generate the related ephemeris line. */
 			this.ephemerisGenerator.writeStep(
 					this.satellite.getStates().getCurrentState()
@@ -179,7 +184,7 @@ public class NumericalSimulator {
 			currentOffset = currentOffset + EphemerisGenerator.ephemerisTimeStep;
 
 			/* **************************************************************	*/
-			
+
 		}
 
 		/* End of processing. */
@@ -195,7 +200,7 @@ public class NumericalSimulator {
 		NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
 				"Shutting down the Satellite IO interfaces."));
 		this.satellite.getIO().stop();
-		
+
 		/* End of execution statistics. */
 		this.endDate = LocalDateTime.now();
 		NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
@@ -222,6 +227,20 @@ public class NumericalSimulator {
 	 */
 	public msp.simulator.satellite.io.IO getIo() {
 		return satellite.getIO();
+	}
+
+	/**
+	 * @return the environment
+	 */
+	public msp.simulator.environment.Environment getEnvironment() {
+		return environment;
+	}
+
+	/**
+	 * @return the dynamic
+	 */
+	public msp.simulator.dynamic.Dynamic getDynamic() {
+		return dynamic;
 	}
 
 }
