@@ -121,11 +121,11 @@ public class StepHandler implements OrekitFixedStepHandler {
 		 * integration time step late during the secondary propagation.				*
 		 * 																			*
 		 * **************************************************************************	*/
-		System.out.println("Date: " + mainPropagatedState.getDate().toString() + " -- " + isLast);
+		//System.out.println("Date: " + mainPropagatedState.getDate().toString() + " -- " + isLast);
 		if (true) {
 			/* ***** Handle the step. ******	*/
 
-			logger.info("Step Handler - " + mainPropagatedState.getDate() + " -> "
+			logger.debug("Step Handler - " + mainPropagatedState.getDate() + " -> "
 					+ mainPropagatedState.getDate().shiftedBy(integrationTimeStep));
 			
 			this.propagateAttitude(mainPropagatedState);
@@ -233,7 +233,7 @@ public class StepHandler implements OrekitFixedStepHandler {
 			/* Updating the satellite reference at the end of the step. */
 			this.satelliteStates.setCurrentState(secondaryPropagatedState);
 			
-			System.out.println("Spin: " + spin.toString());
+			//System.out.println("Spin: " + spin.toString());
 
 		} catch (OrekitException e) {
 			e.printStackTrace();

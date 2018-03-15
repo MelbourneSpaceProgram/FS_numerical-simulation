@@ -1,6 +1,6 @@
 /* Copyright 2017-2018 Melbourne Space Program */
 
-package msp.simulator.dynamic.torques;
+package msp.simulator.dynamic.propagation.integration;
 
 import org.orekit.errors.OrekitException;
 import org.orekit.propagation.SpacecraftState;
@@ -23,12 +23,12 @@ import org.slf4j.LoggerFactory;
  *
  * @author Florian CHAUBEYRE
  */
-public class AccToSpinODE implements AdditionalEquations {
+public class SpinODE implements AdditionalEquations {
 
 	/** Instance of the Logger of the class. */
 	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(
-			AccToSpinODE.class);
+			SpinODE.class);
 	
 	/**
 	 * Name of the additional equation matching
@@ -37,10 +37,10 @@ public class AccToSpinODE implements AdditionalEquations {
 	private static final String name = "Spin";
 	
 	/** Provider of the rotationnal acceleration. */
-	private RotAccelerationProvider rotAccProvider;
+	private RotAccProvider rotAccProvider;
 	
 	
-	public AccToSpinODE(RotAccelerationProvider rotAccProvider) {
+	public SpinODE(RotAccProvider rotAccProvider) {
 		this.rotAccProvider = rotAccProvider;
 	}
 	
@@ -89,7 +89,7 @@ public class AccToSpinODE implements AdditionalEquations {
 		pDot[1] = s.getAdditionalState(this.rotAccProvider.getName())[1];
 		pDot[2] = s.getAdditionalState(this.rotAccProvider.getName())[2];
 
-		System.out.println(s.getDate().toString() + " - " + pDot[0]);
+		//System.out.println(s.getDate().toString() + " - " + pDot[0]);
 		
 		
 		/* 

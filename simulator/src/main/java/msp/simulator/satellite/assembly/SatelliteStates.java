@@ -7,6 +7,7 @@ import java.util.Map;
 import org.hipparchus.complex.Quaternion;
 import org.hipparchus.exception.MathIllegalStateException;
 import org.hipparchus.geometry.euclidean.threed.Rotation;
+import org.hipparchus.geometry.euclidean.threed.RotationConvention;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.orekit.attitudes.Attitude;
 import org.orekit.errors.OrekitException;
@@ -104,25 +105,43 @@ public class SatelliteStates {
 				);
 
 		/* Add user-related additional states. */
+		/*   -> Create the angle vector first. */
+		Rotation rotAttitude = new Rotation (
+				SatelliteStates.initialAttitudeQuaternion.getQ0(),
+				SatelliteStates.initialAttitudeQuaternion.getQ1(),
+				SatelliteStates.initialAttitudeQuaternion.getQ2(),
+				SatelliteStates.initialAttitudeQuaternion.getQ3(),
+				true);
+		
+		Vector3D theta = rotAttitude.getAxis(RotationConvention.VECTOR_OPERATOR)
+				.scalarMultiply(rotAttitude.getAngle());
+		
 		this.initialState = this.initialState
 				/* Rotational Acceleration
 				 *  - Satellite Frame
 				 *  - (rad/s^2)
 				 */
-				.addAdditionalState("RotAcc",  new double[]{
-						SatelliteStates.initialRotAcceleration.getX(),
-						SatelliteStates.initialRotAcceleration.getY(),
-						SatelliteStates.initialRotAcceleration.getZ() }
+				.addAdditionalState(
+						"RotAcc",
+						SatelliteStates.initialRotAcceleration.toArray()
+						)
+				/* Rotation Angle Vector ( or integrated spin )
+				 *  - From the inertial frame (quaternion)
+				 *  - (rad)
+				 */
+				.addAdditionalState(
+						"Theta",
+						theta.toArray()
 						)
 				/* Rotational Speed
 				 *  - Satellite frame
 				 *  - (rad/s) 
 				 */
-				.addAdditionalState("Spin", new double[]{
-						SatelliteStates.initialSpin.getX(),
-						SatelliteStates.initialSpin.getY(),
-						SatelliteStates.initialSpin.getZ() }
-						);
+				.addAdditionalState(
+						"Spin",
+						SatelliteStates.initialSpin.toArray()
+						)
+				;
 
 		/* Update the current state as the initial state. */
 		this.currentState = this.initialState;

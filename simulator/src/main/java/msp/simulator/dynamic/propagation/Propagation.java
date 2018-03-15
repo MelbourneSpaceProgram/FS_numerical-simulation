@@ -2,8 +2,8 @@
 
 package msp.simulator.dynamic.propagation;
 
-import org.hipparchus.ode.ODEIntegrator;
-import org.hipparchus.ode.nonstiff.ClassicalRungeKuttaIntegrator;
+import java.util.Arrays;
+
 import org.orekit.errors.OrekitException;
 import org.orekit.forces.ForceModel;
 import org.orekit.orbits.OrbitType;
@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import msp.simulator.dynamic.forces.Forces;
 import msp.simulator.dynamic.guidance.Guidance;
+import msp.simulator.dynamic.propagation.integration.Integration;
 import msp.simulator.dynamic.torques.Torques;
 import msp.simulator.environment.Environment;
 import msp.simulator.satellite.Satellite;
@@ -36,29 +37,17 @@ import msp.simulator.utils.logs.CustomLoggingTools;
  */
 public class Propagation {
 
-	/* ******* Public Static Attributes ******* */
-
-	/** Time Step in use for integration step calculation. (s) 
-	 * <p>Default value is 0.1 s.
-	 * */
-	public static double integrationTimeStep = 0.1 ;
-
-	/* **************************************** */
-
 	/** Instance of the Logger of the class. */
 	private static final Logger logger = LoggerFactory.getLogger(Propagation.class);
-
-	/** Instance of Integrator of the Propagator. */
-	private ODEIntegrator integrator ;
+	
+	/** Instance of the intagration manager. */
+	private Integration integrationManager;
 
 	/** Instance of Propagator in the simulation. */
 	private NumericalPropagator propagator;
 
 	/** Instance of the satellite in the simulation. */
 	private SatelliteStates satelliteStates;
-
-	/** Instance of the Torques Manager. */
-	private Torques torques;
 	
 	/** Type of the orbit in the simulation. */
 	private OrbitType orbitType;
@@ -82,25 +71,27 @@ public class Propagation {
 
 		/* Linking the main simulation objects. */
 		this.satelliteStates = satellite.getStates();
-		this.torques = torques;
 		this.orbitType = environment.getOrbit().getType();
+		
+		/* Building the integration manager. */
+		this.integrationManager = new Integration(satellite, torques.getTorqueProvider());
 
 		try {
 			/* Creating the Instance of Propagator. 
-			 * Be aware that this new instance will be configured by default.
+			 * Be aware that this new instance will have its default parameters.
 			 * The user needs to configure it afterwards.
 			 */
-			this.integrator = new ClassicalRungeKuttaIntegrator(Propagation.integrationTimeStep);
-			this.propagator = new NumericalPropagator(this.integrator);
+			this.propagator = new NumericalPropagator(
+					this.integrationManager.getIntegrator());
 
 			/* Configuring the step handler of the propagation services. */
 			StepHandler simulationStepHandler = new StepHandler(
 					satelliteStates,
-					Propagation.integrationTimeStep
+					this.integrationManager.getStepSize()
 					);
 
 			this.propagator.setMasterMode(
-					Propagation.integrationTimeStep, 
+					this.integrationManager.getStepSize(), 
 					simulationStepHandler);
 			
 			/* Set the orbit type. */
@@ -124,14 +115,20 @@ public class Propagation {
 			/* Registering the different state providers. */
 			
 			/*  + Attitude					*/
-			this.propagator.setAttitudeProvider(guidance.getAttitudeProvider());
-			
-			/*  + Torque Dynamic 			*/
-			this.propagator.addAdditionalEquations(this.torques.getTorqueToSpinEquation());
+			this.propagator.setAttitudeProvider(
+					guidance.getAttitudeProvider());
 			
 			/*  + Rotational Acceleration.	*/
-			this.propagator.addAdditionalStateProvider(this.torques.getRotAccProvider());
+			this.propagator.addAdditionalStateProvider(
+					this.integrationManager.getRotAccProvider());
 		
+			/*  + Rotational Speed 			*/
+			this.propagator.addAdditionalEquations(
+					this.integrationManager.getSpinEquation());
+			
+			/*  + Rotation Angle				*/
+			this.propagator.addAdditionalEquations(
+					this.integrationManager.getThetaEquation());
 		
 		} catch (OrekitException e) {
 			e.printStackTrace();
@@ -154,6 +151,10 @@ public class Propagation {
 		try {
 			SpacecraftState propagatedState = this.propagator.propagate(targetDate);
 			this.satelliteStates.setCurrentState(propagatedState);
+			
+			System.out.println("Theta: " + 
+					Arrays.toString(propagatedState.getAdditionalState("Theta")));
+			
 					
 		} catch (OrekitException e) {
 			e.printStackTrace();

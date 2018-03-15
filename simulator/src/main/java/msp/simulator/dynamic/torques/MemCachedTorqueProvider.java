@@ -9,7 +9,7 @@ import org.orekit.time.TimeScalesFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import msp.simulator.dynamic.propagation.Propagation;
+import msp.simulator.dynamic.propagation.integration.Integration;
 import msp.simulator.satellite.Satellite;
 import msp.simulator.satellite.io.IO;
 import msp.simulator.utils.logs.CustomLoggingTools;
@@ -36,8 +36,10 @@ public class MemCachedTorqueProvider implements TorqueProvider {
 	private MemcachedClient memcached;
 
 	/** Buffer date to avoid several processing and several torque
-	 * command value at the same date in the simulation. Indeed the
+	 * command values at the same date in the simulation. Indeed the
 	 * command is considered constant over a single propagation step.
+	 * <p>
+	 * The first date is the initial date of the satellite state.
 	 */
 	private AbsoluteDate nextComputationDate;
 
@@ -50,7 +52,7 @@ public class MemCachedTorqueProvider implements TorqueProvider {
 	private String torqueKey;
 	
 	/** Copy of the fixed integration time step. */
-	private final double integrationTimeStep = Propagation.integrationTimeStep;
+	private final double integrationTimeStep = Integration.integrationTimeStep;
 
 	/**
 	 * Create the instance of memcached torque provider.
