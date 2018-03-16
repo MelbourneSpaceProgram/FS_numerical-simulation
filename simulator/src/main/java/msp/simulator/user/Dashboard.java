@@ -12,10 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import msp.simulator.NumericalSimulator;
-import msp.simulator.dynamic.propagation.Propagation;
-import msp.simulator.dynamic.torques.TorqueOverTimeScenarioProvider;
+import msp.simulator.dynamic.propagation.integration.Integration;
+import msp.simulator.dynamic.propagation.integration.RotAccProvider;
 import msp.simulator.dynamic.torques.MemCachedTorqueProvider;
-import msp.simulator.dynamic.torques.RotAccelerationProvider;
+import msp.simulator.dynamic.torques.TorqueOverTimeScenarioProvider;
 import msp.simulator.dynamic.torques.TorqueProviderEnum;
 import msp.simulator.dynamic.torques.Torques;
 import msp.simulator.environment.orbit.OrbitWrapper;
@@ -123,7 +123,8 @@ public class Dashboard {
 	 */
 	public static void setIntegrationTimeStep(double step) {
 		if (step > 0) {
-			Propagation.integrationTimeStep = step;
+			Integration.integrationTimeStep = step;
+
 		} else {
 			logger.error("Wrong time step - need to be strictly positive."
 					+ " (value = " + step);
@@ -229,7 +230,7 @@ public class Dashboard {
 
 	/**
 	 * Set the torque provider to be use by the simulator.
-	 * @param torqueProviderInUse
+	 * @param torqueProviderInUse Instance of the simulation
 	 */
 	public static void setTorqueProvider(TorqueProviderEnum torqueProviderInUse) {
 		Torques.activeTorqueProvider = torqueProviderInUse;
@@ -257,7 +258,8 @@ public class Dashboard {
 				TorqueOverTimeScenarioProvider.TORQUE_SCENARIO.get(0).getStart() == 0.)
 		{
 			Dashboard.setInitialRotAcceleration(
-					new Vector3D(RotAccelerationProvider.computeEulerEquations(
+
+					new Vector3D(RotAccProvider.computeEulerEquations(
 							TorqueOverTimeScenarioProvider.TORQUE_SCENARIO.get(0).getRotVector()
 							.scalarMultiply(TorqueOverTimeScenarioProvider.getTorqueIntensity()), 
 							SatelliteStates.initialSpin, 
@@ -350,7 +352,8 @@ public class Dashboard {
 				((TorqueOverTimeScenarioProvider.TORQUE_SCENARIO.get(0).getStart() == 0.)
 						&&
 						Arrays.equals(
-								RotAccelerationProvider.computeEulerEquations(
+
+								RotAccProvider.computeEulerEquations(
 										TorqueOverTimeScenarioProvider.TORQUE_SCENARIO.get(0).getRotVector()
 										.scalarMultiply(TorqueOverTimeScenarioProvider.getTorqueIntensity()), 
 										SatelliteStates.initialSpin, 
@@ -365,7 +368,8 @@ public class Dashboard {
 					+ "does not match the initial scenario value."
 					+ "\n"
 					+ "Expected: " + Arrays.toString(
-							RotAccelerationProvider.computeEulerEquations(
+
+							RotAccProvider.computeEulerEquations(
 									TorqueOverTimeScenarioProvider.TORQUE_SCENARIO.get(0).getRotVector()
 									.scalarMultiply(TorqueOverTimeScenarioProvider.getTorqueIntensity()), 
 									SatelliteStates.initialSpin, 

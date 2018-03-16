@@ -55,7 +55,6 @@ public class DynamicGuidance implements AttitudeProvider {
 	 * Create the instance of dynamic guidance, i.e. torque driven,
 	 * in the simulation.
 	 * @param satellite Instance of the Simulation
-	 * @param torqueProvider The "torque-law-over-time" provider
 	 */
 	public DynamicGuidance (Satellite satellite) {
 		logger.info(CustomLoggingTools.indentMsg(logger, 
@@ -79,7 +78,6 @@ public class DynamicGuidance implements AttitudeProvider {
 	 * During the integration, we need to access the attitude for
 	 * intermediate time step. Then this method returns a linearly
 	 * extrapolated attitude in case of intermediate date.
-	 * <p>
 	 */
 	@Override
 	public Attitude getAttitude(

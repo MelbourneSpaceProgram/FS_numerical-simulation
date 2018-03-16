@@ -50,7 +50,7 @@ public class TorqueOverTimeScenarioProvider implements TorqueProvider {
 		public Vector3D getRotVector() {return rotVector;}
 	}
 	
-	/** Return the default torque intensity of the scenario. */
+	/** @return The default torque intensity of the scenario. */
 	public static double getTorqueIntensity() {
 		return maxTorqueIntensity;
 	}
