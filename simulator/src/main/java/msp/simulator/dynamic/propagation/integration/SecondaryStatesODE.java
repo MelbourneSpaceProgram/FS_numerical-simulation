@@ -9,13 +9,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class implements an additional equation for the 
- * numerical propagator.
+ * This class implements the additional equation that lead
+ * the behavior of the secondary additional states. Only
+ * one additional equation is allowed.
  * <p>
- * This equation represents the kinetic momentum theorem.
+ * This equation mainly represents the rotational dynamic 
+ * especially the kinetic momentum theorem.
  * It aims to compute, from the overall torque interaction on
  * the satellite at the instant t, the spin (or rotationnal
- * speed) of the satellite at the instant t+dt.
+ * speed) of the satellite at the instant t+dt. Then it integrates
+ * this spin to obtain the rotation angle position.
  * <p>
  * The overall torque being responsible for the rotational
  * acceleration through the satellite inertia, this data is

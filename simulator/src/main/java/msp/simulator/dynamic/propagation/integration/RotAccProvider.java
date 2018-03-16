@@ -15,6 +15,7 @@ import msp.simulator.dynamic.torques.TorqueProvider;
 import msp.simulator.satellite.assembly.SatelliteBody;
 
 /**
+ * Provider of the additional state "rotational acceleration".
  *
  * @author Florian CHAUBEYRE
  */

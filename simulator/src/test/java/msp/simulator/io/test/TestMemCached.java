@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import msp.simulator.NumericalSimulator;
 import msp.simulator.dynamic.propagation.integration.RotAccProvider;
+import msp.simulator.dynamic.propagation.integration.SecondaryStates;
 import msp.simulator.dynamic.torques.TorqueProviderEnum;
 import msp.simulator.satellite.assembly.SatelliteBody;
 import msp.simulator.satellite.assembly.SatelliteStates;
@@ -150,8 +151,10 @@ public class TestMemCached {
 		/* Checking Spin */
 		Assert.assertArrayEquals(
 				new Vector3D(expectedRotAcc).scalarMultiply(accDuration).toArray(), 
-				finalState.getAdditionalState("Spin"), 
-				1e-9);
+				SecondaryStates.extractState(
+						finalState.getAdditionalState(SecondaryStates.key), 
+						SecondaryStates.SPIN
+						),				1e-9);
 	}
 
 

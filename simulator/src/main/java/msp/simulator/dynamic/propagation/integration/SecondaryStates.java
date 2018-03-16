@@ -3,6 +3,8 @@
 package msp.simulator.dynamic.propagation.integration;
 
 /**
+ * Defines the additional states leaded by a differential
+ * equation (ODE) that need to be integrated along the propagation.
  *
  * @author Florian CHAUBEYRE
  */
@@ -23,6 +25,7 @@ public enum SecondaryStates {
 	
 	/** Get the size of the state in the scondary array. */
 	public int getSize() {return this.size;}
+	
 	
 	/* ******* Public Static Attributes ******* */
 	/* These are FINAL: they are not meant to change. */
@@ -58,8 +61,7 @@ public enum SecondaryStates {
 		return extraction;
 	}
 
-	
-	/* **************************************** */
-	
+	/* ***** End Public Static Attributes ***** */
+	/* **************************************** */	
 	
 }
