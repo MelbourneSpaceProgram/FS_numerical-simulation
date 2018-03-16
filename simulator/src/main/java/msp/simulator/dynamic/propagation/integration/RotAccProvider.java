@@ -1,6 +1,6 @@
 /* Copyright 2017-2018 Melbourne Space Program */
 
-package msp.simulator.dynamic.torques;
+package msp.simulator.dynamic.propagation.integration;
 
 import java.util.Arrays;
 
@@ -11,17 +11,18 @@ import org.orekit.propagation.SpacecraftState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import msp.simulator.dynamic.torques.TorqueProvider;
 import msp.simulator.satellite.assembly.SatelliteBody;
 
 /**
  *
  * @author Florian CHAUBEYRE
  */
-public class RotAccelerationProvider implements AdditionalStateProvider {
+public class RotAccProvider implements AdditionalStateProvider {
 
 	/** Instance of the Logger of the class. */
 	private static final Logger logger = LoggerFactory
-			.getLogger(RotAccelerationProvider.class);
+			.getLogger(RotAccProvider.class);
 	
 	/** Name of the related additional state. */
 	private static final String name = "RotAcc";
@@ -36,7 +37,7 @@ public class RotAccelerationProvider implements AdditionalStateProvider {
 	 * 
 	 * @param torqueProvider
 	 */
-	public RotAccelerationProvider(TorqueProvider torqueProvider, SatelliteBody satelliteBody) {
+	public RotAccProvider(TorqueProvider torqueProvider, SatelliteBody satelliteBody) {
 		this.torqueProvider = torqueProvider;
 		this.satelliteBody = satelliteBody;
 	}

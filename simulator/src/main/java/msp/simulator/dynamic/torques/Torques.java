@@ -32,12 +32,6 @@ public class Torques {
 	/** Instance of Torque Provider. */
 	private TorqueProvider torqueProvider;
 
-	/** Instance of the rotational acceleration Provider. */
-	private RotAccelerationProvider rotAccProvider;
-
-	/** Instance of the additional equations */
-	private AccToSpinODE torque2spinEquation;
-
 	/**
 	 * Build the Main Torque Provider of the dynamic module.
 	 * @param environment The Environment of Simulation
@@ -58,33 +52,13 @@ public class Torques {
 			break;
 		}
 
-		this.rotAccProvider = new RotAccelerationProvider(
-				this.torqueProvider,
-				satellite.getAssembly().getBody());
-
-		this.torque2spinEquation = new AccToSpinODE(
-				rotAccProvider);
 	}
-
-	/**
-	 * @return the torque2spinEquation
-	 */
-	public AccToSpinODE getTorqueToSpinEquation() {
-		return torque2spinEquation;
-	}
-
+	
 	/**
 	 * @return the torqueProvider
 	 */
 	public TorqueProvider getTorqueProvider() {
 		return torqueProvider;
-	}
-
-	/**
-	 * @return the rotAccProvider
-	 */
-	public RotAccelerationProvider getRotAccProvider() {
-		return rotAccProvider;
 	}
 
 }

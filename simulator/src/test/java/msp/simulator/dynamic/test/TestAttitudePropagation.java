@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import msp.simulator.NumericalSimulator;
-import msp.simulator.dynamic.torques.RotAccelerationProvider;
+import msp.simulator.dynamic.propagation.integration.RotAccProvider;
 import msp.simulator.dynamic.torques.TorqueOverTimeScenarioProvider;
 import msp.simulator.dynamic.torques.TorqueOverTimeScenarioProvider.Step;
 import msp.simulator.dynamic.torques.TorqueProviderEnum;
@@ -58,8 +58,8 @@ public class TestAttitudePropagation {
 	public void testSimpleRotation() throws Exception {
 
 		/* *** CONFIGURATION *** */
-		double rotationTime = 100;
-		Vector3D n = new Vector3D(1,2,3).normalize();
+		double rotationTime = 10;
+		Vector3D n = new Vector3D(1,0,0).normalize();
 		/* ********************* */
 
 		NumericalSimulator simu = new NumericalSimulator();
@@ -67,7 +67,7 @@ public class TestAttitudePropagation {
 
 		Dashboard.setTorqueProvider(TorqueProviderEnum.SCENARIO);
 
-		Dashboard.setIntegrationTimeStep(0.1);
+		Dashboard.setIntegrationTimeStep(1.0);
 		Dashboard.setEphemerisTimeStep(1.0);
 		Dashboard.setSimulationDuration(rotationTime);
 		Dashboard.setInitialAttitudeQuaternion(1, 0, 0, 0);
@@ -157,7 +157,7 @@ public class TestAttitudePropagation {
 		SpacecraftState finalState = simu.getSatellite().getStates().getCurrentState();
 		
 		/* Computing the expected acceleration. */
-		double[] expectedRotAcc = RotAccelerationProvider.computeEulerEquations(
+		double[] expectedRotAcc = RotAccProvider.computeEulerEquations(
 						rotVector.scalarMultiply(
 								TorqueOverTimeScenarioProvider.getTorqueIntensity()),
 						finalState.getAttitude().getSpin(), 

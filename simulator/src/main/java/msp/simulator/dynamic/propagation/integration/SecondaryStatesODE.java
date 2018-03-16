@@ -1,6 +1,6 @@
 /* Copyright 2017-2018 Melbourne Space Program */
 
-package msp.simulator.dynamic.torques;
+package msp.simulator.dynamic.propagation.integration;
 
 import org.orekit.errors.OrekitException;
 import org.orekit.propagation.SpacecraftState;
@@ -23,27 +23,20 @@ import org.slf4j.LoggerFactory;
  *
  * @author Florian CHAUBEYRE
  */
-public class AccToSpinODE implements AdditionalEquations {
+public class SecondaryStatesODE implements AdditionalEquations {
 
 	/** Instance of the Logger of the class. */
 	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(
-			AccToSpinODE.class);
-	
-	/**
-	 * Name of the additional equation matching
-	 * the additional state to differentiate.
-	 */
-	private static final String name = "Spin";
-	
+			SecondaryStatesODE.class);
+
 	/** Provider of the rotationnal acceleration. */
-	private RotAccelerationProvider rotAccProvider;
-	
-	
-	public AccToSpinODE(RotAccelerationProvider rotAccProvider) {
+	private RotAccProvider rotAccProvider;
+
+	/** Constructor of the secondary states equation. */
+	public SecondaryStatesODE(RotAccProvider rotAccProvider) {
 		this.rotAccProvider = rotAccProvider;
 	}
-	
 
 	/** Name of the Equation.
 	 * <p>This name is directly related to the n-uplet of
@@ -53,7 +46,7 @@ public class AccToSpinODE implements AdditionalEquations {
 	 */
 	@Override
 	public String getName() {
-		return name;
+		return SecondaryStates.key;
 	}
 
 	/** 
@@ -83,11 +76,25 @@ public class AccToSpinODE implements AdditionalEquations {
 	 */
 	@Override
 	public double[] computeDerivatives(SpacecraftState s, double[] pDot) throws OrekitException {
-		
-		/* Updating the Reference of the object as we already have the acceleration. */
-		pDot[0] = s.getAdditionalState(this.rotAccProvider.getName())[0];
-		pDot[1] = s.getAdditionalState(this.rotAccProvider.getName())[1];
-		pDot[2] = s.getAdditionalState(this.rotAccProvider.getName())[2];
+				
+				/* Compute the spin derivative: torque provider. */
+				System.arraycopy(
+						s.getAdditionalState(this.rotAccProvider.getName()),
+						0, 
+						pDot, 
+						SecondaryStates.SPIN.getIndex(), 
+						SecondaryStates.SPIN.getSize()
+						);
+				
+				/* Compute the theta derivative: spin. */
+				System.arraycopy(
+						s.getAdditionalState(SecondaryStates.key), 
+						SecondaryStates.SPIN.getIndex(), 
+						pDot,
+						SecondaryStates.THETA.getIndex(), 
+						SecondaryStates.THETA.getSize()
+						);
+				
 
 		/* 
 		 * Return the potentially new updated main propagation state, i.e.

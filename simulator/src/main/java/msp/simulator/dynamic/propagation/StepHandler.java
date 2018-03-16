@@ -14,6 +14,7 @@ import org.orekit.propagation.sampling.OrekitFixedStepHandler;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.AngularCoordinates;
 
+import msp.simulator.dynamic.propagation.integration.SecondaryStates;
 import msp.simulator.environment.orbit.OrbitWrapper;
 import msp.simulator.satellite.assembly.SatelliteStates;
 import msp.simulator.utils.logs.ephemeris.EphemerisGenerator;
@@ -174,7 +175,21 @@ public class StepHandler implements OrekitFixedStepHandler {
 			Vector3D rotAcc = new Vector3D(mainPropagatedState.getAdditionalState("RotAcc"));
 
 			/* Spin */
-			Vector3D spin = new Vector3D(mainPropagatedState.getAdditionalState("Spin"));
+			Vector3D spin = new Vector3D(
+					SecondaryStates.extractState(
+							mainPropagatedState.getAdditionalState(SecondaryStates.key),
+							SecondaryStates.SPIN)
+					);
+			
+			/* Theta */
+			Vector3D theta = new Vector3D(
+					SecondaryStates.extractState(
+							mainPropagatedState.getAdditionalState(SecondaryStates.key),
+							SecondaryStates.THETA)
+					);
+			System.out.println("--------------------");
+			System.out.println("Theta: " + theta.toString());
+			System.out.println("Spin : " + spin.toString());
 
 			/* Attitude determination: it needs to be propagated. */
 			Attitude currentAttitude =
