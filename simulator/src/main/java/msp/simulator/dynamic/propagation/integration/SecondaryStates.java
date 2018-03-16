@@ -15,15 +15,20 @@ public enum SecondaryStates {
 	private int index;
 	private int size;
 	
+	/**
+	 * Constructor of the enumeration.
+	 * @param index in the secondary array
+	 * @param size of the state vector
+	 */
 	private SecondaryStates (int index, int size) { 
 		this.index = index; 
 		this.size = size;
 	}
 	
-	/** Get the index of the state in the secondary array. */
+	 /** @return The index of the state in the secondary array. */
 	public int getIndex() {return this.index;}
 	
-	/** Get the size of the state in the scondary array. */
+	/** @return The size of the state in the scondary array. */
 	public int getSize() {return this.size;}
 	
 	
@@ -33,9 +38,12 @@ public enum SecondaryStates {
 	/** Name of the additional states and equation. This field cannot be change. */
 	public static final String key = "SecondaryStates";
 
-	/** Get the number of additional states. */
+	/** @return The number of additional states. */
 	public static final int getCardinal() {return values().length;}
 	
+	/**
+	 * @return The size of the full secondary states array.
+	 */
 	public static final int getFullArraySize() {
 		int fullArraySize = 0;
 		for ( SecondaryStates state : SecondaryStates.values()) {

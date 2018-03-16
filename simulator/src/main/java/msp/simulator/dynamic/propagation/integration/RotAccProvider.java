@@ -35,8 +35,9 @@ public class RotAccProvider implements AdditionalStateProvider {
 	private SatelliteBody satelliteBody;
 
 	/**
-	 * 
-	 * @param torqueProvider
+	 * Constructor of the provider.
+	 * @param torqueProvider Instance of the simulation in use
+	 * @param satelliteBody Instance of the simulation
 	 */
 	public RotAccProvider(TorqueProvider torqueProvider, SatelliteBody satelliteBody) {
 		this.torqueProvider = torqueProvider;
@@ -81,6 +82,7 @@ public class RotAccProvider implements AdditionalStateProvider {
 	 * 
 	 * @param torque Current interaction in satellite frame
 	 * @param spin Current rotational speed in satellite frame.
+	 * @param inertiaMatrix of the satellite
 	 * @return The corresponding rotational acceleration vector as an array.
 	 */
 	public static double[] computeEulerEquations(

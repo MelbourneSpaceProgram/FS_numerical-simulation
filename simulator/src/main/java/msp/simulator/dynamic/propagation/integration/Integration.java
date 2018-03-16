@@ -39,6 +39,8 @@ public class Integration {
 	
 	/**
 	 * Constructor of the integration manager.
+	 * @param satellite Instance of the simulation
+	 * @param torqueProvider Instance of the simulation in use
 	 */
 	public Integration(Satellite satellite, TorqueProvider torqueProvider) {
 		/* Integration parameters. */

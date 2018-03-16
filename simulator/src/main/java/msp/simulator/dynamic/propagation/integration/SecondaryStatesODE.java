@@ -36,7 +36,9 @@ public class SecondaryStatesODE implements AdditionalEquations {
 	/** Provider of the rotationnal acceleration. */
 	private RotAccProvider rotAccProvider;
 
-	/** Constructor of the secondary states equation. */
+	/** Constructor of the secondary states equation. 
+	 * @param rotAccProvider Provider of the rotational acceleration in use
+	 */
 	public SecondaryStatesODE(RotAccProvider rotAccProvider) {
 		this.rotAccProvider = rotAccProvider;
 	}

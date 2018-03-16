@@ -230,7 +230,7 @@ public class Dashboard {
 
 	/**
 	 * Set the torque provider to be use by the simulator.
-	 * @param torqueProviderInUse
+	 * @param torqueProviderInUse Instance of the simulation
 	 */
 	public static void setTorqueProvider(TorqueProviderEnum torqueProviderInUse) {
 		Torques.activeTorqueProvider = torqueProviderInUse;

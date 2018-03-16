@@ -31,7 +31,9 @@ public class Sensors {
 	private Magnetometer magnetometer;
 
 	/**
-	 * 
+	 * Constructor of the satellite sensors.
+	 * @param environment Instance of the simulation
+	 * @param assembly Instance of the simulation
 	 */
 	public Sensors(Environment environment, Assembly assembly) {
 		logger.info(CustomLoggingTools.indentMsg(logger,

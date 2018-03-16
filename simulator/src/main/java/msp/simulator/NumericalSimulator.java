@@ -106,7 +106,7 @@ public class NumericalSimulator {
 	 * <p>
 	 * NOTE: Any user defined settings for the simulation
 	 * should be registered prior the initialization/launch.
-	 * @throws Exception 
+	 * @throws Exception when initialization fails.
 	 * @see msp.simulator.user.Dashboard
 	 */
 	public void launch() throws Exception {
@@ -117,7 +117,7 @@ public class NumericalSimulator {
 
 	/**
 	 * Initialize the simulation.
-	 * @throws Exception 
+	 * @throws Exception when the initialization of a module fails
 	 */
 	public void initialize() throws Exception {
 		NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,

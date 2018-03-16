@@ -104,12 +104,6 @@ public class Magnetometer {
 	 * @return GeoMagneticElements at the location of the satellite.
 	 * (where field vector is expressed in nT)
 	 * @see GeoMagneticElements 
-	 * @see org.orekit.bodies.OneAxisEllipsoid#transform(
-	 * org.orekit.utils.PVCoordinates, 
-	 * org.orekit.frames.Frame, 
-	 * org.orekit.time.FieldAbsoluteDate
-	 * )
-	 * 
 	 */
 	public GeoMagneticElements retrievePerfectMeasurement() {
 

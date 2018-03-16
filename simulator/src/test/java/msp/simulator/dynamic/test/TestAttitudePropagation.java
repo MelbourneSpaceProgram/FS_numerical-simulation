@@ -52,7 +52,7 @@ public class TestAttitudePropagation {
 	 * + At the time t = dur, i.e. the end state:<p>
 	 *  Q = ( cos(Pi/2), sin(Pi/2).n )
 	 *    = ( 0, nx, ny, nz)
-	 * @throws Exception 
+	 * @throws Exception when initialization of simulation fails
 	 * 
 	 */
 	@Test 

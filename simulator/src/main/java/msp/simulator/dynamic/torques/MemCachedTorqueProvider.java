@@ -56,6 +56,7 @@ public class MemCachedTorqueProvider implements TorqueProvider {
 	 * Create the instance of memcached torque provider.
 	 * Note that the MemCached connection should be enable
 	 * in the satellite IO prior to this constructor.
+	 * @param satellite Instance of the simulation
 	 */
 	public MemCachedTorqueProvider(Satellite satellite) {
 		if (IO.connectMemCached) {

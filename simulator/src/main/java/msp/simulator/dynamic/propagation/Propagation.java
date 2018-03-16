@@ -216,7 +216,7 @@ public class Propagation {
 	 * @param currentState The state s(t), i.e. the one before integration.
 	 * @param integratedState The state s(t + dt), i.e. resulting 
 	 * from the integration of the step s(t).
-	 * @return 
+	 * @return The same state with a propagated attitude.
 	 * 
 	 * @see NumericalPropagator#propagate(AbsoluteDate)
 	 * 
@@ -347,17 +347,13 @@ public class Propagation {
 	 * that propose a correction.
 	 * 
 	 * @param Qi Initial quaternion to propagate
-	 * @param spin Instant rotational speed
+	 * @param theta Small rotation angle between the two step.
+	 * (integral of the spin from (t) to (t+dt)
 	 * @param dt Integration time step
 	 * @return Qj The final quaternion after the rotation due 
 	 * to the spin during the step of time.
-	 * 
-	 * @see StepHandler#edwards
 	 */
 	public static Quaternion wilcox(Quaternion Qi, Vector3D theta, double dt) {
-
-		/* Vector Angle of Rotation: Theta = dt*W */
-		//Vector3D theta = new Vector3D(dt, spin);
 
 		/* Compute the change-of-frame Quaternion dQ */
 		double dQ0 = 1. - theta.getNormSq() / 8. ;
@@ -389,8 +385,6 @@ public class Propagation {
 	 * @param spin Rotational Speed vector
 	 * @param dt Integration step
 	 * @return The quaternion at t+dt
-	 * 
-	 * @see StepHandler#wilcox
 	 */
 	public static Quaternion edwards(Quaternion Qi, Vector3D theta, Vector3D spin, double dt) {
 
