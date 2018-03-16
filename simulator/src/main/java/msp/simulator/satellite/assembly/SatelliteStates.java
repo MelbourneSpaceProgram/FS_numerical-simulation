@@ -7,6 +7,7 @@ import java.util.Map;
 import org.hipparchus.complex.Quaternion;
 import org.hipparchus.exception.MathIllegalStateException;
 import org.hipparchus.geometry.euclidean.threed.Rotation;
+import org.hipparchus.geometry.euclidean.threed.RotationConvention;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.orekit.attitudes.Attitude;
 import org.orekit.errors.OrekitException;
@@ -15,6 +16,7 @@ import org.orekit.utils.AngularCoordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import msp.simulator.dynamic.propagation.integration.SecondaryStates;
 import msp.simulator.environment.Environment;
 import msp.simulator.utils.logs.CustomLoggingTools;
 
@@ -57,9 +59,6 @@ public class SatelliteStates {
 	/** Logger of the class */
 	private static final Logger logger = LoggerFactory.getLogger(SatelliteStates.class);
 
-	/** Initial Attitude Object of the satellite. */
-	private Attitude initialAttitude;
-
 	/** Initial state of the satellite. */
 	private SpacecraftState initialState;
 
@@ -93,9 +92,6 @@ public class SatelliteStates {
 						)
 				);
 
-		/* Store the user-defined or default initial attitude. */
-		this.initialAttitude = initialAttitude;
-
 		/* Finally creates the initial State of the satellite. */
 		this.initialState = new SpacecraftState(
 				environment.getOrbit(),
@@ -103,7 +99,8 @@ public class SatelliteStates {
 				body.getSatMass()
 				);
 
-		/* Add user-related additional states. */
+		/* Add additional states. */
+		/*  -> Provided State */
 		this.initialState = this.initialState
 				/* Rotational Acceleration
 				 *  - Satellite Frame
@@ -113,18 +110,43 @@ public class SatelliteStates {
 						SatelliteStates.initialRotAcceleration.getX(),
 						SatelliteStates.initialRotAcceleration.getY(),
 						SatelliteStates.initialRotAcceleration.getZ() }
-						)
-				/* Rotational Speed
-				 *  - Satellite frame
-				 *  - (rad/s) 
-				 */
-				.addAdditionalState("Spin", new double[]{
-						SatelliteStates.initialSpin.getX(),
-						SatelliteStates.initialSpin.getY(),
-						SatelliteStates.initialSpin.getZ() }
 						);
 
-		/* Update the current state as the initial state. */
+		/*  -> Secondary States (to integrate) */
+		/*	First compute the angle vector of the rotation. */
+		Vector3D initialTheta = 
+				initialAttitude.getRotation().getAxis(RotationConvention.VECTOR_OPERATOR)
+				.scalarMultiply(initialAttitude.getRotation().getAngle());
+
+		/* Second fulfill the secondary array. */
+		double[] secondaryArray = new double[SecondaryStates.getFullArraySize()];
+		
+		/* Then initialize SPIN. */
+		System.arraycopy(
+				SatelliteStates.initialSpin.toArray(), 
+				0, 
+				secondaryArray, 
+				SecondaryStates.SPIN.getIndex(), 
+				SecondaryStates.SPIN.getSize()
+				);
+		
+		/* Then Initialize THETA. */
+		System.arraycopy(
+				initialTheta.toArray(), 
+				0, 
+				secondaryArray, 
+				SecondaryStates.THETA.getIndex(), 
+				SecondaryStates.THETA.getSize()
+				);
+
+		/* Then Update the state. */
+		this.initialState =	this.initialState.addAdditionalState(
+				SecondaryStates.key, 
+				secondaryArray
+				);
+		
+		/* The initialization of the satellite state is over. */
+		/* Finally update the current state as the initial state. */
 		this.currentState = this.initialState;
 	}
 
@@ -206,7 +228,7 @@ public class SatelliteStates {
 	 * @see Attitude
 	 */
 	public Attitude getInitialAttitude() {
-		return this.initialAttitude;
+		return this.initialState.getAttitude();
 	}	
 
 

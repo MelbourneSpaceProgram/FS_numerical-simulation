@@ -8,8 +8,8 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.logging.LogManager;
 
+import org.hipparchus.util.FastMath;
 import org.orekit.errors.OrekitException;
-import org.orekit.time.AbsoluteDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +25,13 @@ import msp.simulator.utils.logs.ephemeris.EphemerisGenerator;
  * @author Florian CHAUBEYRE
  */
 public class NumericalSimulator {
+
+	/* ******* Public Static Attributes ******* */
+
+	/** Precision threshold to be considered to be zero. */
+	public static final double EPSILON = 1e-13;
+
+	/* **************************************** */
 
 	/** Logger of the instance. */
 	private static final Logger logger = LoggerFactory.getLogger(NumericalSimulator.class);
@@ -99,7 +106,7 @@ public class NumericalSimulator {
 	 * <p>
 	 * NOTE: Any user defined settings for the simulation
 	 * should be registered prior the initialization/launch.
-	 * @throws Exception 
+	 * @throws Exception when initialization fails.
 	 * @see msp.simulator.user.Dashboard
 	 */
 	public void launch() throws Exception {
@@ -110,7 +117,7 @@ public class NumericalSimulator {
 
 	/**
 	 * Initialize the simulation.
-	 * @throws Exception 
+	 * @throws Exception when the initialization of a module fails
 	 */
 	public void initialize() throws Exception {
 		NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
@@ -159,30 +166,51 @@ public class NumericalSimulator {
 					"Processing the Simulation..."));
 		}
 
+		/* Get the integration time step of the simulation. */
+		double integrationTimeStep = this.getDynamic().getPropagation().getIntegrationManager()
+				.getStepSize();
+
+		/* Set the current offset of the main loop. */
 		double currentOffset = 0;
-		AbsoluteDate startDate = 
-				this.satellite.getStates().getInitialState().getDate();
+
+		/* Flag to render the ephemeris services. */
+		boolean renderEphemeris = false;
+		
+		/* Time step period of ephemeris generation. */
+		final int kEphemeris = (int) FastMath.round(
+				EphemerisGenerator.ephemerisTimeStep  
+				/ integrationTimeStep );
+		
+		/* Counter of steps before the ephemeris generation. */
+		int countEphemeris = 0;
 
 		while ((simulationDuration == Double.MAX_VALUE)
 				||
-				currentOffset <= simulationDuration 
+				(currentOffset + integrationTimeStep - simulationDuration < EPSILON)
 				) {
 
-			logger.debug("#### PROPAGATION STEP: " 
-					+ this.satellite.getStates().getCurrentState().getDate().toString()
-					+ " ---> "
-					+ startDate.shiftedBy(currentOffset).toString()) ;
+			/* Propagate the current state s(t) to s(t + dt) */
+			this.dynamic.getPropagation().propagateStep();
 
-			this.dynamic.getPropagation().propagate(startDate.shiftedBy(currentOffset));
+			/* Incrementing the time step: we are at the new offset now. */
+			currentOffset += integrationTimeStep;
+			
+			/* ********** Generate the Ephemeris ********** */
 
-			/* Generate the related ephemeris line. */
-			this.ephemerisGenerator.writeStep(
-					this.satellite.getStates().getCurrentState()
-					);
+			/* Update the flag. */
+			renderEphemeris = 
+					FastMath.floorMod(countEphemeris, kEphemeris) < EPSILON 
+					? true : false;
+			
+			/* Render the epehemeris step if required. */
+			if (renderEphemeris) { 
+				this.ephemerisGenerator.writeStep(
+						this.satellite.getStates().getCurrentState()
+						);
+			}
 
-			/* Incrementing the ephemeris time step. */
-			currentOffset = currentOffset + EphemerisGenerator.ephemerisTimeStep;
-
+			/* Increment the counter. */
+			countEphemeris++;
 			/* **************************************************************	*/
 
 		}

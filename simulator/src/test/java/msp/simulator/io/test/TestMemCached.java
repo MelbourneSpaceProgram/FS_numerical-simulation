@@ -10,7 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import msp.simulator.NumericalSimulator;
-import msp.simulator.dynamic.torques.RotAccelerationProvider;
+import msp.simulator.dynamic.propagation.integration.RotAccProvider;
+import msp.simulator.dynamic.propagation.integration.SecondaryStates;
 import msp.simulator.dynamic.torques.TorqueProviderEnum;
 import msp.simulator.satellite.assembly.SatelliteBody;
 import msp.simulator.satellite.assembly.SatelliteStates;
@@ -100,7 +101,7 @@ public class TestMemCached {
 		Dashboard.setTorqueCommandKey(torqueKey);
 
 		Dashboard.setInitialRotAcceleration(
-				new Vector3D(RotAccelerationProvider.computeEulerEquations(
+				new Vector3D(RotAccProvider.computeEulerEquations(
 						rotVector.scalarMultiply(torqueIntensity), 
 						SatelliteStates.initialSpin, 
 						SatelliteBody.satInertiaMatrix)
@@ -135,7 +136,7 @@ public class TestMemCached {
 		SpacecraftState finalState = simu.getSatellite().getStates().getCurrentState();
 
 		/* Computing the expected acceleration. */
-		double[] expectedRotAcc = RotAccelerationProvider.computeEulerEquations(
+		double[] expectedRotAcc = RotAccProvider.computeEulerEquations(
 				rotVector.scalarMultiply(torqueIntensity),
 				finalState.getAttitude().getSpin(), 
 				simu.getSatellite().getAssembly().getBody().getInertiaMatrix()
@@ -150,8 +151,10 @@ public class TestMemCached {
 		/* Checking Spin */
 		Assert.assertArrayEquals(
 				new Vector3D(expectedRotAcc).scalarMultiply(accDuration).toArray(), 
-				finalState.getAdditionalState("Spin"), 
-				1e-9);
+				SecondaryStates.extractState(
+						finalState.getAdditionalState(SecondaryStates.key), 
+						SecondaryStates.SPIN
+						),				1e-9);
 	}
 
 

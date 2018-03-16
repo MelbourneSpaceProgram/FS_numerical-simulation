@@ -1,6 +1,6 @@
 /* Copyright 2017-2018 Melbourne Space Program */
 
-package msp.simulator.dynamic.torques;
+package msp.simulator.dynamic.propagation.integration;
 
 import org.orekit.errors.OrekitException;
 import org.orekit.propagation.SpacecraftState;
@@ -9,13 +9,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class implements an additional equation for the 
- * numerical propagator.
+ * This class implements the additional equation that lead
+ * the behavior of the secondary additional states. Only
+ * one additional equation is allowed.
  * <p>
- * This equation represents the kinetic momentum theorem.
+ * This equation mainly represents the rotational dynamic 
+ * especially the kinetic momentum theorem.
  * It aims to compute, from the overall torque interaction on
  * the satellite at the instant t, the spin (or rotationnal
- * speed) of the satellite at the instant t+dt.
+ * speed) of the satellite at the instant t+dt. Then it integrates
+ * this spin to obtain the rotation angle position.
  * <p>
  * The overall torque being responsible for the rotational
  * acceleration through the satellite inertia, this data is
@@ -23,27 +26,22 @@ import org.slf4j.LoggerFactory;
  *
  * @author Florian CHAUBEYRE
  */
-public class AccToSpinODE implements AdditionalEquations {
+public class SecondaryStatesODE implements AdditionalEquations {
 
 	/** Instance of the Logger of the class. */
 	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(
-			AccToSpinODE.class);
-	
-	/**
-	 * Name of the additional equation matching
-	 * the additional state to differentiate.
-	 */
-	private static final String name = "Spin";
-	
+			SecondaryStatesODE.class);
+
 	/** Provider of the rotationnal acceleration. */
-	private RotAccelerationProvider rotAccProvider;
-	
-	
-	public AccToSpinODE(RotAccelerationProvider rotAccProvider) {
+	private RotAccProvider rotAccProvider;
+
+	/** Constructor of the secondary states equation. 
+	 * @param rotAccProvider Provider of the rotational acceleration in use
+	 */
+	public SecondaryStatesODE(RotAccProvider rotAccProvider) {
 		this.rotAccProvider = rotAccProvider;
 	}
-	
 
 	/** Name of the Equation.
 	 * <p>This name is directly related to the n-uplet of
@@ -53,7 +51,7 @@ public class AccToSpinODE implements AdditionalEquations {
 	 */
 	@Override
 	public String getName() {
-		return name;
+		return SecondaryStates.key;
 	}
 
 	/** 
@@ -83,11 +81,25 @@ public class AccToSpinODE implements AdditionalEquations {
 	 */
 	@Override
 	public double[] computeDerivatives(SpacecraftState s, double[] pDot) throws OrekitException {
-		
-		/* Updating the Reference of the object as we already have the acceleration. */
-		pDot[0] = s.getAdditionalState(this.rotAccProvider.getName())[0];
-		pDot[1] = s.getAdditionalState(this.rotAccProvider.getName())[1];
-		pDot[2] = s.getAdditionalState(this.rotAccProvider.getName())[2];
+				
+				/* Compute the spin derivative: torque provider. */
+				System.arraycopy(
+						s.getAdditionalState(this.rotAccProvider.getName()),
+						0, 
+						pDot, 
+						SecondaryStates.SPIN.getIndex(), 
+						SecondaryStates.SPIN.getSize()
+						);
+				
+				/* Compute the theta derivative: spin. */
+				System.arraycopy(
+						s.getAdditionalState(SecondaryStates.key), 
+						SecondaryStates.SPIN.getIndex(), 
+						pDot,
+						SecondaryStates.THETA.getIndex(), 
+						SecondaryStates.THETA.getSize()
+						);
+				
 
 		/* 
 		 * Return the potentially new updated main propagation state, i.e.

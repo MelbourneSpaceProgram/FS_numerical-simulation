@@ -14,7 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import msp.simulator.NumericalSimulator;
-import msp.simulator.dynamic.torques.RotAccelerationProvider;
+import msp.simulator.dynamic.propagation.integration.RotAccProvider;
+import msp.simulator.dynamic.propagation.integration.SecondaryStates;
 import msp.simulator.dynamic.torques.TorqueOverTimeScenarioProvider;
 import msp.simulator.dynamic.torques.TorqueOverTimeScenarioProvider.Step;
 import msp.simulator.dynamic.torques.TorqueProviderEnum;
@@ -32,7 +33,7 @@ public class TestAttitudePropagation {
 	/** Instance of the Logger of the class. */
 	private static final Logger logger = 
 			LoggerFactory.getLogger(TestAttitudePropagation.class);
-	
+
 	/**
 	 * Process a simple rotation of Pi at constant spin to
 	 * check the attitude quaternion propagation.
@@ -51,7 +52,7 @@ public class TestAttitudePropagation {
 	 * + At the time t = dur, i.e. the end state:<p>
 	 *  Q = ( cos(Pi/2), sin(Pi/2).n )
 	 *    = ( 0, nx, ny, nz)
-	 * @throws Exception in case the user configuration check failed.
+	 * @throws Exception when initialization of simulation fails
 	 * 
 	 */
 	@Test 
@@ -73,21 +74,21 @@ public class TestAttitudePropagation {
 		Dashboard.setInitialAttitudeQuaternion(1, 0, 0, 0);
 		Dashboard.setInitialSpin(new Vector3D(FastMath.PI / rotationTime, n));
 		Dashboard.setInitialRotAcceleration(new Vector3D(0,0,0));
-		
+
 		simu.initialize();
-		
+
 		logger.info(CustomLoggingTools.toString(
 				"Initial State of the satellite", 
 				simu.getSatellite().getStates().getInitialState()));
 
 		simu.process();
-		
+
 		logger.info(CustomLoggingTools.toString(
 				"Final State of the satellite", 
 				simu.getSatellite().getStates().getCurrentState()));
 
 		simu.exit();
-		
+
 		/* Actual end state of the satellite. */
 		Attitude endAttitude = simu.getSatellite().getStates().getCurrentState().getAttitude();
 		double[] actualAttitudeArray = new double[] {
@@ -101,7 +102,7 @@ public class TestAttitudePropagation {
 		double[] expectedAttitudeArray = new double[] {0, n.getX(), n.getY(), n.getZ()} ;
 
 		/* Approximation error during the propagation. */
-		double delta = 1e-9 ;
+		double delta = 1e-9;
 
 		/* Testing the attitude of the satellite after the processing. */
 		Assert.assertArrayEquals(
@@ -115,7 +116,7 @@ public class TestAttitudePropagation {
 
 		/* **** Data of the test **** */
 		double accDuration = 100;
-		Vector3D rotVector = new Vector3D(1, 0, 0);
+		Vector3D rotVector = new Vector3D(0.1, 0.2, 0.3);
 		/* ************************** */
 
 		NumericalSimulator simu = new NumericalSimulator();
@@ -140,13 +141,13 @@ public class TestAttitudePropagation {
 
 		/* Launching the simulation. */
 		simu.initialize();
-		
+
 		logger.info(CustomLoggingTools.toString(
 				"Initial State of the satellite", 
 				simu.getSatellite().getStates().getInitialState()));
 
 		simu.process();
-		
+
 		logger.info(CustomLoggingTools.toString(
 				"Final State of the satellite", 
 				simu.getSatellite().getStates().getCurrentState()));
@@ -155,14 +156,14 @@ public class TestAttitudePropagation {
 
 		/* Extracting final state. */
 		SpacecraftState finalState = simu.getSatellite().getStates().getCurrentState();
-		
+
 		/* Computing the expected acceleration. */
-		double[] expectedRotAcc = RotAccelerationProvider.computeEulerEquations(
-						rotVector.scalarMultiply(
-								TorqueOverTimeScenarioProvider.getTorqueIntensity()),
-						finalState.getAttitude().getSpin(), 
-						simu.getSatellite().getAssembly().getBody().getInertiaMatrix()
-						);
+		double[] expectedRotAcc = RotAccProvider.computeEulerEquations(
+				rotVector.scalarMultiply(
+						TorqueOverTimeScenarioProvider.getTorqueIntensity()),
+				finalState.getAttitude().getSpin(), 
+				simu.getSatellite().getAssembly().getBody().getInertiaMatrix()
+				);
 
 		/* Checking Rotational Acceleration. */
 		Assert.assertArrayEquals(
@@ -173,7 +174,10 @@ public class TestAttitudePropagation {
 		/* Checking Spin */
 		Assert.assertArrayEquals(
 				new Vector3D(expectedRotAcc).scalarMultiply(accDuration).toArray(), 
-				finalState.getAdditionalState("Spin"), 
+				SecondaryStates.extractState(
+						finalState.getAdditionalState(SecondaryStates.key), 
+						SecondaryStates.SPIN
+						),
 				1e-9);
 
 	}
