@@ -59,8 +59,8 @@ public class TestAttitudePropagation {
 	public void testSimpleRotation() throws Exception {
 
 		/* *** CONFIGURATION *** */
-		double rotationTime = 100;
-		Vector3D n = new Vector3D(1,2,3).normalize();
+		double rotationTime = 20;
+		Vector3D n = new Vector3D(1,0,0).normalize();
 		/* ********************* */
 
 		NumericalSimulator simu = new NumericalSimulator();
@@ -83,12 +83,12 @@ public class TestAttitudePropagation {
 
 		simu.process();
 
+		simu.exit();
+
 		logger.info(CustomLoggingTools.toString(
 				"Final State of the satellite", 
 				simu.getSatellite().getStates().getCurrentState()));
-
-		simu.exit();
-
+		
 		/* Actual end state of the satellite. */
 		Attitude endAttitude = simu.getSatellite().getStates().getCurrentState().getAttitude();
 		double[] actualAttitudeArray = new double[] {

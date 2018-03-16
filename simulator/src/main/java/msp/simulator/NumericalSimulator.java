@@ -6,6 +6,10 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.LogManager;
 
 import org.hipparchus.util.FastMath;
@@ -13,6 +17,8 @@ import org.orekit.errors.OrekitException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import msp.simulator.dynamic.Dynamic;
+import msp.simulator.satellite.Satellite;
 import msp.simulator.user.Dashboard;
 import msp.simulator.utils.architecture.OrekitConfiguration;
 import msp.simulator.utils.logs.CustomLoggingTools;
@@ -108,6 +114,7 @@ public class NumericalSimulator {
 	 * should be registered prior the initialization/launch.
 	 * @throws Exception when initialization fails.
 	 * @see msp.simulator.user.Dashboard
+	 * @deprecated 
 	 */
 	public void launch() throws Exception {
 		this.initialize();
@@ -157,6 +164,7 @@ public class NumericalSimulator {
 
 	}
 
+
 	/**
 	 * Launch the main processing of the simulation.
 	 */
@@ -175,45 +183,139 @@ public class NumericalSimulator {
 
 		/* Flag to render the ephemeris services. */
 		boolean renderEphemeris = false;
-		
+
 		/* Time step period of ephemeris generation. */
 		final int kEphemeris = (int) FastMath.round(
 				EphemerisGenerator.ephemerisTimeStep  
 				/ integrationTimeStep );
-		
+
 		/* Counter of steps before the ephemeris generation. */
 		int countEphemeris = 0;
 
-		while ((simulationDuration == Double.MAX_VALUE)
-				||
-				(currentOffset + integrationTimeStep - simulationDuration < EPSILON)
-				) {
+		final class RealTimeLoop implements Runnable {
 
-			/* Propagate the current state s(t) to s(t + dt) */
-			this.dynamic.getPropagation().propagateStep();
+			double integrationTimeStep;
+			double currentOffset;
+			boolean renderEphemeris;
+			EphemerisGenerator ephemerisGenerator;
+			int kEphemeris;
+			int countEphemeris;
+			Dynamic dynamic;
+			Satellite satellite;
 
-			/* Incrementing the time step: we are at the new offset now. */
-			currentOffset += integrationTimeStep;
-			
-			/* ********** Generate the Ephemeris ********** */
-
-			/* Update the flag. */
-			renderEphemeris = 
-					FastMath.floorMod(countEphemeris, kEphemeris) < EPSILON 
-					? true : false;
-			
-			/* Render the epehemeris step if required. */
-			if (renderEphemeris) { 
-				this.ephemerisGenerator.writeStep(
-						this.satellite.getStates().getCurrentState()
-						);
+			public RealTimeLoop(
+					double integrationTimeStep, 
+					double currentOffset, 
+					boolean renderEphemeris,
+					EphemerisGenerator ephemerisGenerator, 
+					int kEphemeris, 
+					int countEphemeris,
+					Dynamic dynamic,
+					Satellite satellite) {
+				super();
+				this.integrationTimeStep = integrationTimeStep;
+				this.currentOffset = currentOffset;
+				this.renderEphemeris = renderEphemeris;
+				this.ephemerisGenerator = ephemerisGenerator;
+				this.kEphemeris = kEphemeris;
+				this.countEphemeris = countEphemeris;
+				this.dynamic = dynamic;
+				this.satellite = satellite;
 			}
 
-			/* Increment the counter. */
-			countEphemeris++;
-			/* **************************************************************	*/
+			public void run() {
+				if ((simulationDuration == Double.MAX_VALUE)
+						||
+						(currentOffset + integrationTimeStep - simulationDuration < EPSILON)
+						) 
+				{
+					
+					/* Propagate the current state s(t) to s(t + dt) */
+					this.dynamic.getPropagation().propagateStep();
 
-		}
+					/* Incrementing the time step: we are at the new offset now. */
+					currentOffset += integrationTimeStep;
+
+					/* ********** Generate the Ephemeris ********** */
+
+					/* Update the flag. */
+					renderEphemeris = 
+							FastMath.floorMod(countEphemeris, kEphemeris) < EPSILON 
+							? true : false;
+					
+					/* Render the epehemeris step if required. */
+					if (renderEphemeris) { 
+						this.ephemerisGenerator.writeStep(
+								this.satellite.getStates().getCurrentState()
+								);
+					}
+
+					/* Increment the counter. */
+					countEphemeris++;
+					/* **************************************************************	*/
+				}
+			}
+
+		} /* End of class */
+
+		
+		/* Create and schedule the task. */
+		RealTimeLoop realTimeLoop = new RealTimeLoop(
+				integrationTimeStep, 
+				currentOffset, 
+				renderEphemeris,
+				this.ephemerisGenerator, 
+				kEphemeris, 
+				countEphemeris,
+				this.dynamic,
+				this.satellite
+				);
+		
+		final ScheduledExecutorService scheduler =
+			     Executors.newScheduledThreadPool(1);
+		
+		final ScheduledFuture<?> realTimeLoopHandler =
+			       scheduler.scheduleAtFixedRate(
+			    		   realTimeLoop, 
+			    		   0, 
+			    		   100, 
+			    		   TimeUnit.MILLISECONDS);
+		
+		
+		
+		
+		
+//		/* Main processing loop. */
+//		while ((simulationDuration == Double.MAX_VALUE)
+//				||
+//				(currentOffset + integrationTimeStep - simulationDuration < EPSILON)
+//				) {
+//
+//			/* Propagate the current state s(t) to s(t + dt) */
+//			this.dynamic.getPropagation().propagateStep();
+//
+//			/* Incrementing the time step: we are at the new offset now. */
+//			currentOffset += integrationTimeStep;
+//
+//			/* ********** Generate the Ephemeris ********** */
+//
+//			/* Update the flag. */
+//			renderEphemeris = 
+//					FastMath.floorMod(countEphemeris, kEphemeris) < EPSILON 
+//					? true : false;
+//
+//			/* Render the epehemeris step if required. */
+//			if (renderEphemeris) { 
+//				this.ephemerisGenerator.writeStep(
+//						this.satellite.getStates().getCurrentState()
+//						);
+//			}
+//
+//			/* Increment the counter. */
+//			countEphemeris++;
+//			/* **************************************************************	*/
+//
+//		}
 
 		/* End of processing. */
 		logger.info(CustomLoggingTools.indentMsg(logger,
@@ -224,6 +326,14 @@ public class NumericalSimulator {
 	 * Performs the exit processing of the simulation.
 	 */
 	public void exit() {
+		
+		try {
+			Thread.sleep(23000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		/* Properly closing the IO interfaces. */
 		NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
 				"Shutting down the Satellite IO interfaces."));

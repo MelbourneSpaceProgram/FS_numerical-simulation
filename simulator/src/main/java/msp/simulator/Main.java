@@ -22,7 +22,10 @@ public class Main {
 		try {
 			
 			Dashboard.setDefaultConfiguration();
-			simulator.launch();
+			
+			simulator.initialize();
+			simulator.process();
+			simulator.exit();
 			
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -242,7 +242,7 @@ public class EphemerisGenerator {
 			this.writerAEM.flush();
 
 			/* For DEBUG only. */
-			logger.debug(
+			logger.info(
 					"Satellite State to store in the ephemeris:\n" +
 							"Offset: " +
 							newState.getDate().durationFrom(this.extractedStartDate) + 
