@@ -85,7 +85,7 @@ public class TestMemCached {
 	public void testTorqueDrivenSimulation() throws Exception {
 
 		/* **** Data of the test **** */
-		double accDuration = 80 ;
+		double accDuration = 10 ;
 		Vector3D rotVector = new Vector3D(1, 0, 0);
 		double torqueIntensity = 0.1 ;
 		String torqueKey = "torque";
