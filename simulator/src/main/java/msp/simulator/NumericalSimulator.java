@@ -12,6 +12,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.LogManager;
 
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
 import org.orekit.errors.OrekitException;
 import org.slf4j.Logger;
@@ -238,8 +239,22 @@ public class NumericalSimulator {
 					/* Incrementing the time step: we are at the new offset now. */
 					currentOffset += integrationTimeStep;
 
+					
+					/* ******** PAYLOAD *********/
+					Vector3D geoMagneticField = this.satellite.getSensors().getMagnetometer()
+							.retrievePerfectMeasurement().getFieldVector();
+					
+					this.satellite.getIO().getMemcached().set(
+							"Simulation_Magnetometer", 
+							0,
+							geoMagneticField.toArray()
+							);
+					
+					//System.out.println(geoMagneticField.toString());
+					/* *************************/
+					
+					
 					/* ********** Generate the Ephemeris ********** */
-
 					/* Update the flag. */
 					renderEphemeris = 
 							FastMath.floorMod(countEphemeris, kEphemeris) < EPSILON 
@@ -329,13 +344,6 @@ public class NumericalSimulator {
 	 * Performs the exit processing of the simulation.
 	 */
 	public void exit() {
-		
-		try {
-			Thread.sleep(100000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		
 		/* Properly closing the IO interfaces. */
 		NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
