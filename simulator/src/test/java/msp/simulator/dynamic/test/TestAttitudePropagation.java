@@ -59,7 +59,7 @@ public class TestAttitudePropagation {
 	public void testSimpleRotation() throws Exception {
 
 		/* *** CONFIGURATION *** */
-		double rotationTime = 20;
+		double rotationTime = 100;
 		Vector3D n = new Vector3D(1,0,0).normalize();
 		/* ********************* */
 
@@ -102,7 +102,7 @@ public class TestAttitudePropagation {
 		double[] expectedAttitudeArray = new double[] {0, n.getX(), n.getY(), n.getZ()} ;
 
 		/* Approximation error during the propagation. */
-		double delta = 1e-9;
+		double delta = 1e-3;
 
 		/* Testing the attitude of the satellite after the processing. */
 		Assert.assertArrayEquals(

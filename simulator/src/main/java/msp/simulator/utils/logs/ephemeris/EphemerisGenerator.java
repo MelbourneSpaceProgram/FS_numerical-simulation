@@ -88,9 +88,6 @@ public class EphemerisGenerator {
 	/** OrbitWrapper OEM File Writer */
 	private FileWriter writerOEM;
 
-	/** First Date known by the generator. */
-	private AbsoluteDate extractedStartDate;
-
 	/** Capture the first date of the ephemeris. */
 	boolean isStartDateCaptured = false;
 	
@@ -177,12 +174,6 @@ public class EphemerisGenerator {
 	 * @param newState The satellite state to register in the ephemeris
 	 */
 	public void writeStep(SpacecraftState newState) {
-		/* Extracting the start date of the generation. */
-		if (!this.isStartDateCaptured) {
-			this.extractedStartDate = newState.getDate();
-			this.isStartDateCaptured = true;
-		}
-
 		try {
 			StringBuffer buff = new StringBuffer();
 
@@ -244,8 +235,7 @@ public class EphemerisGenerator {
 			/* For DEBUG only. */
 			logger.info(
 					"Satellite State to store in the ephemeris:\n" +
-							"Offset: " +
-							newState.getDate().durationFrom(this.extractedStartDate) + 
+							"State Date: " + newState.getDate().toString() + 
 							"\n" +
 							"Attitude: [{}, {}, {}, {}] \n" +
 							"Spin    : {} \n" +

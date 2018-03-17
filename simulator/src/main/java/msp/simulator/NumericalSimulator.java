@@ -179,7 +179,7 @@ public class NumericalSimulator {
 				.getStepSize();
 
 		/* Set the current offset of the main loop. */
-		double currentOffset = 0;
+		double currentOffset = 0 + integrationTimeStep;
 
 		/* Flag to render the ephemeris services. */
 		boolean renderEphemeris = false;
@@ -190,7 +190,7 @@ public class NumericalSimulator {
 				/ integrationTimeStep );
 
 		/* Counter of steps before the ephemeris generation. */
-		int countEphemeris = 0;
+		int countEphemeris = 1;
 
 		final class RealTimeLoop implements Runnable {
 
@@ -224,11 +224,13 @@ public class NumericalSimulator {
 			}
 
 			public void run() {
-				if ((simulationDuration == Double.MAX_VALUE)
+				if (
+						(simulationDuration == Double.MAX_VALUE)
 						||
-						(currentOffset + integrationTimeStep - simulationDuration < EPSILON)
+						(currentOffset <= simulationDuration)
 						) 
 				{
+					//System.out.println("Trigger: " + System.currentTimeMillis());
 					
 					/* Propagate the current state s(t) to s(t + dt) */
 					this.dynamic.getPropagation().propagateStep();
@@ -274,6 +276,7 @@ public class NumericalSimulator {
 		final ScheduledExecutorService scheduler =
 			     Executors.newScheduledThreadPool(1);
 		
+		@SuppressWarnings("unused")
 		final ScheduledFuture<?> realTimeLoopHandler =
 			       scheduler.scheduleAtFixedRate(
 			    		   realTimeLoop, 
@@ -328,7 +331,7 @@ public class NumericalSimulator {
 	public void exit() {
 		
 		try {
-			Thread.sleep(23000);
+			Thread.sleep(100000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

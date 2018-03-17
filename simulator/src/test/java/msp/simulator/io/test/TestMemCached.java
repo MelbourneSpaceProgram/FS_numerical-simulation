@@ -36,6 +36,9 @@ public class TestMemCached {
 		Dashboard.setMemCachedConnection(true, "127.0.0.1:11211");
 		Dashboard.setSimulationDuration(1.0);
 
+
+
+
 		try {
 			/*
 			if (System.getProperty("os.name").toLowerCase().contains("mac")) {
@@ -53,7 +56,7 @@ public class TestMemCached {
 			e.printStackTrace();
 		}
 
-		String message = "- MemCached: \"I am alive!\" ";
+		String message = "I am alive!";
 		double data = 1234.5678;
 
 		/* Write the data into the io. */
@@ -156,7 +159,6 @@ public class TestMemCached {
 						SecondaryStates.SPIN
 						),				1e-9);
 	}
-
 
 
 }

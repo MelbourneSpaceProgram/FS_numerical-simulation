@@ -61,8 +61,9 @@ public class CustomLoggingTools {
 	 * @return String A string description of a SpacecraftState
 	 */
 	public static String toString(String message, SpacecraftState state) {
-		String s = message + "\n" +
-				"Attitude: ["
+		String s = message + "\n"
+				+ "Date: " + state.getDate().toString() + "\n"
+				+ "Attitude: ["
 				+ state.getAttitude().getRotation().getQ0() + ", "
 				+ state.getAttitude().getRotation().getQ1() + ", "
 				+ state.getAttitude().getRotation().getQ2() + ", "
