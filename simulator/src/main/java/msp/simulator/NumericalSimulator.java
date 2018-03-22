@@ -313,12 +313,13 @@ public class NumericalSimulator {
 			if (
 					(simulationDuration == Double.MAX_VALUE)
 					||
-					(currentOffset + EPSILON < simulationDuration)
+					(currentOffset + 1e-10 < simulationDuration) /* Avoid numerical approximation. */
 					) 
 			{
 
 				//System.out.println("Trigger: " + System.currentTimeMillis());
-
+				//System.out.println("Offset: " + currentOffset);
+				
 				/* Propagate the current state s(t) to s(t + dt) */
 				this.dynamic.getPropagation().propagateStep();
 
