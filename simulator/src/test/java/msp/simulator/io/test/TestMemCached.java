@@ -103,14 +103,14 @@ public class TestMemCached {
 		Dashboard.setTorqueProvider(TorqueProviderEnum.MEMCACHED);
 		Dashboard.setTorqueCommandKey(torqueKey);
 
-//		Dashboard.setInitialRotAcceleration(
-//				new Vector3D(
-//						RotAccProvider.computeEulerEquations(
-//								rotVector.scalarMultiply(torqueIntensity), 
-//								SatelliteStates.initialSpin, 
-//								SatelliteBody.satInertiaMatrix)
-//						)
-//				);
+		Dashboard.setInitialRotAcceleration(
+				new Vector3D(
+						RotAccProvider.computeEulerEquations(
+								rotVector.scalarMultiply(torqueIntensity), 
+								SatelliteStates.initialSpin, 
+								SatelliteBody.satInertiaMatrix)
+						)
+				);
 		Dashboard.setInitialRotAcceleration(new Vector3D(0.0, 0.0, 0.05));
 		
 		
@@ -124,12 +124,12 @@ public class TestMemCached {
 				simu.getSatellite().getStates().getInitialState()));
 
 		/* Set the torque value in the hash table as an array of double. */
-//		simu.getIo().getMemcached()
-//		.set(
-//				torqueKey, 
-//				0, 
-//				rotVector.scalarMultiply(torqueIntensity).toArray()
-//				);
+		simu.getIo().getMemcached()
+		.set(
+				torqueKey, 
+				0, 
+				rotVector.scalarMultiply(torqueIntensity).toArray()
+				);
 
 		simu.process();
 
@@ -137,9 +137,6 @@ public class TestMemCached {
 				"Final State of the satellite", 
 				simu.getSatellite().getStates().getCurrentState()));
 
-		/* [Workaround] Wait end of main loop thread. */
-		Thread.sleep((long) ((accDuration == Double.MAX_VALUE) ? Long.MAX_VALUE : (accDuration + 0.2) * 1000));
-		
 		simu.exit();
 
 		/* Extracting final state. */

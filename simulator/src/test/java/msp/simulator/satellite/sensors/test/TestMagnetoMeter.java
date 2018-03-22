@@ -25,37 +25,37 @@ public class TestMagnetoMeter {
 		NumericalSimulator simu = new NumericalSimulator();
 		Dashboard.setDefaultConfiguration();
 		Dashboard.setMagnetometerNoiseIntensity(Magnetometer.defaultNoiseIntensity);
-		
+
 		try {
 			simu.initialize();
-			
+
+			/* Extract the Magnetometer. */
+			Magnetometer mmt = simu.getSatellite().getSensors().getMagnetometer();
+			Assert.assertNotNull(mmt);
+
+			/* Retrieve the inital measure of the magnetic field. */
+			GeoMagneticElements initialPerfectMeasure = mmt.retrievePerfectMeasurement();
+			GeoMagneticElements initialNoisyMeasure = mmt.retrieveNoisyMeasurement();
+
+			Assert.assertArrayEquals(
+					initialPerfectMeasure.getFieldVector().toArray(), 
+					initialNoisyMeasure.getFieldVector().toArray(), 
+					mmt.getNoiseIntensity()
+					);
+
+			simu.process();
+
+			GeoMagneticElements finalPerfectMeasure = mmt.retrievePerfectMeasurement();
+			Assert.assertNotEquals(
+					initialPerfectMeasure, 
+					finalPerfectMeasure
+					);
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		/* Extract the Magnetometer. */
-		Magnetometer mmt = simu.getSatellite().getSensors().getMagnetometer();
-		Assert.assertNotNull(mmt);
-		
-		/* Retrieve the inital measure of the magnetic field. */
-		GeoMagneticElements initialPerfectMeasure = mmt.retrievePerfectMeasurement();
-		GeoMagneticElements initialNoisyMeasure = mmt.retrieveNoisyMeasurement();
-		
-		Assert.assertArrayEquals(
-				initialPerfectMeasure.getFieldVector().toArray(), 
-				initialNoisyMeasure.getFieldVector().toArray(), 
-				mmt.getNoiseIntensity()
-				);
-		
-		simu.process();
-		
-		GeoMagneticElements finalPerfectMeasure = mmt.retrievePerfectMeasurement();
-		Assert.assertNotEquals(
-				initialPerfectMeasure, 
-				finalPerfectMeasure
-				);
 
 	}
-	
-	
+
+
 }

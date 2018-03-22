@@ -59,7 +59,7 @@ public class TestAttitudePropagation {
 	public void testSimpleRotation() throws Exception {
 
 		/* *** CONFIGURATION *** */
-		double rotationTime = 100;
+		double rotationTime = 10;
 		Vector3D n = new Vector3D(1,0,0).normalize();
 		/* ********************* */
 
@@ -76,19 +76,9 @@ public class TestAttitudePropagation {
 		Dashboard.setInitialRotAcceleration(new Vector3D(0,0,0));
 
 		simu.initialize();
-
-		logger.info(CustomLoggingTools.toString(
-				"Initial State of the satellite", 
-				simu.getSatellite().getStates().getInitialState()));
-
 		simu.process();
-
 		simu.exit();
 
-		logger.info(CustomLoggingTools.toString(
-				"Final State of the satellite", 
-				simu.getSatellite().getStates().getCurrentState()));
-		
 		/* Actual end state of the satellite. */
 		Attitude endAttitude = simu.getSatellite().getStates().getCurrentState().getAttitude();
 		double[] actualAttitudeArray = new double[] {

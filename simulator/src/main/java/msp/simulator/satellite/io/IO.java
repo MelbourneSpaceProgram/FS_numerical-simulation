@@ -145,6 +145,13 @@ public class IO {
 	}
 
 	/**
+	 * @return the connectToMemCached
+	 */
+	public boolean isConnectToMemCached() {
+		return connectToMemCached;
+	}
+
+	/**
 	 * @return The MemCached client of the simulator.
 	 */
 	public MemcachedClient getMemcached() {

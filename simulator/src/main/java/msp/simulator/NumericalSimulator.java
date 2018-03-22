@@ -158,6 +158,9 @@ public class NumericalSimulator {
 			/* Ephemeris Generator Module */
 			this.ephemerisGenerator = new EphemerisGenerator();
 			this.ephemerisGenerator.start();
+			this.ephemerisGenerator.writeStep(
+					this.satellite.getStates().getInitialState()
+					);
 
 		} catch (OrekitException e) {
 			e.printStackTrace();
@@ -168,6 +171,7 @@ public class NumericalSimulator {
 
 	/**
 	 * Launch the main processing of the simulation.
+	 * @throws Exception 
 	 */
 	public void process() {
 		if (this.executionStatus == 1) {
@@ -175,165 +179,57 @@ public class NumericalSimulator {
 					"Processing the Simulation..."));
 		}
 
-		/* Get the integration time step of the simulation. */
-		double integrationTimeStep = this.getDynamic().getPropagation().getIntegrationManager()
-				.getStepSize();
-
-		/* Set the current offset of the main loop. */
-		double currentOffset = 0 + integrationTimeStep;
-
-		/* Flag to render the ephemeris services. */
-		boolean renderEphemeris = false;
-
-		/* Time step period of ephemeris generation. */
-		final int kEphemeris = (int) FastMath.round(
-				EphemerisGenerator.ephemerisTimeStep  
-				/ integrationTimeStep );
-
-		/* Counter of steps before the ephemeris generation. */
-		int countEphemeris = 1;
-
-		final class RealTimeLoop implements Runnable {
-
-			double integrationTimeStep;
-			double currentOffset;
-			boolean renderEphemeris;
-			EphemerisGenerator ephemerisGenerator;
-			int kEphemeris;
-			int countEphemeris;
-			Dynamic dynamic;
-			Satellite satellite;
-
-			public RealTimeLoop(
-					double integrationTimeStep, 
-					double currentOffset, 
-					boolean renderEphemeris,
-					EphemerisGenerator ephemerisGenerator, 
-					int kEphemeris, 
-					int countEphemeris,
-					Dynamic dynamic,
-					Satellite satellite) {
-				super();
-				this.integrationTimeStep = integrationTimeStep;
-				this.currentOffset = currentOffset;
-				this.renderEphemeris = renderEphemeris;
-				this.ephemerisGenerator = ephemerisGenerator;
-				this.kEphemeris = kEphemeris;
-				this.countEphemeris = countEphemeris;
-				this.dynamic = dynamic;
-				this.satellite = satellite;
-			}
-
-			public void run() {
-				if (
-						(simulationDuration == Double.MAX_VALUE)
-						||
-						(currentOffset <= simulationDuration)
-						) 
-				{
-					//System.out.println("Trigger: " + System.currentTimeMillis());
-					
-					/* Propagate the current state s(t) to s(t + dt) */
-					this.dynamic.getPropagation().propagateStep();
-
-					/* Incrementing the time step: we are at the new offset now. */
-					currentOffset += integrationTimeStep;
-
-					
-					/* ******** PAYLOAD *********/
-					Vector3D geoMagneticField = this.satellite.getSensors().getMagnetometer()
-							.retrievePerfectMeasurement().getFieldVector();
-					
-					this.satellite.getIO().getMemcached().set(
-							"Simulation_Magnetometer", 
-							0,
-							geoMagneticField.toArray()
-							);
-					
-					//System.out.println(geoMagneticField.toString());
-					/* *************************/
-					
-					
-					/* ********** Generate the Ephemeris ********** */
-					/* Update the flag. */
-					renderEphemeris = 
-							FastMath.floorMod(countEphemeris, kEphemeris) < EPSILON 
-							? true : false;
-					
-					/* Render the epehemeris step if required. */
-					if (renderEphemeris) { 
-						this.ephemerisGenerator.writeStep(
-								this.satellite.getStates().getCurrentState()
-								);
-					}
-
-					/* Increment the counter. */
-					countEphemeris++;
-					/* **************************************************************	*/
-				}
-			}
-
-		} /* End of class */
-
-		
-		/* Create and schedule the task. */
+		/* Create the main loop task. */
 		RealTimeLoop realTimeLoop = new RealTimeLoop(
-				integrationTimeStep, 
-				currentOffset, 
-				renderEphemeris,
-				this.ephemerisGenerator, 
-				kEphemeris, 
-				countEphemeris,
 				this.dynamic,
-				this.satellite
+				this.satellite,
+				this.ephemerisGenerator
+				);
+
+		final ScheduledExecutorService scheduler =
+				Executors.newScheduledThreadPool(1);
+
+		/* Launch the main task periodically. */
+		final ScheduledFuture<?> realTimeLoopHandler =
+		scheduler.scheduleAtFixedRate(
+				realTimeLoop, 
+				0, 
+				(long) (this.dynamic.getPropagation().getIntegrationManager().getStepSize() * 1000), 
+				TimeUnit.MILLISECONDS);
+		
+		
+		/* Launch the cancel task. */
+		scheduler.schedule(
+				new Runnable() {
+				       public void run() { 
+				    	   logger.info("Terminating the main simulation task.");
+				    	   realTimeLoopHandler.cancel(true); 
+				    	   
+				    	   logger.info("Shutting down the scheduler.");
+				    	   scheduler.shutdown();
+				    	   }
+				     }, 
+				FastMath.round(simulationDuration) + 1, 
+				TimeUnit.SECONDS
 				);
 		
-		final ScheduledExecutorService scheduler =
-			     Executors.newScheduledThreadPool(1);
-		
-		@SuppressWarnings("unused")
-		final ScheduledFuture<?> realTimeLoopHandler =
-			       scheduler.scheduleAtFixedRate(
-			    		   realTimeLoop, 
-			    		   0, 
-			    		   100, 
-			    		   TimeUnit.MILLISECONDS);
-		
-		
-		
-		
-		
-//		/* Main processing loop. */
-//		while ((simulationDuration == Double.MAX_VALUE)
-//				||
-//				(currentOffset + integrationTimeStep - simulationDuration < EPSILON)
-//				) {
-//
-//			/* Propagate the current state s(t) to s(t + dt) */
-//			this.dynamic.getPropagation().propagateStep();
-//
-//			/* Incrementing the time step: we are at the new offset now. */
-//			currentOffset += integrationTimeStep;
-//
-//			/* ********** Generate the Ephemeris ********** */
-//
-//			/* Update the flag. */
-//			renderEphemeris = 
-//					FastMath.floorMod(countEphemeris, kEphemeris) < EPSILON 
-//					? true : false;
-//
-//			/* Render the epehemeris step if required. */
-//			if (renderEphemeris) { 
-//				this.ephemerisGenerator.writeStep(
-//						this.satellite.getStates().getCurrentState()
-//						);
-//			}
-//
-//			/* Increment the counter. */
-//			countEphemeris++;
-//			/* **************************************************************	*/
-//
-//		}
+		/* Wait for the main processing task termination. */
+		try {
+			
+			boolean execStatus =
+					scheduler.awaitTermination(
+							FastMath.round(simulationDuration) + 2, 
+							TimeUnit.SECONDS
+							);
+			
+			if (!execStatus ) {
+				logger.error("Main computation loop failed to terminate.");
+				throw (new Exception("Main computation loop failed to terminate."));
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 		/* End of processing. */
 		logger.info(CustomLoggingTools.indentMsg(logger,
@@ -344,7 +240,7 @@ public class NumericalSimulator {
 	 * Performs the exit processing of the simulation.
 	 */
 	public void exit() {
-		
+
 		/* Properly closing the IO interfaces. */
 		NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
 				"Shutting down the Satellite IO interfaces."));
@@ -362,6 +258,118 @@ public class NumericalSimulator {
 				)
 				);
 	}
+
+	/**
+	 * Runnable class for a scheduled time processing of the main simulation loop.
+	 * Note that this implementation of JAVA does not insure strict real time
+	 * accuracy.
+	 *
+	 * @author Florian CHAUBEYRE
+	 */
+	private final class RealTimeLoop implements Runnable {
+
+		double integrationTimeStep;
+		double currentOffset;
+		boolean renderEphemeris;
+		EphemerisGenerator ephemerisGenerator;
+		int kEphemeris;
+		int countEphemeris;
+		Dynamic dynamic;
+		Satellite satellite;
+
+		/**
+		 * Create the main simulation loop task as a runnable object ready to
+		 * be scheduled periodically.
+		 * 
+		 * @param dynamic
+		 * @param satellite
+		 * @param ephemerisGenerator
+		 */
+		public RealTimeLoop(
+				Dynamic dynamic,
+				Satellite satellite,
+				EphemerisGenerator ephemerisGenerator) {
+
+			this.dynamic = dynamic;
+			this.satellite = satellite;
+			this.ephemerisGenerator = ephemerisGenerator;
+
+			this.integrationTimeStep = dynamic.getPropagation().getIntegrationManager().getStepSize();
+
+			this.renderEphemeris = false;
+			this.kEphemeris = (int) FastMath.round(
+					EphemerisGenerator.ephemerisTimeStep  
+					/ this.integrationTimeStep );
+
+			this.currentOffset = 0;
+			this.countEphemeris = 1; /* The incrementation of the current offset occurs prior. */
+
+		}
+
+		/**
+		 * Main processing loop of the simulator.
+		 */
+		public void run() {
+			if (
+					(simulationDuration == Double.MAX_VALUE)
+					||
+					(currentOffset + EPSILON < simulationDuration)
+					) 
+			{
+
+				//System.out.println("Trigger: " + System.currentTimeMillis());
+
+				/* Propagate the current state s(t) to s(t + dt) */
+				this.dynamic.getPropagation().propagateStep();
+
+				/* Incrementing the time step: we are at the new offset now after the propagation. */
+				currentOffset += integrationTimeStep;
+
+
+				/* ******** PAYLOAD *********/
+				/*  Export magnetometer measurements. */
+				if(this.satellite.getIO().isConnectToMemCached()) {
+
+					Vector3D geoMagneticField = this.satellite.getSensors().getMagnetometer()
+							.retrievePerfectMeasurement().getFieldVector();
+
+					this.satellite.getIO().getMemcached().set(
+							"Simulation_Magnetometer", 
+							0,
+							geoMagneticField.toArray()
+							);
+				}
+
+				//System.out.println(geoMagneticField.toString());
+
+				/* *************************/
+
+
+				/* ********** Generate the Ephemeris ********** */
+				/* Update the flag. */
+				renderEphemeris = 
+						FastMath.floorMod(countEphemeris, kEphemeris) < EPSILON 
+						? true : false;
+
+				/* Render the epehemeris step if required. */
+				if (renderEphemeris) { 
+					this.ephemerisGenerator.writeStep(
+							this.satellite.getStates().getCurrentState()
+							);
+				}
+
+				/* Increment the counter. */
+				countEphemeris++;
+				/* **************************************************************	*/
+			} else {
+				try {
+					throw (new Exception());
+				} catch (Exception e) {
+				}
+			}
+		}
+	} /* End of class */
+
 
 	/**
 	 * @return the satellite
