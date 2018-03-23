@@ -15,6 +15,7 @@ import java.util.logging.LogManager;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
 import org.orekit.errors.OrekitException;
+import org.orekit.propagation.SpacecraftState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -158,9 +159,20 @@ public class NumericalSimulator {
 			/* Ephemeris Generator Module */
 			this.ephemerisGenerator = new EphemerisGenerator();
 			this.ephemerisGenerator.start();
-			this.ephemerisGenerator.writeStep(
-					this.satellite.getStates().getInitialState()
-					);
+
+
+			/* ********* Initial State Processing before propagation. ********  */
+			SpacecraftState initialState = this.satellite.getStates().getInitialState();
+
+			/* Writing initial step into the ephemeris. */ 
+			this.ephemerisGenerator.writeStep(initialState);
+
+			/* Pushing the initial state into the VTS socket. */
+			if (this.satellite.getIO().isConnectToMemCached()) {
+				this.satellite.getIO().exportToVts(initialState);
+
+				//this.satellite.getIO().getVtsOutputStream().println("CMD TIME PLAY");
+			}
 
 		} catch (OrekitException e) {
 			e.printStackTrace();
@@ -191,37 +203,37 @@ public class NumericalSimulator {
 
 		/* Launch the main task periodically. */
 		final ScheduledFuture<?> realTimeLoopHandler =
-		scheduler.scheduleAtFixedRate(
-				realTimeLoop, 
-				0, 
-				(long) (this.dynamic.getPropagation().getIntegrationManager().getStepSize() * 1000), 
-				TimeUnit.MILLISECONDS);
-		
-		
+				scheduler.scheduleAtFixedRate(
+						realTimeLoop, 
+						0, 
+						(long) (this.dynamic.getPropagation().getIntegrationManager().getStepSize() * 1000), 
+						TimeUnit.MILLISECONDS);
+
+
 		/* Launch the cancel task. */
 		scheduler.schedule(
 				new Runnable() {
-				       public void run() { 
-				    	   logger.info("Terminating the main simulation task.");
-				    	   realTimeLoopHandler.cancel(true); 
-				    	   
-				    	   logger.info("Shutting down the scheduler.");
-				    	   scheduler.shutdown();
-				    	   }
-				     }, 
+					public void run() { 
+						logger.info("Terminating the main simulation task.");
+						realTimeLoopHandler.cancel(true); 
+
+						logger.info("Shutting down the scheduler.");
+						scheduler.shutdown();
+					}
+				}, 
 				FastMath.round(simulationDuration) + 1, 
 				TimeUnit.SECONDS
 				);
-		
+
 		/* Wait for the main processing task termination. */
 		try {
-			
+
 			boolean execStatus =
 					scheduler.awaitTermination(
 							FastMath.round(simulationDuration) + 2, 
 							TimeUnit.SECONDS
 							);
-			
+
 			if (!execStatus ) {
 				logger.error("Main computation loop failed to terminate.");
 				throw (new Exception("Main computation loop failed to terminate."));
@@ -319,7 +331,7 @@ public class NumericalSimulator {
 
 				//System.out.println("Trigger: " + System.currentTimeMillis());
 				//System.out.println("Offset: " + currentOffset);
-				
+
 				/* Propagate the current state s(t) to s(t + dt) */
 				this.dynamic.getPropagation().propagateStep();
 
@@ -341,8 +353,11 @@ public class NumericalSimulator {
 							);
 				}
 
-				//System.out.println(geoMagneticField.toString());
-
+				/* Export the satellite state to VTS for visualization. */
+				if(this.satellite.getIO().isConnectToVts()) {
+					this.satellite.getIO().exportToVts(
+							this.satellite.getStates().getCurrentState());
+				}
 				/* *************************/
 
 

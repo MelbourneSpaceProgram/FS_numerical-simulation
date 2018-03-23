@@ -59,7 +59,7 @@ public class TestAttitudePropagation {
 	public void testSimpleRotation() throws Exception {
 
 		/* *** CONFIGURATION *** */
-		double rotationTime = 10;
+		double rotationTime = 100;
 		Vector3D n = new Vector3D(1,0,0).normalize();
 		/* ********************* */
 
@@ -74,6 +74,8 @@ public class TestAttitudePropagation {
 		Dashboard.setInitialAttitudeQuaternion(1, 0, 0, 0);
 		Dashboard.setInitialSpin(new Vector3D(FastMath.PI / rotationTime, n));
 		Dashboard.setInitialRotAcceleration(new Vector3D(0,0,0));
+		
+		//Dashboard.setVtsConnection(true);
 
 		simu.initialize();
 		simu.process();
@@ -112,7 +114,7 @@ public class TestAttitudePropagation {
 		NumericalSimulator simu = new NumericalSimulator();
 		Dashboard.setDefaultConfiguration();
 		Dashboard.setSimulationDuration(accDuration);
-		Dashboard.setIntegrationTimeStep(0.1);
+		Dashboard.setIntegrationTimeStep(1);
 
 		Dashboard.setTorqueProvider(TorqueProviderEnum.SCENARIO);
 
@@ -135,6 +137,8 @@ public class TestAttitudePropagation {
 		logger.info(CustomLoggingTools.toString(
 				"Initial State of the satellite", 
 				simu.getSatellite().getStates().getInitialState()));
+		
+		Thread.sleep(1000);
 
 		simu.process();
 

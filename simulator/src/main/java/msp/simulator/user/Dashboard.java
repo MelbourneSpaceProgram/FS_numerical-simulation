@@ -300,6 +300,14 @@ public class Dashboard {
 	public static void setTorqueCommandKey(String key) {
 		MemCachedTorqueProvider.torqueCommandKey = key;
 	}
+	
+	/**
+	 * Setting the connection to the VTS socket.
+	 * @param active true to activate the connection.
+	 */
+	public static void setVtsConnection(boolean active) {
+		IO.connectVts = active;
+	}
 
 
 	/* ********************************************************* */
