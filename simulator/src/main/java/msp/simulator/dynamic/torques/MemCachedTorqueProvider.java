@@ -2,6 +2,7 @@
 
 package msp.simulator.dynamic.torques;
 
+import java.lang.System;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.orekit.errors.OrekitException;
 import org.orekit.time.AbsoluteDate;
@@ -14,6 +15,7 @@ import msp.simulator.satellite.Satellite;
 import msp.simulator.satellite.io.IO;
 import msp.simulator.utils.logs.CustomLoggingTools;
 import net.spy.memcached.MemcachedClient;
+import java.nio.ByteBuffer;
 
 /**
  *
@@ -90,15 +92,29 @@ public class MemCachedTorqueProvider implements TorqueProvider {
 		 * and a potential false comparison. */
 		if (date.toString().equals(this.nextComputationDate.toString())) {
 			
-			logger.info(this.torqueKey + "X");
-			
-			/* Reading the torque command from MemCached. */
-			Vector3D torqueCommand = new Vector3D(
-					(double) this.memcached.get(this.torqueKey + "X"),
-					(double) this.memcached.get(this.torqueKey + "Y"),
-					(double) this.memcached.get(this.torqueKey + "Z")
-					);
-			
+        Vector3D torqueCommand = new Vector3D(0,0,0);
+
+			  /* Reading the torque command from MemCached. */
+        try {
+            if (this.memcached.get("Simulation_Torque_X") == null) {
+        			  torqueCommand = new Vector3D(
+                    ByteBuffer.wrap(
+                        ((String)this.memcached.get("Simulation_Torque_Y"))
+                        .getBytes()).getDouble(),
+                    ByteBuffer.wrap(
+                        ((String)this.memcached.get("Simulation_Torque_X"))
+                        .getBytes()).getDouble(),
+                    ByteBuffer.wrap(
+                        ((String)this.memcached.get("Simulation_Torque_Z"))
+                        .getBytes()).getDouble()
+        			  		);
+            }
+        } catch (Exception e) {
+            logger.error("Getting torques from memcached: " + e.toString());
+            System.exit(0);
+        }
+
+        logger.info(torqueCommand.toString());
 
 			/* Updating the buffer data. */
 			try {
