@@ -1,6 +1,6 @@
 /* Copyright 2017-2018 Melbourne Space Program */
 
-package msp.simulator.dynamic.test;
+package msp.simulator.test;
 
 import java.util.ArrayList;
 
@@ -28,11 +28,11 @@ import msp.simulator.utils.logs.CustomLoggingTools;
  * 
  * @author Florian CHAUBEYRE
  */
-public class TestAttitudePropagation {
+public class TestDynamic {
 
 	/** Instance of the Logger of the class. */
 	private static final Logger logger = 
-			LoggerFactory.getLogger(TestAttitudePropagation.class);
+			LoggerFactory.getLogger(TestDynamic.class);
 
 	/**
 	 * Process a simple rotation of Pi at constant spin to
@@ -56,7 +56,7 @@ public class TestAttitudePropagation {
 	 * 
 	 */
 	@Test 
-	public void testSimpleRotation() throws Exception {
+	public void testRotation() throws Exception {
 
 		/* *** CONFIGURATION *** */
 		double rotationTime = 100;
@@ -104,7 +104,7 @@ public class TestAttitudePropagation {
 	}
 
 	@Test
-	public void testSimpleAcceleration() throws Exception {
+	public void testRotationAcceleration() throws Exception {
 
 		/* **** Data of the test **** */
 		double accDuration = 100;
@@ -138,8 +138,6 @@ public class TestAttitudePropagation {
 				"Initial State of the satellite", 
 				simu.getSatellite().getStates().getInitialState()));
 		
-		Thread.sleep(1000);
-
 		simu.process();
 
 		logger.info(CustomLoggingTools.toString(
@@ -175,30 +173,5 @@ public class TestAttitudePropagation {
 				1e-9);
 
 	}
-	
-	@Test 
-	public void testDetumblingRealTime() throws Exception {
-
-		NumericalSimulator simu = new NumericalSimulator();
-		Dashboard.setDefaultConfiguration();
-
-		Dashboard.setIntegrationTimeStep(0.1);
-		Dashboard.setEphemerisTimeStep(1.0);
-		Dashboard.setSimulationDuration(Double.MAX_VALUE);
-		
-		Dashboard.setInitialAttitudeQuaternion(1, 0, 0, 0);
-		Dashboard.setInitialSpin(new Vector3D(1, 1, 1));
-		Dashboard.setInitialRotAcceleration(new Vector3D(0,0,0));
-		
-		Dashboard.setTorqueProvider(TorqueProviderEnum.MEMCACHED);
-		Dashboard.setMemCachedConnection(true, "127.0.0.1:11211");
-		
-		//Dashboard.setVtsConnection(true);
-
-		simu.initialize();
-		simu.process();
-		simu.exit();
-	}
-	
 
 }
