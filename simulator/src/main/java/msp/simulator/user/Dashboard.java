@@ -107,7 +107,7 @@ public class Dashboard {
 
 		/* **** IO Settings **** */
 		Dashboard.setMemCachedConnection(IO.connectMemCached, IO.memcachedSocketAddress);
-		Dashboard.setTorqueCommandKey("torque");
+		Dashboard.setTorqueCommandKey(MemCachedTorqueProvider.torqueCommandKey);
 
 		try {
 			Dashboard.checkConfiguration();

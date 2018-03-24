@@ -90,12 +90,15 @@ public class MemCachedTorqueProvider implements TorqueProvider {
 		 * and a potential false comparison. */
 		if (date.toString().equals(this.nextComputationDate.toString())) {
 			
+			logger.info(this.torqueKey + "X");
+			
 			/* Reading the torque command from MemCached. */
 			Vector3D torqueCommand = new Vector3D(
 					(double) this.memcached.get(this.torqueKey + "X"),
 					(double) this.memcached.get(this.torqueKey + "Y"),
 					(double) this.memcached.get(this.torqueKey + "Z")
 					);
+			
 
 			/* Updating the buffer data. */
 			try {

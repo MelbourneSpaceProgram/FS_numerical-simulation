@@ -23,7 +23,7 @@ public class TestRealTime {
 
 		Dashboard.setIntegrationTimeStep(0.1);
 		Dashboard.setEphemerisTimeStep(1.0);
-		Dashboard.setSimulationDuration(Double.MAX_VALUE);
+		Dashboard.setSimulationDuration(100);
 		
 		Dashboard.setInitialAttitudeQuaternion(1, 0, 0, 0);
 		Dashboard.setInitialSpin(new Vector3D(1, 1, 1));
