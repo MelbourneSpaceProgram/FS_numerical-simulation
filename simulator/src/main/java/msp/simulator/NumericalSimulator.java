@@ -168,7 +168,7 @@ public class NumericalSimulator {
 			this.ephemerisGenerator.writeStep(initialState);
 
 			/* Pushing the initial state into the VTS socket. */
-			if (this.satellite.getIO().isConnectToMemCached()) {
+			if (this.satellite.getIO().isConnectToVts()) {
 				this.satellite.getIO().exportToVts(initialState);
 
 				//this.satellite.getIO().getVtsOutputStream().println("CMD TIME PLAY");
