@@ -24,7 +24,7 @@ public class MemCachedTorqueProvider implements TorqueProvider {
 	/* ******* Public Static Attributes ******* */
 
 	/** Public key to access the MemCached hash table. */
-	public static String torqueCommandKey = "torque";
+	public static String torqueCommandKey = "Simulation_Torque_";
 
 	/* **************************************** */
 
@@ -92,7 +92,9 @@ public class MemCachedTorqueProvider implements TorqueProvider {
 			
 			/* Reading the torque command from MemCached. */
 			Vector3D torqueCommand = new Vector3D(
-					(double[]) this.memcached.get(this.torqueKey)
+					(double) this.memcached.get(this.torqueKey + "X"),
+					(double) this.memcached.get(this.torqueKey + "Y"),
+					(double) this.memcached.get(this.torqueKey + "Z")
 					);
 
 			/* Updating the buffer data. */

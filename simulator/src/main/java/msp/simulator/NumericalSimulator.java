@@ -347,9 +347,19 @@ public class NumericalSimulator {
 							.retrievePerfectMeasurement().getFieldVector();
 
 					this.satellite.getIO().getMemcached().set(
-							"Simulation_Magnetometer", 
+							"Simulation_Magnetometer_X", 
 							0,
-							geoMagneticField.toArray()
+							geoMagneticField.getX()
+							);
+					this.satellite.getIO().getMemcached().set(
+							"Simulation_Magnetometer_Y", 
+							0,
+							geoMagneticField.getY()
+							);
+					this.satellite.getIO().getMemcached().set(
+							"Simulation_Magnetometer_Z", 
+							0,
+							geoMagneticField.getZ()
 							);
 				}
 
