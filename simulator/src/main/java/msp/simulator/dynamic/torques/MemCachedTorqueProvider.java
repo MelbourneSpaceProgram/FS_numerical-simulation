@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import msp.simulator.dynamic.propagation.integration.Integration;
 import msp.simulator.satellite.Satellite;
 import msp.simulator.satellite.io.IO;
+import msp.simulator.satellite.io.HackMemcachedTranscoder;
 import msp.simulator.utils.logs.CustomLoggingTools;
 import net.spy.memcached.MemcachedClient;
 import java.nio.ByteBuffer;
@@ -27,6 +28,9 @@ public class MemCachedTorqueProvider implements TorqueProvider {
 
 	/** Public key to access the MemCached hash table. */
 	public static String torqueCommandKey = "Simulation_Torque_";
+
+  /** Transcoder that lets the Memcached Client return bytes */
+  private static HackMemcachedTranscoder tc = new HackMemcachedTranscoder();
 
 	/* **************************************** */
 
@@ -76,6 +80,7 @@ public class MemCachedTorqueProvider implements TorqueProvider {
 					"Memcached connection is not enable!"));
 		}
 	}
+
 	
 	/**
 	 * Retrieve the torque command from the MemCached common memory
@@ -91,23 +96,24 @@ public class MemCachedTorqueProvider implements TorqueProvider {
 		/* Comparing strings avoids numerical approximation of the dates
 		 * and a potential false comparison. */
 		if (date.toString().equals(this.nextComputationDate.toString())) {
-			
+
         Vector3D torqueCommand = new Vector3D(0,0,0);
 
 			  /* Reading the torque command from MemCached. */
         try {
-            if (this.memcached.get("Simulation_Torque_X") == null) {
-        			  torqueCommand = new Vector3D(
-                    ByteBuffer.wrap(
-                        ((String)this.memcached.get("Simulation_Torque_Y"))
-                        .getBytes()).getDouble(),
-                    ByteBuffer.wrap(
-                        ((String)this.memcached.get("Simulation_Torque_X"))
-                        .getBytes()).getDouble(),
-                    ByteBuffer.wrap(
-                        ((String)this.memcached.get("Simulation_Torque_Z"))
-                        .getBytes()).getDouble()
-        			  		);
+            if (this.memcached.get("Simulation_Torque_X") != null) {
+                double x = ByteBuffer.wrap(
+                               this.memcached.get("Simulation_Torque_X",tc))
+                               .getDouble();
+                double y = ByteBuffer.wrap(
+                               this.memcached.get("Simulation_Torque_Y",tc))
+                               .getDouble();
+                double z = ByteBuffer.wrap(
+                               this.memcached.get("Simulation_Torque_Z",tc))
+                               .getDouble();
+        			  torqueCommand = new Vector3D(x,y,z);
+            } else {
+                logger.info("Not getting torque from memcached!");
             }
         } catch (Exception e) {
             logger.error("Getting torques from memcached: " + e.toString());
