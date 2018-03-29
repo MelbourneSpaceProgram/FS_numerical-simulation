@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import msp.simulator.utils.logs.CustomLoggingTools;
+import msp.simulator.satellite.assembly.SatelliteStates;
 
 /**
  *
@@ -173,7 +174,8 @@ public class EphemerisGenerator {
 	 * ephemeris file.
 	 * @param newState The satellite state to register in the ephemeris
 	 */
-	public void writeStep(SpacecraftState newState) {
+	public void writeStep(SatelliteStates satState) {
+    SpacecraftState newState = satState.getCurrentState();
 		try {
 			StringBuffer buff = new StringBuffer();
 
@@ -239,13 +241,15 @@ public class EphemerisGenerator {
 							"\n" +
 							"Attitude: [{}, {}, {}, {}] \n" +
 							"Spin    : {} \n" +
-							"RotAcc  : {}",
+							"RotAcc  : {}\n" +
+              "Momentum: {}",
 							newState.getAttitude().getRotation().getQ0(),
 							newState.getAttitude().getRotation().getQ1(),
 							newState.getAttitude().getRotation().getQ2(),
 							newState.getAttitude().getRotation().getQ3(),
 							newState.getAttitude().getSpin().toString(),
-							newState.getAttitude().getRotationAcceleration().toString()
+              newState.getAttitude().getRotationAcceleration().toString(),
+              satState.getAngularMomentum()
 					);
 
 		} catch (OrekitException | IOException e) {
