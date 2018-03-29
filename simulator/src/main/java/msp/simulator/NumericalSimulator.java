@@ -343,23 +343,25 @@ public class NumericalSimulator {
 				/*  Export magnetometer measurements. */
 				if(this.satellite.getIO().isConnectToMemCached()) {
 
-					Vector3D geoMagneticField = this.satellite.getSensors().getMagnetometer()
+					Vector3D inertialGeoMagneticField = this.satellite.getSensors().getMagnetometer()
 							.retrievePerfectMeasurement().getFieldVector();
+
+          Vector3D satelliteGeoMagneticField = this.satellite.getStates().getCurrentState().getAttitude().getRotation().applyTo(inertialGeoMagneticField);
 
 					this.satellite.getIO().getMemcached().set(
 							"Simulation_Magnetometer_X", 
 							0,
-							geoMagneticField.getX()
+							satelliteGeoMagneticField.getX()
 							);
 					this.satellite.getIO().getMemcached().set(
 							"Simulation_Magnetometer_Y", 
 							0,
-							geoMagneticField.getY()
+							satelliteGeoMagneticField.getY()
 							);
 					this.satellite.getIO().getMemcached().set(
 							"Simulation_Magnetometer_Z", 
 							0,
-							geoMagneticField.getZ()
+							satelliteGeoMagneticField.getZ()
 							);
 				}
 

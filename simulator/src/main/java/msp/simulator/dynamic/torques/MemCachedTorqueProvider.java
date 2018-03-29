@@ -120,7 +120,7 @@ public class MemCachedTorqueProvider implements TorqueProvider {
             System.exit(0);
         }
 
-        logger.info(torqueCommand.toString());
+        //logger.info(torqueCommand.toString());
 
 			/* Updating the buffer data. */
 			try {
