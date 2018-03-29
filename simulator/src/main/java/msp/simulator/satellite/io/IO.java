@@ -63,6 +63,9 @@ public class IO {
 	/** MemCached client in use by the simulation. */
 	private MemcachedClient memcached;
 
+	/** Raw transcoder to deserialize Memcached data. */
+	private MemcachedRawTranscoder rawTranscoder;
+
 	/** Flag to activate the connection to the VTS visualization software. */
 	private boolean connectToVts = false;
 
@@ -70,7 +73,7 @@ public class IO {
 	private Socket vts;
 
 	/** VTS Socket Output stream. */
-	PrintWriter vtsOut;
+	private PrintWriter vtsOut;
 
 	/**
 	 * Create the instance of IO manager.
@@ -81,6 +84,7 @@ public class IO {
 
 		this.connectToMemCached = IO.connectMemCached;
 		this.memcachedHostAddress = IO.memcachedSocketAddress;
+		this.rawTranscoder = new MemcachedRawTranscoder();
 
 		this.connectToVts = IO.connectVts;
 	}
@@ -149,6 +153,9 @@ public class IO {
 			try {
 				this.vts = new Socket("localhost", 8888);
 				this.vtsOut = new PrintWriter(this.vts.getOutputStream(), true);
+				
+				/* Napoleon is hard-coded because he will stay in history
+				 * as the first leader of the MSP simulation facilities! */
 				this.vtsOut.println("INIT Napoleon REGULATING");
 
 			} catch (IOException e) {
@@ -226,7 +233,7 @@ public class IO {
 				 * DATA 123 20447.000174 pos "-6538.3475061863419 2703.5361504162843 197.30707005759857"
 				 */
 
-				/* OEM Data to stream out to VTS. */
+				/* OEM Data to stream out to VTS. Note the conversion to KM. */
 				String cmdOem = 
 						"DATA " +
 								cnesJulianDayOffset + " " +
@@ -264,37 +271,41 @@ public class IO {
 		} else {
 			logger.error("VTS Socket is not operating.");
 		}
-		}
-
-		/**
-		 * @return the connectToMemCached
-		 */
-		public boolean isConnectToMemCached() {
-			return connectToMemCached;
-		}
-
-		/**
-		 * @return The MemCached client of the simulator.
-		 */
-		public MemcachedClient getMemcached() {
-			return memcached;
-		}
-
-		/**
-		 * @return VTS Client output stream.
-		 */
-		public PrintWriter getVtsOutputStream() {
-			return vtsOut;
-		}
-
-		/**
-		 * @return Connection to VTS socket flag.
-		 */
-		public boolean isConnectToVts() {
-			return connectToVts;
-		}
-
 	}
 
+	/**
+	 * @return the connectToMemCached
+	 */
+	public boolean isConnectToMemCached() {
+		return connectToMemCached;
+	}
 
+	/**
+	 * @return The MemCached client of the simulator.
+	 */
+	public MemcachedClient getMemcached() {
+		return memcached;
+	}
 
+	/**
+	 * @return VTS Client output stream.
+	 */
+	public PrintWriter getVtsOutputStream() {
+		return vtsOut;
+	}
+
+	/**
+	 * @return Connection to VTS socket flag.
+	 */
+	public boolean isConnectToVts() {
+		return connectToVts;
+	}
+
+	/**
+	 * @return the rawTranscoder
+	 */
+	public MemcachedRawTranscoder getRawTranscoder() {
+		return rawTranscoder;
+	}
+
+}

@@ -13,22 +13,24 @@ import org.slf4j.LoggerFactory;
 import msp.simulator.NumericalSimulator;
 import msp.simulator.dynamic.propagation.integration.RotAccProvider;
 import msp.simulator.dynamic.propagation.integration.SecondaryStates;
+import msp.simulator.dynamic.torques.MemCachedTorqueProvider;
 import msp.simulator.dynamic.torques.TorqueProviderEnum;
 import msp.simulator.satellite.assembly.SatelliteBody;
 import msp.simulator.satellite.assembly.SatelliteStates;
+import msp.simulator.satellite.io.MemcachedRawTranscoder;
 import msp.simulator.satellite.sensors.Magnetometer;
 import msp.simulator.user.Dashboard;
-import msp.simulator.utils.logs.CustomLoggingTools;
+import net.spy.memcached.MemcachedClient;
 
 /**
  *
  * @author Florian CHAUBEYRE
  */
 public class TestSatellite {
-	
+
 	/** Logger of the instance. */
 	private static final Logger logger = LoggerFactory.getLogger(TestSatellite.class);
-	
+
 	@Test
 	public void testMemcachedConnection() {
 		/* Set up the simulation. */
@@ -90,13 +92,13 @@ public class TestSatellite {
 		double accDuration = 10 ;
 		Vector3D rotVector = new Vector3D(1, 0, 0);
 		double torqueIntensity = 0.1 ;
-		String torqueKey = "Simulation_Torque";
+		String torqueKey = MemCachedTorqueProvider.torqueCommandKey;
 		/* ************************** */
 
 		NumericalSimulator simu = new NumericalSimulator();
 		Dashboard.setDefaultConfiguration();
 		Dashboard.setSimulationDuration(accDuration);
-		Dashboard.setIntegrationTimeStep(0.1);
+		Dashboard.setIntegrationTimeStep(1.0);
 
 		Dashboard.setMemCachedConnection(true, "127.0.0.1:11211");
 		Dashboard.setTorqueProvider(TorqueProviderEnum.MEMCACHED);
@@ -110,31 +112,25 @@ public class TestSatellite {
 								SatelliteBody.satInertiaMatrix)
 						)
 				);
-		Dashboard.setInitialRotAcceleration(new Vector3D(0.0, 0.0, 0.05));
-		
-		
+		Dashboard.setInitialRotAcceleration(new Vector3D(0.0, 0.0, 0.0));
+
+
 		Dashboard.checkConfiguration();
 
 		/* Launching the simulation. */
 		simu.initialize();
 
-		logger.info(CustomLoggingTools.toString(
-				"Initial State of the satellite", 
-				simu.getSatellite().getStates().getInitialState()));
-
 		/* Set the torque value in the hash table as an array of double. */
-		simu.getIo().getMemcached()
-		.set(
-				torqueKey, 
-				0, 
-				rotVector.scalarMultiply(torqueIntensity).toArray()
-				);
+		MemcachedClient memcached = simu.getIo().getMemcached();
+		
+		memcached.set(torqueKey + "X", 0, MemcachedRawTranscoder.toRawByteArray(
+				rotVector.scalarMultiply(torqueIntensity).getX()));
+		memcached.set(torqueKey + "Y", 0, MemcachedRawTranscoder.toRawByteArray(
+				rotVector.scalarMultiply(torqueIntensity).getY()));
+		memcached.set(torqueKey + "Z", 0, MemcachedRawTranscoder.toRawByteArray(
+				rotVector.scalarMultiply(torqueIntensity).getZ()));
 
 		simu.process();
-
-		logger.info(CustomLoggingTools.toString(
-				"Final State of the satellite", 
-				simu.getSatellite().getStates().getCurrentState()));
 
 		simu.exit();
 

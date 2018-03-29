@@ -36,6 +36,12 @@ public class NumericalSimulator {
 
 	/* ******* Public Static Attributes ******* */
 
+	/** 
+	 * Time duration of the simulation : the double max value
+	 * states for an "infinite loop" duration.
+	 */
+	public static double simulationDuration = Double.MAX_VALUE;
+	
 	/** Precision threshold to be considered to be zero. */
 	public static final double EPSILON = 1e-13;
 
@@ -62,12 +68,6 @@ public class NumericalSimulator {
 
 	private final LocalDateTime startDate;
 	private LocalDateTime endDate;
-
-	/** 
-	 * Time duration of the simulation : the double max value
-	 * states for an "infinite loop" duration.
-	 */
-	public static double simulationDuration = Double.MAX_VALUE;
 
 	public NumericalSimulator() {
 		this.startDate = LocalDateTime.now();
@@ -206,31 +206,36 @@ public class NumericalSimulator {
 				scheduler.scheduleAtFixedRate(
 						realTimeLoop, 
 						0, 
-						(long) (this.dynamic.getPropagation().getIntegrationManager().getStepSize() * 1000), 
+						(long) (this.dynamic.getPropagation().getIntegrationManager()
+								.getStepSize() * 1000), 
 						TimeUnit.MILLISECONDS);
 
 
-		/* Launch the cancel task. */
-		scheduler.schedule(
-				new Runnable() {
-					public void run() { 
-						logger.info("Terminating the main simulation task.");
-						realTimeLoopHandler.cancel(true); 
-
-						logger.info("Shutting down the scheduler.");
-						scheduler.shutdown();
-					}
-				}, 
-				FastMath.round(simulationDuration) + 1, 
-				TimeUnit.SECONDS
-				);
+		/* Launch the cancellation task if the duration is finite. */
+		if (simulationDuration != Double.MAX_VALUE) {
+			scheduler.schedule(
+					new Runnable() {
+						public void run() { 
+							logger.info("Terminating the main simulation task.");
+							realTimeLoopHandler.cancel(true); 
+							
+							logger.info("Shutting down the scheduler.");
+							scheduler.shutdown();
+						}
+					}, 
+					FastMath.round(simulationDuration), 
+					TimeUnit.SECONDS
+					);
+		}
 
 		/* Wait for the main processing task termination. */
 		try {
+			long timeOut = (simulationDuration == Double.MAX_VALUE) ?
+					Long.MAX_VALUE : (FastMath.round(simulationDuration) + 1) ;
 
 			boolean execStatus =
 					scheduler.awaitTermination(
-							FastMath.round(simulationDuration) + 2, 
+							timeOut,
 							TimeUnit.SECONDS
 							);
 
@@ -252,7 +257,6 @@ public class NumericalSimulator {
 	 * Performs the exit processing of the simulation.
 	 */
 	public void exit() {
-
 		/* Properly closing the IO interfaces. */
 		NumericalSimulator.logger.info(CustomLoggingTools.indentMsg(logger,
 				"Shutting down the Satellite IO interfaces."));
