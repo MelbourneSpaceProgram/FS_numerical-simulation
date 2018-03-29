@@ -15,13 +15,11 @@ import java.util.logging.LogManager;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
 import org.orekit.errors.OrekitException;
-import org.orekit.propagation.SpacecraftState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import msp.simulator.dynamic.Dynamic;
 import msp.simulator.satellite.Satellite;
-import msp.simulator.satellite.assembly.SatelliteStates;
 import msp.simulator.user.Dashboard;
 import msp.simulator.utils.architecture.OrekitConfiguration;
 import msp.simulator.utils.logs.CustomLoggingTools;
@@ -42,7 +40,7 @@ public class NumericalSimulator {
 	 * states for an "infinite loop" duration.
 	 */
 	public static double simulationDuration = Double.MAX_VALUE;
-	
+
 	/** Precision threshold to be considered to be zero. */
 	public static final double EPSILON = 1e-13;
 
@@ -163,15 +161,14 @@ public class NumericalSimulator {
 
 
 			/* ********* Initial State Processing before propagation. ********  */
-			SatelliteStates initialSatState = this.satellite.getStates();
-			SpacecraftState initialState = initialSatState.getInitialState();
-
 			/* Writing initial step into the ephemeris. */ 
-			this.ephemerisGenerator.writeStep(initialSatState);
+			this.ephemerisGenerator.writeStep(this.satellite);
 
 			/* Pushing the initial state into the VTS socket. */
 			if (this.satellite.getIO().isConnectToVts()) {
-				this.satellite.getIO().exportToVts(initialState);
+				this.satellite.getIO().exportToVts(
+						this.satellite.getStates().getInitialState()
+						);
 
 				//this.satellite.getIO().getVtsOutputStream().println("CMD TIME PLAY");
 			}
@@ -220,7 +217,7 @@ public class NumericalSimulator {
 						public void run() { 
 							logger.info("Terminating the main simulation task.");
 							realTimeLoopHandler.cancel(true); 
-							
+
 							logger.info("Shutting down the scheduler.");
 							scheduler.shutdown();
 						}
@@ -352,7 +349,7 @@ public class NumericalSimulator {
 					Vector3D inertialGeoMagneticField = this.satellite.getSensors().getMagnetometer()
 							.retrievePerfectMeasurement().getFieldVector();
 
-          Vector3D satelliteGeoMagneticField = this.satellite.getStates().getCurrentState().getAttitude().getRotation().applyTo(inertialGeoMagneticField);
+					Vector3D satelliteGeoMagneticField = this.satellite.getStates().getCurrentState().getAttitude().getRotation().applyTo(inertialGeoMagneticField);
 
 					this.satellite.getIO().getMemcached().set(
 							"Simulation_Magnetometer_X", 
@@ -387,9 +384,7 @@ public class NumericalSimulator {
 
 				/* Render the epehemeris step if required. */
 				if (renderEphemeris) { 
-					this.ephemerisGenerator.writeStep(
-							this.satellite.getStates()
-							);
+					this.ephemerisGenerator.writeStep(this.satellite);
 				}
 
 				/* Increment the counter. */

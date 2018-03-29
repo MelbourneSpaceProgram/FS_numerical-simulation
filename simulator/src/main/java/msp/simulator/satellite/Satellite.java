@@ -12,8 +12,6 @@ import msp.simulator.satellite.io.IO;
 import msp.simulator.satellite.sensors.Sensors;
 import msp.simulator.utils.logs.CustomLoggingTools;
 
-import org.hipparchus.geometry.euclidean.threed.Vector3D;
-
 /**
  *
  * @author Florian CHAUBEYRE
