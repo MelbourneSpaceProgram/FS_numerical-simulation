@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import msp.simulator.dynamic.propagation.integration.SecondaryStates;
 import msp.simulator.environment.Environment;
+import msp.simulator.satellite.SatelliteBody;
 import msp.simulator.utils.logs.CustomLoggingTools;
 
 /**
@@ -231,5 +232,29 @@ public class SatelliteStates {
 		return this.initialState.getAttitude();
 	}	
 
+  /**
+   * Calculate the angular momentum of the satellite
+   * (not sure where the right place for this is)
+   */
+  public Vector3D getAngularMomentum() {
+      Vector3D rotationRate = this.getCurrentState()
+                                  .getAttitude()
+                                  .getSpin();
+      double[][] inertiaMatrix = SatelliteBody.satInertiaMatrix;
+      // This is a bit of a hack! Not quite sure how to make Hipparchus'
+      // Geometry package work with it's Core Linear package for
+      // matrix multiplication.
+      Vector3D row0 = new Vector3D(inertiaMatrix[0]);
+      Vector3D row1 = new Vector3D(inertiaMatrix[1]);
+      Vector3D row2 = new Vector3D(inertiaMatrix[2]);
+
+      Vector3D angularMomentum = new Vector3D(
+          row0.dotProduct(rotationRate),
+          row1.dotProduct(rotationRate),
+          row2.dotProduct(rotationRate)
+      );
+
+      return angularMomentum;
+  }
 
 }

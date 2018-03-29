@@ -8,6 +8,7 @@ import org.junit.Test;
 import msp.simulator.NumericalSimulator;
 import msp.simulator.dynamic.torques.TorqueProviderEnum;
 import msp.simulator.user.Dashboard;
+import msp.simulator.satellite.assembly.SatelliteBody;
 
 /**
  * 
@@ -22,8 +23,10 @@ public class TestRealTime {
 		Dashboard.setDefaultConfiguration();
 
 		Dashboard.setIntegrationTimeStep(0.1);
-		Dashboard.setEphemerisTimeStep(1.0);
-		Dashboard.setSimulationDuration(100);
+		Dashboard.setEphemerisTimeStep(0.1);
+		Dashboard.setSimulationDuration(10000000);
+
+    Dashboard.setSatelliteInertiaMatrix(SatelliteBody.satInertiaMatrix);
 		
 		Dashboard.setInitialAttitudeQuaternion(1, 0, 0, 0);
 		Dashboard.setInitialSpin(new Vector3D(1, 1, 1));

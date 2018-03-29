@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import msp.simulator.dynamic.Dynamic;
 import msp.simulator.satellite.Satellite;
+import msp.simulator.satellite.assembly.SatelliteStates;
 import msp.simulator.user.Dashboard;
 import msp.simulator.utils.architecture.OrekitConfiguration;
 import msp.simulator.utils.logs.CustomLoggingTools;
@@ -162,10 +163,11 @@ public class NumericalSimulator {
 
 
 			/* ********* Initial State Processing before propagation. ********  */
-			SpacecraftState initialState = this.satellite.getStates().getInitialState();
+			SatelliteStates initialSatState = this.satellite.getStates();
+			SpacecraftState initialState = initialSatState.getInitialState();
 
 			/* Writing initial step into the ephemeris. */ 
-			this.ephemerisGenerator.writeStep(initialState);
+			this.ephemerisGenerator.writeStep(initialSatState);
 
 			/* Pushing the initial state into the VTS socket. */
 			if (this.satellite.getIO().isConnectToVts()) {
@@ -347,23 +349,25 @@ public class NumericalSimulator {
 				/*  Export magnetometer measurements. */
 				if(this.satellite.getIO().isConnectToMemCached()) {
 
-					Vector3D geoMagneticField = this.satellite.getSensors().getMagnetometer()
+					Vector3D inertialGeoMagneticField = this.satellite.getSensors().getMagnetometer()
 							.retrievePerfectMeasurement().getFieldVector();
+
+          Vector3D satelliteGeoMagneticField = this.satellite.getStates().getCurrentState().getAttitude().getRotation().applyTo(inertialGeoMagneticField);
 
 					this.satellite.getIO().getMemcached().set(
 							"Simulation_Magnetometer_X", 
 							0,
-							geoMagneticField.getX()
+							satelliteGeoMagneticField.getX()
 							);
 					this.satellite.getIO().getMemcached().set(
 							"Simulation_Magnetometer_Y", 
 							0,
-							geoMagneticField.getY()
+							satelliteGeoMagneticField.getY()
 							);
 					this.satellite.getIO().getMemcached().set(
 							"Simulation_Magnetometer_Z", 
 							0,
-							geoMagneticField.getZ()
+							satelliteGeoMagneticField.getZ()
 							);
 				}
 
@@ -384,7 +388,7 @@ public class NumericalSimulator {
 				/* Render the epehemeris step if required. */
 				if (renderEphemeris) { 
 					this.ephemerisGenerator.writeStep(
-							this.satellite.getStates().getCurrentState()
+							this.satellite.getStates()
 							);
 				}
 
