@@ -12,7 +12,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.LogManager;
 
-import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
 import org.orekit.errors.OrekitException;
 import org.slf4j.Logger;
@@ -343,30 +342,9 @@ public class NumericalSimulator {
 
 
 				/* ******** PAYLOAD *********/
-				/*  Export magnetometer measurements. */
-				if(this.satellite.getIO().isConnectToMemCached()) {
 
-					Vector3D inertialGeoMagneticField = this.satellite.getSensors().getMagnetometer()
-							.retrievePerfectMeasurement().getFieldVector();
-
-					Vector3D satelliteGeoMagneticField = this.satellite.getStates().getCurrentState().getAttitude().getRotation().applyTo(inertialGeoMagneticField);
-
-					this.satellite.getIO().getMemcached().set(
-							"Simulation_Magnetometer_X", 
-							0,
-							satelliteGeoMagneticField.getX()
-							);
-					this.satellite.getIO().getMemcached().set(
-							"Simulation_Magnetometer_Y", 
-							0,
-							satelliteGeoMagneticField.getY()
-							);
-					this.satellite.getIO().getMemcached().set(
-							"Simulation_Magnetometer_Z", 
-							0,
-							satelliteGeoMagneticField.getZ()
-							);
-				}
+				/* Execute the mission of the satellite for the step. */
+				this.satellite.executeStepMission();
 
 				/* Export the satellite state to VTS for visualization. */
 				if(this.satellite.getIO().isConnectToVts()) {
@@ -390,6 +368,7 @@ public class NumericalSimulator {
 				/* Increment the counter. */
 				countEphemeris++;
 				/* **************************************************************	*/
+				
 			} else {
 				try {
 					throw (new Exception());

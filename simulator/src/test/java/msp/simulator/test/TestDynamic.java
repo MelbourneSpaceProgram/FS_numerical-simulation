@@ -59,7 +59,7 @@ public class TestDynamic {
 	public void testRotation() throws Exception {
 
 		/* *** CONFIGURATION *** */
-		double rotationTime = 100;
+		double rotationTime = 10;
 		Vector3D n = new Vector3D(1,0,0).normalize();
 		/* ********************* */
 
@@ -107,7 +107,7 @@ public class TestDynamic {
 	public void testRotationAcceleration() throws Exception {
 
 		/* **** Data of the test **** */
-		double accDuration = 100;
+		double accDuration = 10;
 		Vector3D rotVector = new Vector3D(0.1, 0.2, 0.3);
 		/* ************************** */
 

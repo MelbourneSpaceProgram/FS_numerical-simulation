@@ -2,6 +2,7 @@
 
 package msp.simulator.satellite;
 
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,6 +10,7 @@ import msp.simulator.environment.Environment;
 import msp.simulator.satellite.assembly.Assembly;
 import msp.simulator.satellite.assembly.SatelliteStates;
 import msp.simulator.satellite.io.IO;
+import msp.simulator.satellite.io.MemcachedRawTranscoder;
 import msp.simulator.satellite.sensors.Sensors;
 import msp.simulator.utils.logs.CustomLoggingTools;
 
@@ -20,13 +22,13 @@ public class Satellite {
 
 	/** Logger of the class */
 	private static final Logger logger = LoggerFactory.getLogger(Satellite.class);
-	
+
 	/** Instance of Assembly of the Satellite. */
 	private Assembly assembly;
-	
+
 	/** Instance of the Sensors of the satellite. */
 	private Sensors sensors;
-	
+
 	/** Instance of the IO Manager of the satellite. */
 	private IO io;
 
@@ -40,17 +42,60 @@ public class Satellite {
 
 		/* Building the Assembly of the Satellite. */
 		this.assembly = new Assembly(environment);
-		
+
 		/* Building the sensors. */
 		this.sensors = new Sensors(environment, assembly);
-		
+
 		/* Build the IO Manager. */
 		this.io = new IO();
 		Satellite.logger.info(CustomLoggingTools.indentMsg(Satellite.logger,
 				"  -> Connecting to the IO modules..."));
 		this.io.start();
-		
+
 	}
+
+	/**
+	 * Process the mission of the satellite for the current step.
+	 * It includes all of the payload processing but also the
+	 * externalization of the sensors etc.
+	 */
+	public void executeStepMission() {
+
+		/* Sensor Measurement */
+		if (this.io.isConnectToMemCached()) {
+
+			/* Magnetometer Measurement of the Geomagnetic field vector. */
+			/* This import is done once to avoid multiple noise computation.
+			 * But it actually do not matter.*/
+			Vector3D mmtMeasuredData = this.getSensors().getMagnetometer().getData_magField();
+			
+			/* Note that the double types are converted into an array of bytes
+			 * before being send to the Memcached common memory to avoid both 
+			 * serialization and deserialization issues. */
+			byte[] rawMag_x = MemcachedRawTranscoder.toRawByteArray(mmtMeasuredData.getX());
+			byte[] rawMag_y = MemcachedRawTranscoder.toRawByteArray(mmtMeasuredData.getY());
+			byte[] rawMag_z = MemcachedRawTranscoder.toRawByteArray(mmtMeasuredData.getZ());
+			
+			this.io.getMemcached().set(
+					"Simulation_Magnetometer_X", 0, 
+					rawMag_x,
+					this.io.getRawTranscoder()
+					);
+			this.io.getMemcached().set(
+					"Simulation_Magnetometer_Y", 0, 
+					rawMag_y,
+					this.io.getRawTranscoder()
+					);
+			this.io.getMemcached().set(
+					"Simulation_Magnetometer_Z", 0, 
+					rawMag_z,
+					this.io.getRawTranscoder()
+					);			
+		}
+	}
+
+
+
 
 	/**
 	 * Return the assembly of the satellite.
@@ -78,7 +123,7 @@ public class Satellite {
 	public Sensors getSensors() {
 		return this.sensors;
 	}
-	
+
 	/**
 	 * Return the satellite IO manager.
 	 * @return IO Instance of the satellite.

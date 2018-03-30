@@ -2,6 +2,8 @@
 
 package msp.simulator.test;
 
+import java.nio.ByteBuffer;
+
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.junit.Assert;
 import org.junit.Test;
@@ -98,7 +100,7 @@ public class TestSatellite {
 		NumericalSimulator simu = new NumericalSimulator();
 		Dashboard.setDefaultConfiguration();
 		Dashboard.setSimulationDuration(accDuration);
-		Dashboard.setIntegrationTimeStep(1.0);
+		Dashboard.setIntegrationTimeStep(0.1);
 
 		Dashboard.setMemCachedConnection(true, "127.0.0.1:11211");
 		Dashboard.setTorqueProvider(TorqueProviderEnum.MEMCACHED);
@@ -122,7 +124,7 @@ public class TestSatellite {
 
 		/* Set the torque value in the hash table as an array of double. */
 		MemcachedClient memcached = simu.getIo().getMemcached();
-		
+
 		memcached.set(torqueKey + "X", 0, MemcachedRawTranscoder.toRawByteArray(
 				rotVector.scalarMultiply(torqueIntensity).getX()));
 		memcached.set(torqueKey + "Y", 0, MemcachedRawTranscoder.toRawByteArray(
@@ -131,8 +133,6 @@ public class TestSatellite {
 				rotVector.scalarMultiply(torqueIntensity).getZ()));
 
 		simu.process();
-
-		simu.exit();
 
 		/* Extracting final state. */
 		SpacecraftState finalState = simu.getSatellite().getStates().getCurrentState();
@@ -157,6 +157,36 @@ public class TestSatellite {
 						finalState.getAdditionalState(SecondaryStates.key), 
 						SecondaryStates.SPIN
 						),				1e-9);
+
+		/* Check that the MMT sensor data are well exported to the common memory. */
+		Assert.assertArrayEquals(
+				/* Note that getData always introduces a noise in the measure. */
+				simu.getSatellite().getSensors().getMagnetometer().getData_magField().toArray(), 
+				new Vector3D(
+						ByteBuffer.wrap(
+								simu.getIo().getMemcached().get(
+										"Simulation_Magnetometer_X",
+										simu.getIo().getRawTranscoder()
+										)).getDouble(),
+						ByteBuffer.wrap(
+								simu.getIo().getMemcached().get(
+										"Simulation_Magnetometer_Y",
+										simu.getIo().getRawTranscoder()
+										)).getDouble(),
+						ByteBuffer.wrap(
+								simu.getIo().getMemcached().get(
+										"Simulation_Magnetometer_Z",
+										simu.getIo().getRawTranscoder()
+										)).getDouble()
+						).toArray(),
+				/* Converting to Tesla. */
+				/* Note that we compare a noisy value with another, so we potentially add
+				 * twice the noise in the worst case. */
+				2 * simu.getSatellite().getSensors().getMagnetometer().getNoiseIntensity() * 1e-9 
+				);
+
+		/* End the simulation and the test. */
+		simu.exit();
 	}
 
 	/**
@@ -177,21 +207,21 @@ public class TestSatellite {
 			Assert.assertNotNull(mmt);
 
 			/* Retrieve the inital measure of the magnetic field. */
-			GeoMagneticElements initialPerfectMeasure = mmt.retrievePerfectMeasurement();
-			GeoMagneticElements initialNoisyMeasure = mmt.retrieveNoisyMeasurement();
+			GeoMagneticElements initialPerfectField = mmt.retrievePerfectField();
+			GeoMagneticElements initialNoisyField = mmt.retrieveNoisyField();
 
 			Assert.assertArrayEquals(
-					initialPerfectMeasure.getFieldVector().toArray(), 
-					initialNoisyMeasure.getFieldVector().toArray(), 
+					initialPerfectField.getFieldVector().toArray(), 
+					initialNoisyField.getFieldVector().toArray(), 
 					mmt.getNoiseIntensity()
 					);
 
 			simu.process();
 
-			GeoMagneticElements finalPerfectMeasure = mmt.retrievePerfectMeasurement();
+			GeoMagneticElements finalPerfectField = mmt.retrievePerfectField();
 			Assert.assertNotEquals(
-					initialPerfectMeasure, 
-					finalPerfectMeasure
+					initialPerfectField, 
+					finalPerfectField
 					);
 
 		} catch (Exception e) {

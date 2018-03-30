@@ -12,6 +12,8 @@ import msp.simulator.environment.Environment;
 import msp.simulator.utils.logs.CustomLoggingTools;
 
 /**
+ * The assembly describes the entity of the satellite and gathers
+ * both its physical and state representation.
  *
  * @author Florian CHAUBEYRE
  */

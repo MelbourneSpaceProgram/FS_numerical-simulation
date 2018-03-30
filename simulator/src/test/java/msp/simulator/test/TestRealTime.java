@@ -23,8 +23,8 @@ public class TestRealTime {
 		Dashboard.setDefaultConfiguration();
 
 		Dashboard.setIntegrationTimeStep(0.1);
-		Dashboard.setEphemerisTimeStep(0.1);
-		Dashboard.setSimulationDuration(10000000);
+		Dashboard.setEphemerisTimeStep(1.0);
+		Dashboard.setSimulationDuration(Double.MAX_VALUE);
 
     Dashboard.setSatelliteInertiaMatrix(SatelliteBody.satInertiaMatrix);
 		
