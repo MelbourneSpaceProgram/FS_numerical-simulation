@@ -2,8 +2,11 @@
 
 package msp.simulator.user;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.logging.LogManager;
 
 import org.hipparchus.complex.Quaternion;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
@@ -57,6 +60,9 @@ public class Dashboard {
 
 	/** Set the Configuration of the Simulation to the default Settings. */
 	public static void setDefaultConfiguration() {
+		
+		Dashboard.configureLogging();
+
 		logger.info(CustomLoggingTools.indentMsg(logger, 
 				"Setting Default Configuration..."));
 
@@ -113,6 +119,46 @@ public class Dashboard {
 		try {
 			Dashboard.checkConfiguration();
 		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/** Configure the logging services of the simulation. */
+	public static void configureLogging() {
+		/* Setting the configuration of the Logging Services. */
+		LogManager myLogManager = LogManager.getLogManager();
+
+		/* OS-independent variables. */
+		final String userDir = System.getProperty("user.dir");
+		final String fileSeparator = System.getProperty("file.separator");
+
+		/* Setting the configuration file location. */
+		System.setProperty(
+				"java.util.logging.config.file", 
+				userDir				 	+ fileSeparator
+				+ "src" 					+ fileSeparator
+				+ "main" 				+ fileSeparator
+				+ "resources" 			+ fileSeparator
+				+ "config" 				+ fileSeparator
+				+ "log-config-file.txt"
+				);
+
+		/* Creating the log directory. */
+		File simuLogDir = new File(
+				userDir 			+ fileSeparator
+				+ "src" 			+ fileSeparator
+				+ "main" 		+ fileSeparator
+				+ "resources" 	+ fileSeparator
+				+ "logs" 		+ fileSeparator
+				);
+		if (!simuLogDir.exists()) {
+			simuLogDir.mkdirs();
+		}
+
+		/* Reading the overall configuration for the logging services. */
+		try {
+			myLogManager.readConfiguration();
+		} catch (SecurityException | IOException e) {
 			e.printStackTrace();
 		}
 	}

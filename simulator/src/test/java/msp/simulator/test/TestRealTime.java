@@ -3,6 +3,7 @@
 package msp.simulator.test;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.junit.Test;
 
 import msp.simulator.NumericalSimulator;
 import msp.simulator.dynamic.torques.TorqueProviderEnum;
@@ -13,16 +14,16 @@ import msp.simulator.user.Dashboard;
  * User test for a real-time communication with the flight software.
  * This test is exclude from the automation test runner of the 
  * project.
- * 
  * @author Florian CHAUBEYRE
  */
 public class TestRealTime {
 
+	@Test
 	public void testDetumblingRealTime() throws Exception {
 
 		Dashboard.setDefaultConfiguration();
 		Dashboard.setRealTimeProcessing(true);
-		Dashboard.setSimulationDuration(1);
+		Dashboard.setSimulationDuration(1000000);
 		
 		Dashboard.setIntegrationTimeStep(0.1);
 		Dashboard.setEphemerisTimeStep(1.0);

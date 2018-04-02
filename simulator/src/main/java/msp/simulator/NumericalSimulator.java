@@ -2,15 +2,12 @@
 
 package msp.simulator;
 
-import java.io.File;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.LogManager;
 
 import org.hipparchus.util.FastMath;
 import org.orekit.errors.OrekitException;
@@ -80,43 +77,6 @@ public class NumericalSimulator {
 	public NumericalSimulator() {
 		this.startDate = LocalDateTime.now();
 		this.realTimeProcessing = NumericalSimulator.realTimeUserFlag;
-
-		/* Setting the configuration of the Logging Services. */
-		LogManager myLogManager = LogManager.getLogManager();
-
-		/* OS-independent variables. */
-		final String userDir = System.getProperty("user.dir");
-		final String fileSeparator = System.getProperty("file.separator");
-
-		/* Setting the configuration file location. */
-		System.setProperty(
-				"java.util.logging.config.file", 
-				userDir				 	+ fileSeparator
-				+ "src" 					+ fileSeparator
-				+ "main" 				+ fileSeparator
-				+ "resources" 			+ fileSeparator
-				+ "config" 				+ fileSeparator
-				+ "log-config-file.txt"
-				);
-
-		/* Creating the log directory. */
-		File simuLogDir = new File(
-				userDir 			+ fileSeparator
-				+ "src" 			+ fileSeparator
-				+ "main" 		+ fileSeparator
-				+ "resources" 	+ fileSeparator
-				+ "logs" 		+ fileSeparator
-				);
-		if (!simuLogDir.exists()) {
-			simuLogDir.mkdirs();
-		}
-
-		/* Reading the overall configuration for the logging services. */
-		try {
-			myLogManager.readConfiguration();
-		} catch (SecurityException | IOException e) {
-			e.printStackTrace();
-		}
 
 		NumericalSimulator.logger.info("Simulation Instance Created.");
 	}
