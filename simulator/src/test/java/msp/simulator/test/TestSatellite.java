@@ -34,30 +34,17 @@ public class TestSatellite {
 	private static final Logger logger = LoggerFactory.getLogger(TestSatellite.class);
 
 	@Test
-	public void testMemcachedConnection() {
-		/* Set up the simulation. */
-		NumericalSimulator simu = new NumericalSimulator();
+	public void testMemcachedConnection() throws Exception {
+
 		Dashboard.setDefaultConfiguration();
 
 		Dashboard.setMemCachedConnection(true, "127.0.0.1:11211");
-		Dashboard.setSimulationDuration(1.0);
+		Dashboard.setSimulationDuration(1);
 
-		try {
-			/*
-			if (System.getProperty("os.name").toLowerCase().contains("mac")) {
-				logger.info("### Launching the MemCached server.");
-				IO.mac_os_create_memcached_servor();
-			} else {
-				System.out.println(
-						"##### Be sure the MemCached server is up and running #####");
-			}
-			 */
 
-			simu.initialize();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		/* *** Creating and launching the simulation. *** */
+		NumericalSimulator simu = new NumericalSimulator();
+		simu.initialize();
 
 		String message = "I am alive!";
 		double data = 1234.5678;
@@ -91,13 +78,12 @@ public class TestSatellite {
 	public void testMemcachedTorqueDrivenSimulation() throws Exception {
 
 		/* **** Data of the test **** */
-		double accDuration = 10 ;
+		long accDuration = 10 ;
 		Vector3D rotVector = new Vector3D(1, 0, 0);
 		double torqueIntensity = 0.1 ;
 		String torqueKey = MemCachedTorqueProvider.torqueCommandKey;
 		/* ************************** */
 
-		NumericalSimulator simu = new NumericalSimulator();
 		Dashboard.setDefaultConfiguration();
 		Dashboard.setSimulationDuration(accDuration);
 		Dashboard.setIntegrationTimeStep(0.1);
@@ -120,6 +106,7 @@ public class TestSatellite {
 		Dashboard.checkConfiguration();
 
 		/* Launching the simulation. */
+		NumericalSimulator simu = new NumericalSimulator();
 		simu.initialize();
 
 		/* Set the torque value in the hash table as an array of double. */

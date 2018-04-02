@@ -59,24 +59,24 @@ public class TestDynamic {
 	public void testRotation() throws Exception {
 
 		/* *** CONFIGURATION *** */
-		double rotationTime = 10;
+		long rotationTime = 10;
 		Vector3D n = new Vector3D(1,0,0).normalize();
 		/* ********************* */
 
-		NumericalSimulator simu = new NumericalSimulator();
 		Dashboard.setDefaultConfiguration();
+		Dashboard.setRealTimeProcessing(true);
 
 		Dashboard.setTorqueProvider(TorqueProviderEnum.SCENARIO);
-
 		Dashboard.setIntegrationTimeStep(0.1);
 		Dashboard.setEphemerisTimeStep(1.0);
 		Dashboard.setSimulationDuration(rotationTime);
 		Dashboard.setInitialAttitudeQuaternion(1, 0, 0, 0);
 		Dashboard.setInitialSpin(new Vector3D(FastMath.PI / rotationTime, n));
 		Dashboard.setInitialRotAcceleration(new Vector3D(0,0,0));
-		
 		//Dashboard.setVtsConnection(true);
 
+		/* *** Creating and launching the simulation. *** */
+		NumericalSimulator simu = new NumericalSimulator();
 		simu.initialize();
 		simu.process();
 		simu.exit();
@@ -107,22 +107,22 @@ public class TestDynamic {
 	public void testRotationAcceleration() throws Exception {
 
 		/* **** Data of the test **** */
-		double accDuration = 10;
+		long accDuration = 100;
 		Vector3D rotVector = new Vector3D(0.1, 0.2, 0.3);
 		/* ************************** */
 
-		NumericalSimulator simu = new NumericalSimulator();
+		/**** Configuration of the simulation. ****/
 		Dashboard.setDefaultConfiguration();
+		Dashboard.setRealTimeProcessing(false);
 		Dashboard.setSimulationDuration(accDuration);
 		Dashboard.setIntegrationTimeStep(1);
-
 		Dashboard.setTorqueProvider(TorqueProviderEnum.SCENARIO);
 
 		/* Writing the torque scenario. */
 		ArrayList<TorqueOverTimeScenarioProvider.Step> torqueScenario = 
 				new ArrayList<TorqueOverTimeScenarioProvider.Step>();
-		torqueScenario.add(new Step(0., accDuration + 1, rotVector));
 
+		torqueScenario.add(new Step(0., accDuration + 1, rotVector));
 		//torqueScenario.add(new Step(5., 3., new Vector3D(-1,0,0)));
 		//torqueScenario.add(new Step(55., 10., new Vector3D(1,2,3)));
 		//torqueScenario.add(new Step(70., 10., new Vector3D(-1,-2,-3)));
@@ -131,13 +131,14 @@ public class TestDynamic {
 
 		Dashboard.checkConfiguration();
 
-		/* Launching the simulation. */
+		/**** Creating and launching the simulation. ****/
+		NumericalSimulator simu = new NumericalSimulator();
 		simu.initialize();
 
 		logger.info(CustomLoggingTools.toString(
 				"Initial State of the satellite", 
 				simu.getSatellite().getStates().getInitialState()));
-		
+
 		simu.process();
 
 		logger.info(CustomLoggingTools.toString(

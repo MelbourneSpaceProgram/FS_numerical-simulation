@@ -32,7 +32,7 @@ import msp.simulator.utils.logs.ephemeris.EphemerisGenerator;
  * of the numerical simulator.
  * <p>
  * The configuration has to be set before any
- * simulation initialization and can be used
+ * simulation creation and can be used
  * anywhere by the user as the provided method 
  * are static.
  * <p>
@@ -60,9 +60,10 @@ public class Dashboard {
 		logger.info(CustomLoggingTools.indentMsg(logger, 
 				"Setting Default Configuration..."));
 
+		Dashboard.setRealTimeProcessing(false);
 		Dashboard.setIntegrationTimeStep(0.1);
 		Dashboard.setEphemerisTimeStep(1.0);
-		Dashboard.setSimulationDuration(10.0);
+		Dashboard.setSimulationDuration(10);
 		Dashboard.setOrbitalParameters(new OrbitalParameters(
 				575000, 	
 				0,
@@ -117,8 +118,19 @@ public class Dashboard {
 	}
 
 	/**
+	 * Set the real-time processing flag of the simulator.
+	 * @param status True to trigger the real-time processing.
+	 */
+	public static void setRealTimeProcessing(boolean status) {
+		NumericalSimulator.realTimeUserFlag = status;
+	}
+
+	/**
 	 * Set the integration time step of the different integrations
-	 * used on the simulation (Attitude and Main PVT)
+	 * used on the simulation (Attitude and Main PVT).
+	 * <p>
+	 * Note that the integration step should be a factor of the
+	 * simulation duration.
 	 * @param step in seconds and strictly positive
 	 */
 	public static void setIntegrationTimeStep(double step) {
@@ -148,11 +160,11 @@ public class Dashboard {
 	/**
 	 * Set the time duration of the simulation to process.
 	 * <p>
-	 * The double max value <i>(Double.MAX_VALUE)</i> states
-	 * for an "infinite loop" duration.
+	 * Note that it should be a factor of the integration
+	 * time step.
 	 * @param duration in seconds
 	 */
-	public static void setSimulationDuration(double duration) {
+	public static void setSimulationDuration(long duration) {
 		NumericalSimulator.simulationDuration = duration ; /* s. */
 	}
 
@@ -300,7 +312,7 @@ public class Dashboard {
 	public static void setTorqueCommandKey(String key) {
 		MemCachedTorqueProvider.torqueCommandKey = key;
 	}
-	
+
 	/**
 	 * Setting the connection to the VTS socket.
 	 * @param active true to activate the connection.
@@ -322,7 +334,23 @@ public class Dashboard {
 		boolean mainStatus = true;
 		boolean status;
 
-		/* Check n°1 */
+		/* Check */
+		/* The integration time step should be a factor of the simulation duration. */
+		status = FastMath.floorMod(
+				NumericalSimulator.simulationDuration * 1000,
+				(long) (Integration.integrationTimeStep * 1000)
+				) == 0;
+		if (!status) {
+			logger.error("The integration time step should be a factor "
+					+ "of the simulation duration."
+					+ "\n"
+					+ "\t\tIntegration Step: {} ms. vs {} s. :Duration",
+					(long) (Integration.integrationTimeStep * 1000),
+					NumericalSimulator.simulationDuration);
+		}
+		mainStatus &= status;	
+
+		/* Check */
 		/* The ephemeris time step should be inferior than the simulation duration. */
 		status = EphemerisGenerator.ephemerisTimeStep <= NumericalSimulator.simulationDuration;
 		if (!status) {
@@ -335,7 +363,7 @@ public class Dashboard {
 		}
 		mainStatus &= status;
 
-		/* Check n°2 */
+		/* Check */
 		/* When a MemCached torque provider is set, the MemCached connection 
 		 * should be enable in the satellite IO. 
 		 */
@@ -348,7 +376,7 @@ public class Dashboard {
 		}
 		mainStatus &= status;
 
-		/* Check n°3 */
+		/* Check */
 		/* In case the active torque provider is a scenario beginning at the initial
 		 * date of the simulation, the first step should provide a torque that match 
 		 * the initial rotational acceleration of the satellite.

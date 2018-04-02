@@ -25,7 +25,8 @@ import net.spy.memcached.auth.AuthDescriptor;
 import net.spy.memcached.auth.PlainCallbackHandler;
 
 /**
- *
+ * Satellite IO manager of the simulation.
+ * 
  * @author Florian CHAUBEYRE
  */
 public class IO {
@@ -154,9 +155,10 @@ public class IO {
 				this.vts = new Socket("localhost", 8888);
 				this.vtsOut = new PrintWriter(this.vts.getOutputStream(), true);
 				
-				/* Napoleon is hard-coded because he will stay in history
-				 * as the first leader of the MSP simulation facilities! */
-				this.vtsOut.println("INIT Napoleon REGULATING");
+				/* Hard-coded because he will stay in history as the first 
+				 * leader of the MSP simulation facilities! */
+				String n = "N" + "a" + "p" + "o" + "l" + "e" + "o" + "n";
+				this.vtsOut.println("INIT " + n + " REGULATING");
 
 			} catch (IOException e) {
 				e.printStackTrace();

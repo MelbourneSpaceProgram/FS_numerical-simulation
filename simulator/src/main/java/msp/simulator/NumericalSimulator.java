@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import msp.simulator.dynamic.Dynamic;
+import msp.simulator.environment.Environment;
 import msp.simulator.satellite.Satellite;
 import msp.simulator.user.Dashboard;
 import msp.simulator.utils.architecture.OrekitConfiguration;
@@ -34,63 +35,77 @@ public class NumericalSimulator {
 
 	/* ******* Public Static Attributes ******* */
 
-	/** 
-	 * Time duration of the simulation : the double max value
-	 * states for an "infinite loop" duration.
-	 */
-	public static double simulationDuration = Double.MAX_VALUE;
+	/** Time duration of the simulation. (Always numerically finite) */
+	public static long simulationDuration = Long.MAX_VALUE;
 
-	/** Precision threshold to be considered to be zero. */
-	public static final double EPSILON = 1e-13;
+	/** Real-time processing flag. */
+	public static boolean realTimeUserFlag = false;
+
+	/** Double precision threshold to be considered to be zero in the simulation. 
+	 * This enables to avoid failure due to any numerical approximation. */
+	public static final double EPSILON = 1e-10;
 
 	/* **************************************** */
 
 	/** Logger of the instance. */
 	private static final Logger logger = LoggerFactory.getLogger(NumericalSimulator.class);
 
+	/** Private real-time processing flag. */
+	private boolean realTimeProcessing;
+
 	/* The different modules of the simulator. */
 	/** Environment Instance in the Simulation. */
-	private msp.simulator.environment.Environment environment;
+	private Environment environment;
 
 	/** Satellite Instance of the Simulation. */
-	private msp.simulator.satellite.Satellite satellite;
+	private Satellite satellite;
 
 	/** Dynamic Module of the Simulation. */
-	private msp.simulator.dynamic.Dynamic dynamic;
+	private Dynamic dynamic;
 
 	/** Ephemeris Generator Instance of the simulator. */
-	private msp.simulator.utils.logs.ephemeris.EphemerisGenerator ephemerisGenerator;
+	private EphemerisGenerator ephemerisGenerator;
 
 	/* TODO: Enumerate the execution status. */
+	/** Execution status of the simulation. */
 	private int executionStatus;
 
+	/** Computer date at simulation start. */
 	private final LocalDateTime startDate;
+
+	/** Computer date at simulation exit. */
 	private LocalDateTime endDate;
 
+	/** Constructor of an instance of numerical simulator. */
 	public NumericalSimulator() {
 		this.startDate = LocalDateTime.now();
+		this.realTimeProcessing = NumericalSimulator.realTimeUserFlag;
 
 		/* Setting the configuration of the Logging Services. */
 		LogManager myLogManager = LogManager.getLogManager();
 
+		/* OS-independent variables. */
+		final String userDir = System.getProperty("user.dir");
+		final String fileSeparator = System.getProperty("file.separator");
+
 		/* Setting the configuration file location. */
 		System.setProperty(
 				"java.util.logging.config.file", 
-				System.getProperty("user.dir") + System.getProperty("file.separator") 
-				+ "src" + System.getProperty("file.separator")
-				+ "main" + System.getProperty("file.separator")
-				+ "resources" + System.getProperty("file.separator")
-				+ "config" + System.getProperty("file.separator")
+				userDir				 	+ fileSeparator
+				+ "src" 					+ fileSeparator
+				+ "main" 				+ fileSeparator
+				+ "resources" 			+ fileSeparator
+				+ "config" 				+ fileSeparator
 				+ "log-config-file.txt"
 				);
 
 		/* Creating the log directory. */
 		File simuLogDir = new File(
-				System.getProperty("user.dir") + System.getProperty("file.separator") 
-				+ "src" + System.getProperty("file.separator")
-				+ "main" + System.getProperty("file.separator")
-				+ "resources" + System.getProperty("file.separator")
-				+ "logs" + System.getProperty("file.separator")
+				userDir 			+ fileSeparator
+				+ "src" 			+ fileSeparator
+				+ "main" 		+ fileSeparator
+				+ "resources" 	+ fileSeparator
+				+ "logs" 		+ fileSeparator
 				);
 		if (!simuLogDir.exists()) {
 			simuLogDir.mkdirs();
@@ -110,11 +125,10 @@ public class NumericalSimulator {
 	 * This method performs in order the initialization,
 	 * the processing and the exit of the simulation.
 	 * <p>
-	 * NOTE: Any user defined settings for the simulation
-	 * should be registered prior the initialization/launch.
+	 * NOTE: The configuration of the simulation should be
+	 * set prior to the initialization or launch.
 	 * @throws Exception when initialization fails.
 	 * @see msp.simulator.user.Dashboard
-	 * @deprecated 
 	 */
 	public void launch() throws Exception {
 		this.initialize();
@@ -168,19 +182,15 @@ public class NumericalSimulator {
 				this.satellite.getIO().exportToVts(
 						this.satellite.getStates().getInitialState()
 						);
-
-				//this.satellite.getIO().getVtsOutputStream().println("CMD TIME PLAY");
 			}
 
 		} catch (OrekitException e) {
 			e.printStackTrace();
 		}
-
 	}
 
-
 	/**
-	 * Launch the main processing of the simulation.
+	 * Execute the main processing of the simulation.
 	 * @throws Exception 
 	 */
 	public void process() {
@@ -189,28 +199,37 @@ public class NumericalSimulator {
 					"Processing the Simulation..."));
 		}
 
-		/* Create the main loop task. */
-		RealTimeLoop realTimeLoop = new RealTimeLoop(
+		/* Creating the main simulation loop task. */
+		MainSimulationTask mainSimulationTask = new MainSimulationTask(
+				this.environment,
 				this.dynamic,
 				this.satellite,
 				this.ephemerisGenerator
 				);
 
-		final ScheduledExecutorService scheduler =
-				Executors.newScheduledThreadPool(1);
+		/* Wall clock processing. */
+		if (!this.realTimeProcessing) {
+			while(mainSimulationTask.isRunning()) {
+				mainSimulationTask.run();
+			}
 
-		/* Launch the main task periodically. */
-		final ScheduledFuture<?> realTimeLoopHandler =
-				scheduler.scheduleAtFixedRate(
-						realTimeLoop, 
-						0, 
-						(long) (this.dynamic.getPropagation().getIntegrationManager()
-								.getStepSize() * 1000), 
-						TimeUnit.MILLISECONDS);
+			/* Real-time processing. */
+		} else {
+
+			final ScheduledExecutorService scheduler =
+					Executors.newScheduledThreadPool(1);
+
+			/* Launch the main task periodically. */
+			final ScheduledFuture<?> realTimeLoopHandler =
+					scheduler.scheduleAtFixedRate(
+							mainSimulationTask, 
+							0, 
+							(long) (this.dynamic.getPropagation().getIntegrationManager()
+									.getStepSize() * 1000), 
+							TimeUnit.MILLISECONDS);
 
 
-		/* Launch the cancellation task if the duration is finite. */
-		if (simulationDuration != Double.MAX_VALUE) {
+			/* Launch the cancellation task. */
 			scheduler.schedule(
 					new Runnable() {
 						public void run() { 
@@ -221,34 +240,34 @@ public class NumericalSimulator {
 							scheduler.shutdown();
 						}
 					}, 
-					FastMath.round(simulationDuration), 
+					simulationDuration, 
 					TimeUnit.SECONDS
 					);
-		}
 
-		/* Wait for the main processing task termination. */
-		try {
-			long timeOut = (simulationDuration == Double.MAX_VALUE) ?
-					Long.MAX_VALUE : (FastMath.round(simulationDuration) + 1) ;
 
-			boolean execStatus =
-					scheduler.awaitTermination(
-							timeOut,
-							TimeUnit.SECONDS
-							);
+			/* Wait for the main processing task termination. */
+			try {
+				boolean execStatus =
+						scheduler.awaitTermination(
+								simulationDuration == Long.MAX_VALUE ? 
+										Long.MAX_VALUE 
+										: simulationDuration + 1 ,
+								TimeUnit.SECONDS
+								);
 
-			if (!execStatus ) {
-				logger.error("Main computation loop failed to terminate.");
-				throw (new Exception("Main computation loop failed to terminate."));
+				if (!execStatus ) {
+					logger.error("Main computation loop failed to terminate.");
+					throw (new Exception("Main computation loop failed to terminate."));
+				}
+
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
-
+		
 		/* End of processing. */
 		logger.info(CustomLoggingTools.indentMsg(logger,
-				"End of Processing Stage."));
+				"End of Processing Stage."));	
 	}
 
 	/**
@@ -274,72 +293,89 @@ public class NumericalSimulator {
 	}
 
 	/**
-	 * Runnable class for a scheduled time processing of the main simulation loop.
-	 * Note that this implementation of JAVA does not insure strict real time
-	 * accuracy.
+	 * Nested class of the simulator responsible to manage and run the primary 
+	 * task of the main loop.
+	 * <p>
+	 * This class implements Runnable in order to allow a scheduled time 
+	 * processing of each step for real-time services.
+	 * <p>
+	 * <i>Note that this implementation of JAVA does not insure strict real time
+	 * accuracy.</i>
 	 *
 	 * @author Florian CHAUBEYRE
 	 */
-	private final class RealTimeLoop implements Runnable {
+	private final class MainSimulationTask implements Runnable {
 
-		double integrationTimeStep;
-		double currentOffset;
-		boolean renderEphemeris;
-		EphemerisGenerator ephemerisGenerator;
-		int kEphemeris;
-		int countEphemeris;
-		Dynamic dynamic;
-		Satellite satellite;
+		/* Main simulation fields. */
+
+		/** Environment module of the simulation. */
+		@SuppressWarnings("unused")
+		private Environment environment;
+
+		/** Dynamic module of the simulation. */
+		private Dynamic dynamic;
+
+		/** Satellite module of the simulation. */
+		private Satellite satellite;
+
+		/** Ephemeris Generator module of the simulation. */
+		private EphemerisGenerator ephemerisGenerator;
+
+		/* Other fields needed by the task. */
+
+		/** Integration time step of the simulation. */
+		private double integrationTimeStep;
+
+		/** Current offset in the main loop. */
+		private double currentOffset;
+
+		/** Time period of the ephemeris generation. */
+		private int ephemerisPeriod;
+
+		/** Counter of steps before the ephemeris generation. */
+		private int ephemerisStepCounter;
 
 		/**
 		 * Create the main simulation loop task as a runnable object ready to
 		 * be scheduled periodically.
 		 * 
-		 * @param dynamic
-		 * @param satellite
-		 * @param ephemerisGenerator
+		 * @param environment Instance of the simulation.
+		 * @param dynamic Instance of the simulation.
+		 * @param satellite Instance of the simulation.
+		 * @param ephemerisGenerator Instance of the simulation.
 		 */
-		public RealTimeLoop(
+		public MainSimulationTask(
+				Environment environment,
 				Dynamic dynamic,
 				Satellite satellite,
 				EphemerisGenerator ephemerisGenerator) {
 
+			this.environment = environment;
 			this.dynamic = dynamic;
 			this.satellite = satellite;
 			this.ephemerisGenerator = ephemerisGenerator;
 
 			this.integrationTimeStep = dynamic.getPropagation().getIntegrationManager().getStepSize();
-
-			this.renderEphemeris = false;
-			this.kEphemeris = (int) FastMath.round(
-					EphemerisGenerator.ephemerisTimeStep  
-					/ this.integrationTimeStep );
-
 			this.currentOffset = 0;
-			this.countEphemeris = 1; /* The incrementation of the current offset occurs prior. */
 
+			this.ephemerisPeriod = (int) FastMath.round(
+					EphemerisGenerator.ephemerisTimeStep  / this.integrationTimeStep
+					);
+			this.ephemerisStepCounter = 1;
 		}
 
 		/**
 		 * Main processing loop of the simulator.
 		 */
 		public void run() {
-			if (
-					(simulationDuration == Double.MAX_VALUE)
-					||
-					(currentOffset + 1e-10 < simulationDuration) /* Avoid numerical approximation. */
-					) 
-			{
-
-				//System.out.println("Trigger: " + System.currentTimeMillis());
-				//System.out.println("Offset: " + currentOffset);
+			if (this.isRunning()) {
 
 				/* Propagate the current state s(t) to s(t + dt) */
 				this.dynamic.getPropagation().propagateStep();
 
-				/* Incrementing the time step: we are at the new offset now after the propagation. */
+				/* Incrementing the current offset.
+				 * We are now at the new offset after the propagation. */
 				currentOffset += integrationTimeStep;
-
 
 				/* ******** PAYLOAD *********/
 
@@ -355,20 +391,20 @@ public class NumericalSimulator {
 
 
 				/* ********** Generate the Ephemeris ********** */
-				/* Update the flag. */
-				renderEphemeris = 
-						FastMath.floorMod(countEphemeris, kEphemeris) < EPSILON 
+				/* Compute the ephemeris generation flag. */
+				boolean renderEphemeris = 
+						FastMath.floorMod(ephemerisStepCounter, ephemerisPeriod) < EPSILON 
 						? true : false;
 
-				/* Render the epehemeris step if required. */
+				/* Render the ephemeris step if required. */
 				if (renderEphemeris) { 
 					this.ephemerisGenerator.writeStep(this.satellite);
 				}
 
 				/* Increment the counter. */
-				countEphemeris++;
+				ephemerisStepCounter++;
 				/* **************************************************************	*/
-				
+
 			} else {
 				try {
 					throw (new Exception());
@@ -376,33 +412,42 @@ public class NumericalSimulator {
 				}
 			}
 		}
-	} /* End of class */
 
+		/**
+		 * Assert if the primary task of the simulation is running.
+		 * @return True if running, false otherwise.
+		 */
+		public boolean isRunning() {
+			/* Basically run until the end of the simulation duration. */
+			boolean status = (currentOffset + EPSILON < simulationDuration);
 
-	/**
-	 * @return the satellite
-	 */
-	public msp.simulator.satellite.Satellite getSatellite() {
-		return satellite;
-	}
-
-	/**
-	 * Return the Satellite IO Manager.
-	 * @return IO instance of the satellite.
-	 */
-	public msp.simulator.satellite.io.IO getIo() {
-		return satellite.getIO();
-	}
+			return status;
+		}
+	} /* End of nested class */
 
 	/**
-	 * @return the environment
+	 * @return The space environment of the simulation.
 	 */
 	public msp.simulator.environment.Environment getEnvironment() {
 		return environment;
 	}
 
 	/**
-	 * @return the dynamic
+	 * @return The satellite instance of the simulation.
+	 */
+	public msp.simulator.satellite.Satellite getSatellite() {
+		return satellite;
+	}
+
+	/**
+	 * @return The satellite IO manager of the simulation.
+	 */
+	public msp.simulator.satellite.io.IO getIo() {
+		return satellite.getIO();
+	}
+
+	/**
+	 * @return The dynamic engine of the simulation.
 	 */
 	public msp.simulator.dynamic.Dynamic getDynamic() {
 		return dynamic;
