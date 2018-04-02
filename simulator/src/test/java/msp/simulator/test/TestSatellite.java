@@ -78,13 +78,14 @@ public class TestSatellite {
 	public void testMemcachedTorqueDrivenSimulation() throws Exception {
 
 		/* **** Data of the test **** */
-		long accDuration = 10 ;
+		long accDuration = 100 ;
 		Vector3D rotVector = new Vector3D(1, 0, 0);
 		double torqueIntensity = 0.1 ;
 		String torqueKey = MemCachedTorqueProvider.torqueCommandKey;
 		/* ************************** */
 
 		Dashboard.setDefaultConfiguration();
+		Dashboard.setRealTimeProcessing(true);
 		Dashboard.setSimulationDuration(accDuration);
 		Dashboard.setIntegrationTimeStep(0.1);
 

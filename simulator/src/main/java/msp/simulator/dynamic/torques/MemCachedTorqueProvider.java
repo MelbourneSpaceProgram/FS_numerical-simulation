@@ -5,9 +5,7 @@ package msp.simulator.dynamic.torques;
 import java.nio.ByteBuffer;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.orekit.errors.OrekitException;
 import org.orekit.time.AbsoluteDate;
-import org.orekit.time.TimeScalesFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,25 +102,15 @@ public class MemCachedTorqueProvider implements TorqueProvider {
 	public Vector3D getTorque(AbsoluteDate date) {
 		/* Flag to enable the acquisition of the torque for the step. */
 		boolean acquisition;
-
-		/* Strings avoids numerical approximation of the dates and a potential 
-		 * false comparison. */
-		AbsoluteDate roundDate = new AbsoluteDate();
-		try {
-			roundDate = new AbsoluteDate(
-					date.toString(),
-					TimeScalesFactory.getUTC()
-					);
-		} catch (OrekitException e) { e.printStackTrace(); }
 		
 		/* As the torque is considered constant over a step, we only need 
 		 * to acquire the torque once at the very beginning of the step. */
 		this.stepStart = this.satState.getCurrentState().getDate();
 		
 		acquisition = 
-				(roundDate.compareTo(this.nextAcquisitionDate) == 0)
+				(date.compareTo(this.nextAcquisitionDate) == 0)
 				&&
-				(roundDate.compareTo(this.stepStart) == 0)
+				(date.compareTo(this.stepStart) == 0)
 				;
 		
 		/* Retrieve the torque command if a new step is detected. */
@@ -178,7 +166,7 @@ public class MemCachedTorqueProvider implements TorqueProvider {
 			logger.debug("------------- Torque Provider: " + date.toString() +" - " +
 					this.stepTorque.toString());
 		}
-
+		
 		/* Finally returns the torque of the step (updated if needed). */
 		return this.stepTorque;
 	}

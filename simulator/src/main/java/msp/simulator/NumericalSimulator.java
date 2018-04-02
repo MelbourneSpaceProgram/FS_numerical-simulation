@@ -212,7 +212,7 @@ public class NumericalSimulator {
 								simulationDuration == Long.MAX_VALUE ? 
 										Long.MAX_VALUE 
 										: simulationDuration + 1 ,
-								TimeUnit.SECONDS
+										TimeUnit.SECONDS
 								);
 
 				if (!execStatus ) {
@@ -224,7 +224,7 @@ public class NumericalSimulator {
 				e.printStackTrace();
 			}
 		}
-		
+
 		/* End of processing. */
 		logger.info(CustomLoggingTools.indentMsg(logger,
 				"End of Processing Stage."));	
