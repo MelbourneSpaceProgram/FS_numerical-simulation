@@ -85,7 +85,7 @@ public class TestSatellite {
 		/* ************************** */
 
 		Dashboard.setDefaultConfiguration();
-		Dashboard.setRealTimeProcessing(true);
+		Dashboard.setRealTimeProcessing(false);
 		Dashboard.setSimulationDuration(accDuration);
 		Dashboard.setIntegrationTimeStep(0.1);
 
