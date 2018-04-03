@@ -131,25 +131,8 @@ public class Propagation {
 	}
 
 	/**
-	 * Ensure the propagation to the target date and update the satellite
-	 * state.
-	 * <p>
-	 * Note that the time resolution of the propagation is not given by the
-	 * target date but by the integration time step.
-	 * 
-	 * @param targetDate The date where the propagation processing ends.
-	 * @deprecated since v0.4: the propagation should be made at each integration step.
+	 * Propagate the satellite states for a single step of time.
 	 */
-	public void propagate(AbsoluteDate targetDate) {
-		try {
-			SpacecraftState propagatedState = this.propagator.propagate(targetDate);
-			this.satelliteStates.setCurrentState(propagatedState);
-
-		} catch (OrekitException e) {
-			e.printStackTrace();
-		}
-	}
-
 	public void propagateStep() {
 
 		/* Step before the integration s(t). */
@@ -201,22 +184,20 @@ public class Propagation {
 	}
 
 	/**
-	 * Compute and Update the satellite state at the next time step.
+	 * Compute the satellite rotational state at the next time step.
 	 * <p>
 	 * The dynamic computation is as follow: 
 	 * Torque -- Spin -- Attitude.
 	 * <p>
 	 * The main OreKit integration takes care of the orbital 
 	 * parameters and integrates the additional data - e.g. the 
-	 * spin - where the secondary integration resolves the new 
-	 * attitude through the Wilcox algorithm.
-	 * <p>
-	 * This process is called "Propagation".
+	 * spin and angle of rot. - where this secondary integration
+	 * resolves the new attitude through the Wilcox algorithm.
 	 * 
 	 * @param currentState The state s(t), i.e. the one before integration.
 	 * @param integratedState The state s(t + dt), i.e. resulting 
 	 * from the integration of the step s(t).
-	 * @return The same state with a propagated attitude.
+	 * @return The fully updated state s(t+dt) with its propagated attitude.
 	 * 
 	 * @see NumericalPropagator#propagate(AbsoluteDate)
 	 * 
@@ -230,26 +211,11 @@ public class Propagation {
 		SpacecraftState secondaryPropagatedState = null;
 
 		try {
-
-			/** TODO: Update the comments. */
-
-			/* At that point the main propagation of the orbital parameters
-			 * and the additional states (spin and rotational acceleration)
-			 * is done and we have access to a SpacecraftState containing 
-			 * the current Attitude and the new integrated spin.
-			 * Thus we can compute the attitude at the next step.
-			 */
-			/* Nonetheless as said in the main introduction of the class
-			 * the date contained in the main propagated state is not updated,
-			 * it means that we have access to the right orbit but with the
-			 * previous date. Thus we have to update this date ourselves to
-			 * store it in our own satellite states.
-			 * As the date is accessed through the orbit, we have to build
-			 * a clone of the orbit but with the right date.
-			 */
-
-			/* Determine the data of the rotation at the next step. 
-			 * The additional states are already updated.
+			/* At that point the integration of the orbital parameters
+			 * and the additional states (angle of rotation, spin and 
+			 * rotational acceleration) should be done.
+			 * Thus we can compute the rotational parameters at the next 
+			 * time step.
 			 */
 
 			/* Rotational Acceleration */

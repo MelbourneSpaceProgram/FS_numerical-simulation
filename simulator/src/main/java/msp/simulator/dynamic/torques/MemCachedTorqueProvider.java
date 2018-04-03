@@ -2,16 +2,18 @@
 
 package msp.simulator.dynamic.torques;
 
+import java.nio.ByteBuffer;
+
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.orekit.errors.OrekitException;
 import org.orekit.time.AbsoluteDate;
-import org.orekit.time.TimeScalesFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import msp.simulator.dynamic.propagation.integration.Integration;
 import msp.simulator.satellite.Satellite;
+import msp.simulator.satellite.assembly.SatelliteStates;
 import msp.simulator.satellite.io.IO;
+import msp.simulator.satellite.io.MemcachedRawTranscoder;
 import msp.simulator.utils.logs.CustomLoggingTools;
 import net.spy.memcached.MemcachedClient;
 
@@ -24,9 +26,12 @@ public class MemCachedTorqueProvider implements TorqueProvider {
 	/* ******* Public Static Attributes ******* */
 
 	/** Public key to access the MemCached hash table. */
-	public static String torqueCommandKey = "torque";
+	public static String torqueCommandKey = "Simulation_Torque_";
 
 	/* **************************************** */
+	
+	/** Private Key to store the public key. */
+	private String torqueKey;
 
 	/** Logger of the class */
 	private static final Logger logger = LoggerFactory.getLogger(
@@ -35,22 +40,25 @@ public class MemCachedTorqueProvider implements TorqueProvider {
 	/** Instance of the MemCached Client of the simulation. */
 	private MemcachedClient memcached;
 
-	/** Buffer date to avoid several processing and several torque
-	 * command value at the same date in the simulation. Indeed the
-	 * command is considered constant over a single propagation step.
-	 */
-	private AbsoluteDate nextComputationDate;
+	/** Instance of the "raw data" transcoder of the IO. */
+	private MemcachedRawTranscoder memcachedTranscoder;
 
-	/** The last stored torque command is return in case the last date 
-	 * is already processed.
-	 */
-	private Vector3D lastTorque;
+	/** Buffered date of the beginning of the step. */
+	private AbsoluteDate stepStart;
 
-	/** Private Key to store the public key. */
-	private String torqueKey;
+	/** Satellite states keeping the start date of the step all 
+	 * along the step. */
+	private SatelliteStates satState;
 	
+	
+	/** Buffered date of the next acquisition date. */
+	private AbsoluteDate nextAcquisitionDate;
+
+	/** Buffered torque for the current step. */
+	private Vector3D stepTorque;
+
 	/** Copy of the fixed integration time step. */
-	private final double integrationTimeStep = Integration.integrationTimeStep;
+	private final double stepSize = Integration.integrationTimeStep;
 
 	/**
 	 * Create the instance of memcached torque provider.
@@ -63,18 +71,24 @@ public class MemCachedTorqueProvider implements TorqueProvider {
 			logger.info(CustomLoggingTools.indentMsg(logger,
 					"Connecting to the MemCached Torque Provider..."));
 
-			this.nextComputationDate = satellite.getStates().getInitialState().getDate();
-			this.lastTorque = Vector3D.ZERO;
+			/* The beginning date of the step is actually given by the state of
+			 * the satellite during the propagation. */
+			this.satState = satellite.getStates();
+			this.stepStart = this.satState.getCurrentState().getDate();
+			this.nextAcquisitionDate = this.satState.getInitialState().getDate();
+			this.stepTorque = Vector3D.ZERO;
 
 			this.torqueKey = MemCachedTorqueProvider.torqueCommandKey;
 			this.memcached = satellite.getIO().getMemcached();
+			this.memcachedTranscoder = satellite.getIO().getRawTranscoder();
 
 		} else {
 			logger.error(CustomLoggingTools.indentMsg(logger,
 					"Memcached connection is not enable!"));
 		}
 	}
-	
+
+
 	/**
 	 * Retrieve the torque command from the MemCached common memory
 	 * hash table. This command is then ideally set by the real flight
@@ -86,39 +100,75 @@ public class MemCachedTorqueProvider implements TorqueProvider {
 	 */
 	@Override
 	public Vector3D getTorque(AbsoluteDate date) {
-		/* Comparing strings avoids numerical approximation of the dates
-		 * and a potential false comparison. */
-		if (date.toString().equals(this.nextComputationDate.toString())) {
-			
-			/* Reading the torque command from MemCached. */
-			Vector3D torqueCommand = new Vector3D(
-					(double[]) this.memcached.get(this.torqueKey)
-					);
+		/* Flag to enable the acquisition of the torque for the step. */
+		boolean acquisition;
+		
+		/* As the torque is considered constant over a step, we only need 
+		 * to acquire the torque once at the very beginning of the step. */
+		this.stepStart = this.satState.getCurrentState().getDate();
+		
+		acquisition = 
+				(date.compareTo(this.nextAcquisitionDate) == 0)
+				&&
+				(date.compareTo(this.stepStart) == 0)
+				;
+		
+		/* Retrieve the torque command if a new step is detected. */
+		if (acquisition) {
 
-			/* Updating the buffer data. */
+			/* Reading the torque command from MemCached. */
 			try {
-				this.nextComputationDate = new AbsoluteDate(
-						date.shiftedBy(this.integrationTimeStep).toString(),
-						TimeScalesFactory.getUTC()
+				Vector3D torqueCommand;
+
+				double torque_x = ByteBuffer.wrap(
+						this.memcached.get(
+								this.torqueKey + "X",
+								this.memcachedTranscoder))
+						.getDouble();
+
+				double torque_y = ByteBuffer.wrap(
+						this.memcached.get(
+								this.torqueKey + "Y",
+								this.memcachedTranscoder))
+						.getDouble();
+
+				double torque_z = ByteBuffer.wrap(
+						this.memcached.get(
+								this.torqueKey + "Z",
+								this.memcachedTranscoder))
+						.getDouble();
+
+				torqueCommand = new Vector3D(
+						torque_x,
+						torque_y,
+						torque_z
 						);
-			} catch (OrekitException e) {
+				
+				/* Checking the data transmission. */
+				if (torqueCommand.isNaN() || torqueCommand.isInfinite()) {
+					throw new Exception("Torque acquisition: MemCached transmission failed.");
+				} 
+
+				/* Then update the buffered data. */
+				this.nextAcquisitionDate = this.stepStart.shiftedBy(this.stepSize);
+				this.stepTorque = torqueCommand;
+				
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			
-			this.lastTorque = torqueCommand;
 
-			/* Debug */
-			logger.debug("Torque Acquisition: " + date.toString() +" - " +
-					torqueCommand.toString());
+			/* Debug Information */
+			logger.debug("Torque Provider (Acquisition): " + date.toString() +" - " +
+					this.stepTorque.toString());
 
-			return torqueCommand;
-			
 		} else {
-			logger.debug("--- Torque Provider: " + date.toString() +" - " +
-					this.lastTorque.toString());
-			
-			return this.lastTorque;
+			/* Else the torque is already computed for the current step. */
+			logger.debug("------------- Torque Provider: " + date.toString() +" - " +
+					this.stepTorque.toString());
 		}
+		
+		/* Finally returns the torque of the step (updated if needed). */
+		return this.stepTorque;
 	}
 
 }

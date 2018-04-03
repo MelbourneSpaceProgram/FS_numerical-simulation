@@ -2,8 +2,11 @@
 
 package msp.simulator.user;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.logging.LogManager;
 
 import org.hipparchus.complex.Quaternion;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
@@ -32,7 +35,7 @@ import msp.simulator.utils.logs.ephemeris.EphemerisGenerator;
  * of the numerical simulator.
  * <p>
  * The configuration has to be set before any
- * simulation initialization and can be used
+ * simulation creation and can be used
  * anywhere by the user as the provided method 
  * are static.
  * <p>
@@ -57,12 +60,16 @@ public class Dashboard {
 
 	/** Set the Configuration of the Simulation to the default Settings. */
 	public static void setDefaultConfiguration() {
+		
+		Dashboard.configureLogging();
+
 		logger.info(CustomLoggingTools.indentMsg(logger, 
 				"Setting Default Configuration..."));
 
+		Dashboard.setRealTimeProcessing(false);
 		Dashboard.setIntegrationTimeStep(0.1);
 		Dashboard.setEphemerisTimeStep(1.0);
-		Dashboard.setSimulationDuration(10.0);
+		Dashboard.setSimulationDuration(10);
 		Dashboard.setOrbitalParameters(new OrbitalParameters(
 				575000, 	
 				0,
@@ -107,7 +114,7 @@ public class Dashboard {
 
 		/* **** IO Settings **** */
 		Dashboard.setMemCachedConnection(IO.connectMemCached, IO.memcachedSocketAddress);
-		Dashboard.setTorqueCommandKey("torque");
+		Dashboard.setTorqueCommandKey(MemCachedTorqueProvider.torqueCommandKey);
 
 		try {
 			Dashboard.checkConfiguration();
@@ -116,9 +123,60 @@ public class Dashboard {
 		}
 	}
 
+	/** Configure the logging services of the simulation. */
+	public static void configureLogging() {
+		/* Setting the configuration of the Logging Services. */
+		LogManager myLogManager = LogManager.getLogManager();
+
+		/* OS-independent variables. */
+		final String userDir = System.getProperty("user.dir");
+		final String fileSeparator = System.getProperty("file.separator");
+
+		/* Setting the configuration file location. */
+		System.setProperty(
+				"java.util.logging.config.file", 
+				userDir				 	+ fileSeparator
+				+ "src" 					+ fileSeparator
+				+ "main" 				+ fileSeparator
+				+ "resources" 			+ fileSeparator
+				+ "config" 				+ fileSeparator
+				+ "log-config-file.txt"
+				);
+
+		/* Creating the log directory. */
+		File simuLogDir = new File(
+				userDir 			+ fileSeparator
+				+ "src" 			+ fileSeparator
+				+ "main" 		+ fileSeparator
+				+ "resources" 	+ fileSeparator
+				+ "logs" 		+ fileSeparator
+				);
+		if (!simuLogDir.exists()) {
+			simuLogDir.mkdirs();
+		}
+
+		/* Reading the overall configuration for the logging services. */
+		try {
+			myLogManager.readConfiguration();
+		} catch (SecurityException | IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Set the real-time processing flag of the simulator.
+	 * @param status True to trigger the real-time processing.
+	 */
+	public static void setRealTimeProcessing(boolean status) {
+		NumericalSimulator.realTimeUserFlag = status;
+	}
+
 	/**
 	 * Set the integration time step of the different integrations
-	 * used on the simulation (Attitude and Main PVT)
+	 * used on the simulation (Attitude and Main PVT).
+	 * <p>
+	 * Note that the integration step should be a factor of the
+	 * simulation duration.
 	 * @param step in seconds and strictly positive
 	 */
 	public static void setIntegrationTimeStep(double step) {
@@ -148,11 +206,11 @@ public class Dashboard {
 	/**
 	 * Set the time duration of the simulation to process.
 	 * <p>
-	 * The double max value <i>(Double.MAX_VALUE)</i> states
-	 * for an "infinite loop" duration.
+	 * Note that it should be a factor of the integration
+	 * time step.
 	 * @param duration in seconds
 	 */
-	public static void setSimulationDuration(double duration) {
+	public static void setSimulationDuration(long duration) {
 		NumericalSimulator.simulationDuration = duration ; /* s. */
 	}
 
@@ -301,6 +359,14 @@ public class Dashboard {
 		MemCachedTorqueProvider.torqueCommandKey = key;
 	}
 
+	/**
+	 * Setting the connection to the VTS socket.
+	 * @param active true to activate the connection.
+	 */
+	public static void setVtsConnection(boolean active) {
+		IO.connectVts = active;
+	}
+
 
 	/* ********************************************************* */
 	/* *****************		CHECK METHODS	 ****************** */
@@ -314,7 +380,23 @@ public class Dashboard {
 		boolean mainStatus = true;
 		boolean status;
 
-		/* Check n°1 */
+		/* Check */
+		/* The integration time step should be a factor of the simulation duration. */
+		status = FastMath.floorMod(
+				NumericalSimulator.simulationDuration * 1000,
+				(long) (Integration.integrationTimeStep * 1000)
+				) == 0;
+		if (!status) {
+			logger.error("The integration time step should be a factor "
+					+ "of the simulation duration."
+					+ "\n"
+					+ "\t\tIntegration Step: {} ms. vs {} s. :Duration",
+					(long) (Integration.integrationTimeStep * 1000),
+					NumericalSimulator.simulationDuration);
+		}
+		mainStatus &= status;	
+
+		/* Check */
 		/* The ephemeris time step should be inferior than the simulation duration. */
 		status = EphemerisGenerator.ephemerisTimeStep <= NumericalSimulator.simulationDuration;
 		if (!status) {
@@ -327,7 +409,7 @@ public class Dashboard {
 		}
 		mainStatus &= status;
 
-		/* Check n°2 */
+		/* Check */
 		/* When a MemCached torque provider is set, the MemCached connection 
 		 * should be enable in the satellite IO. 
 		 */
@@ -340,7 +422,7 @@ public class Dashboard {
 		}
 		mainStatus &= status;
 
-		/* Check n°3 */
+		/* Check */
 		/* In case the active torque provider is a scenario beginning at the initial
 		 * date of the simulation, the first step should provide a torque that match 
 		 * the initial rotational acceleration of the satellite.
