@@ -71,9 +71,9 @@ public class Magnetometer {
 	 * @return GeoMagneticElements (where field vector is expressed in nT)
 	 * @see #retrievePerfectMeasurement()
 	 */
-	public GeoMagneticElements retrieveNoisyMeasurement() {
+	public GeoMagneticElements retrieveNoisyField() {
 		/* Perfect Measure. */
-		GeoMagneticElements perfectMeasure = this.retrievePerfectMeasurement();
+		GeoMagneticElements perfectMeasure = this.retrievePerfectField();
 
 		/* Normally distributed random noise contribution. */
 		Vector3D noise = new Vector3D ( new double[] { 
@@ -105,7 +105,7 @@ public class Magnetometer {
 	 * (where field vector is expressed in nT)
 	 * @see GeoMagneticElements 
 	 */
-	public GeoMagneticElements retrievePerfectMeasurement() {
+	public GeoMagneticElements retrievePerfectField() {
 
 		SpacecraftState satState = this.assembly.getStates().getCurrentState() ;
 
@@ -149,9 +149,28 @@ public class Magnetometer {
 
 		return trueMagField;
 	}
+	
+	/**
+	 * Retrieve the measured data from the magnetometer sensors.
+	 * <p>
+	 * WARNING: a noise is always introduced component by component
+	 * on the returned value. Storing the vector before working on
+	 * it may be required.
+	 * 
+	 * @return Geomagnetic Field Vector (in Tesla)
+	 */
+	public Vector3D getData_magField() {
+		/* Retrieve the noisy magnetic field. */
+		Vector3D data = this.retrieveNoisyField().getFieldVector();
+	
+		/* Convert nTesla into Tesla. */
+		data = data.scalarMultiply(1e-9);
+	
+		return data;
+	}
 
 	/**
-	 * @return The noise intensity.
+	 * @return The noise intensity in nTesla.
 	 */
 	public double getNoiseIntensity() {
 		return noiseIntensity;

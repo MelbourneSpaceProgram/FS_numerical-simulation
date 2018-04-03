@@ -21,6 +21,7 @@ import org.orekit.utils.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import msp.simulator.satellite.Satellite;
 import msp.simulator.utils.logs.CustomLoggingTools;
 
 /**
@@ -37,7 +38,7 @@ public class EphemerisGenerator {
 			LoggerFactory.getLogger(EphemerisGenerator.class);
 
 	/* ****** Default Values **** */
-	
+
 	/** Ephemeris time step in seconds. */
 	public static double ephemerisTimeStep = 1.0; /* seconds */
 
@@ -49,8 +50,8 @@ public class EphemerisGenerator {
 			+ "resources" + System.getProperty("file.separator")
 			+ "ephemeris" + System.getProperty("file.separator")
 			;
-			
-	
+
+
 	/** Default Name of the Simulation. */
 	public static String DEFAULT_SIMU_NAME =
 			"MSP-SIM-V.0.1-" + 
@@ -58,7 +59,7 @@ public class EphemerisGenerator {
 					LocalDateTime.now().format(
 							DateTimeFormatter.ofPattern("dd.MM@HH.mm"))
 					+ "-";
-	
+
 	/** New Line Symbol. */
 	protected final static String LS = System.getProperty("line.separator");
 
@@ -88,12 +89,9 @@ public class EphemerisGenerator {
 	/** OrbitWrapper OEM File Writer */
 	private FileWriter writerOEM;
 
-	/** First Date known by the generator. */
-	private AbsoluteDate extractedStartDate;
-
 	/** Capture the first date of the ephemeris. */
 	boolean isStartDateCaptured = false;
-	
+
 	/**
 	 * Create the ephemeris generator.
 	 */
@@ -174,15 +172,10 @@ public class EphemerisGenerator {
 	/**
 	 * Append the line corresponding the current satellite step to the
 	 * ephemeris file.
-	 * @param newState The satellite state to register in the ephemeris
+	 * @param satState The satellite state to register in the ephemeris
 	 */
-	public void writeStep(SpacecraftState newState) {
-		/* Extracting the start date of the generation. */
-		if (!this.isStartDateCaptured) {
-			this.extractedStartDate = newState.getDate();
-			this.isStartDateCaptured = true;
-		}
-
+	public void writeStep(Satellite satellite) {
+		SpacecraftState newState = satellite.getStates().getCurrentState();
 		try {
 			StringBuffer buff = new StringBuffer();
 
@@ -242,20 +235,21 @@ public class EphemerisGenerator {
 			this.writerAEM.flush();
 
 			/* For DEBUG only. */
-			logger.debug(
+			logger.info(
 					"Satellite State to store in the ephemeris:\n" +
-							"Offset: " +
-							newState.getDate().durationFrom(this.extractedStartDate) + 
+							"State Date: " + newState.getDate().toString() + 
 							"\n" +
 							"Attitude: [{}, {}, {}, {}] \n" +
 							"Spin    : {} \n" +
-							"RotAcc  : {}",
+							"RotAcc  : {}\n" +
+							"Momentum: {}",
 							newState.getAttitude().getRotation().getQ0(),
 							newState.getAttitude().getRotation().getQ1(),
 							newState.getAttitude().getRotation().getQ2(),
 							newState.getAttitude().getRotation().getQ3(),
 							newState.getAttitude().getSpin().toString(),
-							newState.getAttitude().getRotationAcceleration().toString()
+							newState.getAttitude().getRotationAcceleration().toString(),
+							satellite.getAssembly().getAngularMomentum()
 					);
 
 		} catch (OrekitException | IOException e) {
@@ -342,5 +336,5 @@ public class EphemerisGenerator {
 		}
 		return null;
 	}
-	
+
 }
