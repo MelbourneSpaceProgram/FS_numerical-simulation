@@ -66,7 +66,7 @@ public class Satellite {
 
 			/* Magnetometer Measurement of the Geomagnetic field vector. */
 			/* This import is done once to avoid multiple noise computation.
-			 * But it actually do not matter.*/
+			 * But it actually does not matter.*/
 			Vector3D mmtMeasuredData = this.getSensors().getMagnetometer().getData_magField();
 			
 			/* Note that the double types are converted into an array of bytes

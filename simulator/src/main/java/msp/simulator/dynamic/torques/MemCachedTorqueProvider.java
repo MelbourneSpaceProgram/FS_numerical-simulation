@@ -143,7 +143,7 @@ public class MemCachedTorqueProvider implements TorqueProvider {
 						torque_y,
 						torque_z
 						);
-
+				
 				/* Checking the data transmission. */
 				if (torqueCommand.isNaN() || torqueCommand.isInfinite()) {
 					throw new Exception("Torque acquisition: MemCached transmission failed.");

@@ -17,39 +17,39 @@ import msp.simulator.utils.logs.CustomLoggingTools;
  * @author Florian CHAUBEYRE
  */
 public class SatelliteBody extends BoxAndSolarArraySpacecraft {
-	
+
 	/* ******* Public Static Attributes ******* */
 
 	/** Size of the satellite box in meters - (x, y, z) */
 	public static double[] satBoxSizeWithNoSolarPanel = new double[] {0.01, 0.01, 0.01} ;
-	
+
 	/* Note that the size of the solar panels is set to zero in the class constructor.*/
-	
+
 	/** Mass of the satellite in kilogram. */
 	public static double satelliteMass = 1.04;
-	
+
 	/** Inertia matrix of the satellite. */
-  // TODO(rskew) update inertia matrix
+	// TODO(rskew) update inertia matrix
 	public static double[][] satInertiaMatrix =  /* kg.m^2 */ {
 			{1191.648 * 1.3e-6,           0       ,           0        },
 			{         0       ,  1169.506 * 1.3e-6,           0        },
 			{         0       ,           0       ,  1203.969 * 1.3e-6 },
-		};
+	};
 
 	/* **************************************** */
 
 	/** Logger of the class */
 	private static final Logger logger = LoggerFactory.getLogger(SatelliteBody.class);
-	
+
 	/** Satellite Box Size with no Solar Array. */
 	private double[] satBoxSize;
-	
+
 	/** Mass of the satellite. */
 	private double satMass;
-	
+
 	/** Inertia matrix of the satellite. */
 	private double[][] inertiaMatrix;
-	
+
 	/**
 	 * Build the Satellite Body as a CubeSat (Cube with no Solar Arrays)
 	 * sensitive to drag and radiation.
@@ -64,12 +64,12 @@ public class SatelliteBody extends BoxAndSolarArraySpacecraft {
 				.getPvCoordinateProvider(), /* Sun Coordinate Provider */
 				0, Vector3D.PLUS_I, 0, 0, 0 /* Solar Array Parameters: Zero */
 				);
-		
+
 		/* Copy the user value into a protected variable. */
 		this.satBoxSize = SatelliteBody.satBoxSizeWithNoSolarPanel;
 		this.satMass = SatelliteBody.satelliteMass;
 		this.inertiaMatrix = SatelliteBody.satInertiaMatrix;
-		
+
 		SatelliteBody.logger.info(CustomLoggingTools.indentMsg(SatelliteBody.logger, 
 				" -> Building the CubeSat body: Success."));
 	}
@@ -97,5 +97,5 @@ public class SatelliteBody extends BoxAndSolarArraySpacecraft {
 	public double[][] getInertiaMatrix() {
 		return inertiaMatrix;
 	}
-	
+
 }
