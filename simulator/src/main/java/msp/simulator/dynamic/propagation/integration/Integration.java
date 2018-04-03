@@ -19,7 +19,8 @@ public class Integration {
 	/* ******* Public Static Attributes ******* */
 
 	/** Time Step in use for integration step calculation. (s) 
-	 * <p>Default value is 0.1 s.
+	 * <p>Default value is 0.1 s. The step size should not be
+	 * inferior than 1ms.
 	 * */
 	public static double integrationTimeStep = 0.1 ;
 
@@ -79,7 +80,7 @@ public class Integration {
 	}
 
 	/**
-	 * @return the stepSize
+	 * @return the stepSize in seconds.
 	 */
 	public double getStepSize() {
 		return stepSize;

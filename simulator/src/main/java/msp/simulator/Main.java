@@ -17,12 +17,15 @@ public class Main {
 	 * @param args - unused
 	 */
 	public static void main(String[] args) {
-		NumericalSimulator simulator = new NumericalSimulator();
-		
 		try {
-			
+			/* *** Configuration of the simulator. */
 			Dashboard.setDefaultConfiguration();
-			simulator.launch();
+			
+			/* *** Creating and launching the simulation. */
+			NumericalSimulator simulator = new NumericalSimulator();
+			simulator.initialize();
+			simulator.process();
+			simulator.exit();
 			
 		} catch (Exception e) {
 			e.printStackTrace();
