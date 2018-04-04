@@ -49,6 +49,9 @@ public class SatelliteBody extends BoxAndSolarArraySpacecraft {
 
 	/** Inertia matrix of the satellite. */
 	private double[][] inertiaMatrix;
+	
+	/** TODO: Initialize properly. */
+	private static final double initialDragCoeff = 1.0;
 
 	/**
 	 * Build the Satellite Body as a CubeSat (Cube with no Solar Arrays)
@@ -57,12 +60,15 @@ public class SatelliteBody extends BoxAndSolarArraySpacecraft {
 	 */
 	public SatelliteBody(Environment environment) {
 		super(
-				satBoxSizeWithNoSolarPanel[0],	/* X Length of Body */
-				satBoxSizeWithNoSolarPanel[1],	/* Y Length of Body */
-				satBoxSizeWithNoSolarPanel[2],	/* Z Length of Body */
-				environment.getSolarSystem().getSun()
-				.getPvCoordinateProvider(), /* Sun Coordinate Provider */
-				0, Vector3D.PLUS_I, 0, 0, 0 /* Solar Array Parameters: Zero */
+				satBoxSizeWithNoSolarPanel[0],
+				satBoxSizeWithNoSolarPanel[1],
+				satBoxSizeWithNoSolarPanel[2],
+				environment.getSolarSystem().getSun().getPvCoordinateProvider(),
+				0,	/* Solar Array Area */
+				Vector3D.PLUS_I, /* Solar Array Axis */
+				initialDragCoeff,	/* Drag Coefficient: */
+				0,	/* Absorption Coefficient */
+				0	/* Reflection Coefficient */
 				);
 
 		/* Copy the user value into a protected variable. */

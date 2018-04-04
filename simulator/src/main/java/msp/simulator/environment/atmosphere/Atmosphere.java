@@ -50,7 +50,7 @@ public final class Atmosphere extends HarrisPriester {
 		 */
 		super(	sun.getPvCoordinateProvider(),
 				earth.getEllipsoid(),
-				/* Cosine Exponent */ 5
+				5		/* Arbitrary set. */
 				);
 		
 		logger.info(CustomLoggingTools.indentMsg(logger, 

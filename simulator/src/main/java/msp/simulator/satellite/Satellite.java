@@ -62,7 +62,7 @@ public class Satellite {
 	public void executeStepMission() {
 
 		/* Sensor Measurement */
-		if (this.io.isConnectToMemCached()) {
+		if (this.io.isConnectedToMemCached()) {
 
 			/* Magnetometer Measurement of the Geomagnetic field vector. */
 			/* This import is done once to avoid multiple noise computation.
@@ -92,6 +92,7 @@ public class Satellite {
 					this.io.getRawTranscoder()
 					);			
 		}
+		
 	}
 
 
