@@ -155,16 +155,18 @@ public class GroundStation {
 							Double.valueOf(tle.getLine2().substring(52, 63)));
 
 					/* Exporting the values to MemCached. */
-					memcached.set("TLE_Mean_Motion"				, 0, meanMotion);
-					memcached.set("TLE_Mean_Motion_First_Deriv"	, 0, meanMotionFirstDerivative);
-					memcached.set("TLE_Mean_Motion_Second_Deriv"	, 0, meanMotionSecondDerivative);
-					memcached.set("TLE_Mean_Anomaly"				, 0, meanAnomaly);
-					memcached.set("TLE_Inclination"				, 0, inclination);
-					memcached.set("TLE_Argument_Perigee"			, 0, argPerigee);
-					memcached.set("TLE_Eccentricity"				, 0, eccentricity);
-					memcached.set("TLE_Raan"			, 0, raan);
-					memcached.set("TLE_Bstar"		, 0, bStar);
-					memcached.set("TLE_Epoch"		, 0, epoch);
+					memcached.set("Simulation_TLE_Mean_Motion", 0, meanMotion);
+					memcached.set("Simulation_TLE_Mean_Motion_First_Deriv",
+                        0, meanMotionFirstDerivative);
+					memcached.set("Simulation_TLE_Mean_Motion_Second_Deriv",
+                        0, meanMotionSecondDerivative);
+					memcached.set("Simulation_TLE_Mean_Anomaly", 0, meanAnomaly);
+					memcached.set("Simulation_TLE_Inclination", 0, inclination);
+					memcached.set("Simulation_TLE_Argument_Perigee", 0, argPerigee);
+					memcached.set("Simulation_TLE_Eccentricity", 0, eccentricity);
+					memcached.set("Simulation_TLE_Raan", 0, raan);
+					memcached.set("Simulation_TLE_Bstar", 0, bStar);
+					memcached.set("Simulation_TLE_Epoch", 0, epoch);
 
 
 					/* Logging Information. */
