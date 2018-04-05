@@ -58,7 +58,7 @@ public class SatelliteBody extends BoxAndSolarArraySpacecraft {
 	private double[][] inertiaMatrix;
 
 	/** TODO: Initialize properly. */
-	private static final double initialDragCoeff = 1.0;
+	private static final double initialDragCoeff = 0;
 
 	/**
 	 * Build the Satellite Body as a CubeSat (Cube with no Solar Arrays)

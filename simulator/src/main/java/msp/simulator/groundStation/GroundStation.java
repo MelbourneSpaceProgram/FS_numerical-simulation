@@ -31,7 +31,8 @@ public class GroundStation {
 
 	/* ******* Public Static Attributes ******* */
 
-	/** Periodicity of the work of the ground station. Default value is 3 hours. */
+	/** Periodicity of the work of the ground station. Default value is 3 hours. 
+	 * (in second) */
 	public static long periodicityOfWork = 60 * 60 * 3;
 
 	/* **************************************** */
@@ -63,6 +64,7 @@ public class GroundStation {
 
 	/**
 	 * Execute the mission of the ground station at the specified date.
+	 * @param date The specified date.
 	 */
 	public void executeMission(AbsoluteDate date) {
 		if (this.isTeamWorking(date)) {
@@ -219,6 +221,7 @@ public class GroundStation {
 	/**
 	 * Return the assertion if the team of the ground station is working
 	 * at the given date.
+	 * @param date The given date
 	 * @return True if the team is working at this date, false otherwise.
 	 */
 	public boolean isTeamWorking(AbsoluteDate date) {

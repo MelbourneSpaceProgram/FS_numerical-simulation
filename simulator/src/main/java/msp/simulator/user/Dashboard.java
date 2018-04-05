@@ -37,7 +37,7 @@ import msp.simulator.utils.logs.ephemeris.EphemerisGenerator;
  * <p>
  * The configuration has to be set before any
  * simulation creation and can be used
- * anywhere by the user as the provided method 
+ * anywhere by the user as the provided methods
  * are static.
  * <p>
  * The configuration setting relies on the fact 
