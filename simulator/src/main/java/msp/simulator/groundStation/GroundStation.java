@@ -28,7 +28,7 @@ import net.spy.memcached.MemcachedClient;
  * @author Florian CHAUBEYRE
  */
 public class GroundStation {
-	
+
 	/* ******* Public Static Attributes ******* */
 
 	/** Periodicity of the work of the ground station. Default value is 3 hours. */
@@ -155,18 +155,16 @@ public class GroundStation {
 							Double.valueOf(tle.getLine2().substring(52, 63)));
 
 					/* Exporting the values to MemCached. */
-					memcached.set("Simulation_TLE_Mean_Motion", 0, meanMotion);
-					memcached.set("Simulation_TLE_Mean_Motion_First_Deriv",
-                        0, meanMotionFirstDerivative);
-					memcached.set("Simulation_TLE_Mean_Motion_Second_Deriv",
-                        0, meanMotionSecondDerivative);
-					memcached.set("Simulation_TLE_Mean_Anomaly", 0, meanAnomaly);
-					memcached.set("Simulation_TLE_Inclination", 0, inclination);
-					memcached.set("Simulation_TLE_Argument_Perigee", 0, argPerigee);
-					memcached.set("Simulation_TLE_Eccentricity", 0, eccentricity);
-					memcached.set("Simulation_TLE_Raan", 0, raan);
-					memcached.set("Simulation_TLE_Bstar", 0, bStar);
-					memcached.set("Simulation_TLE_Epoch", 0, epoch);
+					memcached.set("Simulation_TLE_Mean_Motion_Second_Deriv"	, 0, meanMotionSecondDerivative);
+					memcached.set("Simulation_TLE_Mean_Motion_First_Deriv"	, 0, meanMotionFirstDerivative);
+					memcached.set("Simulation_TLE_Mean_Motion"				, 0, meanMotion);
+					memcached.set("Simulation_TLE_Argument_Perigee"		, 0, argPerigee);
+					memcached.set("Simulation_TLE_Eccentricity"			, 0, eccentricity);
+					memcached.set("Simulation_TLE_Mean_Anomaly"			, 0, meanAnomaly);
+					memcached.set("Simulation_TLE_Inclination"			, 0, inclination);
+					memcached.set("Simulation_TLE_Bstar"		, 0, bStar);
+					memcached.set("Simulation_TLE_Epoch"		, 0, epoch);
+					memcached.set("Simulation_TLE_Raan"		, 0, raan);
 
 
 					/* Logging Information. */
@@ -176,34 +174,34 @@ public class GroundStation {
 									+ "Date: " + date.toString()
 									+ "\n"
 									+ "TLE_Mean_Motion: "
-									+ ByteBuffer.wrap((byte[]) memcached.get("Simulation_TLE_Mean_Motion")).getDouble()
+									+ ByteBuffer.wrap(meanMotion).getDouble()
 									+ "\n"
 									+ "TLE_Mean_Motion_First_Deriv: "
-									+ ByteBuffer.wrap((byte[]) memcached.get("Simulation_TLE_Mean_Motion_First_Deriv")).getDouble()
+									+ ByteBuffer.wrap(meanMotionFirstDerivative).getDouble()
 									+ "\n"
 									+ "TLE_Mean_Motion_Second_Deriv: "
-									+ ByteBuffer.wrap((byte[]) memcached.get("Simulation_TLE_Mean_Motion_Second_Deriv")).getDouble()
+									+ ByteBuffer.wrap(meanMotionSecondDerivative).getDouble()
 									+ "\n"
 									+ "TLE_Mean_Anomaly: " + 
-									+ ByteBuffer.wrap((byte[]) memcached.get("Simulation_TLE_Mean_Anomaly")).getDouble()
+									+ ByteBuffer.wrap(meanAnomaly).getDouble()
 									+ "\n"
 									+ "TLE_Inclination: " + 
-									+ ByteBuffer.wrap((byte[]) memcached.get("Simulation_TLE_Inclination")).getDouble()
+									+ ByteBuffer.wrap(inclination).getDouble()
 									+ "\n"
 									+ "TLE_Raan: " + 
-									+ ByteBuffer.wrap((byte[]) memcached.get("Simulation_TLE_Raan")).getDouble()
+									+ ByteBuffer.wrap(raan).getDouble()
 									+ "\n"
 									+ "TLE_Bstar: " + 
-									+ ByteBuffer.wrap((byte[]) memcached.get("Simulation_TLE_Bstar")).getDouble()
+									+ ByteBuffer.wrap(bStar).getDouble()
 									+ "\n"
 									+ "TLE_Epoch: " + 
-									+ ByteBuffer.wrap((byte[]) memcached.get("Simulation_TLE_Epoch")).getDouble()
+									+ ByteBuffer.wrap(epoch).getDouble()
 									+ "\n"
 									+ "TLE_Eccentricity: " + 
-									+ ByteBuffer.wrap((byte[]) memcached.get("Simulation_TLE_Eccentricity")).getDouble()
+									+ ByteBuffer.wrap(eccentricity).getDouble()
 									+ "\n"
 									+ "TLE_Argument_Perigee: " + 
-									+ ByteBuffer.wrap((byte[]) memcached.get("Simulation_TLE_Argument_Perigee")).getDouble()
+									+ ByteBuffer.wrap(argPerigee).getDouble()
 									+ "\n"
 									+ "Raw : " + tle.getLine1() 
 									+ "\n"

@@ -88,6 +88,7 @@ public class TestSatellite {
 		Dashboard.setRealTimeProcessing(false);
 		Dashboard.setSimulationDuration(accDuration);
 		Dashboard.setIntegrationTimeStep(0.1);
+		Dashboard.setGroundStationWorkPeriod(10);
 
 		Dashboard.setMemCachedConnection(true, "127.0.0.1:11211");
 		Dashboard.setTorqueProvider(TorqueProviderEnum.MEMCACHED);
