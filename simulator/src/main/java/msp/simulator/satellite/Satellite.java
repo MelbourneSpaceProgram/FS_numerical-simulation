@@ -33,7 +33,8 @@ public class Satellite {
 	private IO io;
 
 	/**
-	 * Build the intance of the Satellite in the simulation.
+	 * Build the intance of the Satellite in the simulation and connect
+	 * the required IO.
 	 * @param environment Instance of the Simulation
 	 */
 	public Satellite(Environment environment) {

@@ -33,7 +33,8 @@ public class NumericalSimulator {
 
 	/* ******* Public Static Attributes ******* */
 
-	/** Time duration of the simulation. (Always numerically finite) */
+	/** Time duration of the simulation. (Always numerically finite) 
+	 * Default value is Long.MAX_VALUE. */
 	public static long simulationDuration = Long.MAX_VALUE;
 
 	/** Real-time processing flag. */
@@ -146,6 +147,11 @@ public class NumericalSimulator {
 			/* ********* Initial State Processing before propagation. ********  */
 			/* Writing initial step into the ephemeris. */ 
 			this.ephemerisGenerator.writeStep(this.satellite);
+			
+			/* Sending the initial ground station data to the satellite. */
+			this.groundStation.executeMission(
+					this.satellite.getStates().getInitialState().getDate()
+					);
 
 			/* Pushing the initial state into the VTS socket. */
 			if (this.satellite.getIO().isConnectedToVts()) {

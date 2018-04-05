@@ -4,6 +4,7 @@ package msp.simulator.test;
 
 import java.util.ArrayList;
 
+import org.hipparchus.complex.Quaternion;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.util.FastMath;
 import org.junit.Assert;
@@ -70,7 +71,7 @@ public class TestDynamic {
 		Dashboard.setIntegrationTimeStep(0.1);
 		Dashboard.setEphemerisTimeStep(1.0);
 		Dashboard.setSimulationDuration(rotationTime);
-		Dashboard.setInitialAttitudeQuaternion(1, 0, 0, 0);
+		Dashboard.setInitialAttitudeQuaternion(new Quaternion(1, 0, 0, 0));
 		Dashboard.setInitialSpin(new Vector3D(FastMath.PI / rotationTime, n));
 		Dashboard.setInitialRotAcceleration(new Vector3D(0,0,0));
 		//Dashboard.setVtsConnection(true);
