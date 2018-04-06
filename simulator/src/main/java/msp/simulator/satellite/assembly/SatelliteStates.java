@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import msp.simulator.dynamic.propagation.integration.SecondaryStates;
 import msp.simulator.environment.Environment;
+import msp.simulator.satellite.assembly.SatelliteBody;
 import msp.simulator.utils.logs.CustomLoggingTools;
 
 /**
@@ -230,6 +231,5 @@ public class SatelliteStates {
 	public Attitude getInitialAttitude() {
 		return this.initialState.getAttitude();
 	}	
-
 
 }
