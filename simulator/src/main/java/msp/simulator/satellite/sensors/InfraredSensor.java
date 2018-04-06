@@ -41,7 +41,7 @@ public class InfraredSensor {
 	 *            Angle to Nadir vector along an axis plane
 	 * @return result The corresponding infrared reading for the angle to Nadir
 	 */
-	private double AngleToInfrared(double angle) {
+	private double angleToInfrared(double angle) {
 		double result, x = angle;
 		/*
 		 * Uses a ninth-order polynomial of best fit to the model infrared curve
@@ -60,7 +60,7 @@ public class InfraredSensor {
 	 * @param sideNormal Vector normal to a satellite side
 	 * @return Angle to Nadir along an axis plane
 	 */
-	private double AngleFromNadirVector(Vector3D nadir, Vector3D sideNormal) {
+	private double angleFromNadirVector(Vector3D nadir, Vector3D sideNormal) {
 		return FastMath.acos(Vector3D.dotProduct(nadir, sideNormal) / nadir.getNorm());
 	}
 
@@ -72,9 +72,9 @@ public class InfraredSensor {
 	 * @return infraredReading Infrared reading of the sensor based upon its
 	 *         relationship with the angle to Nadir
 	 */
-	public double CalculateInfraredReading(Vector3D nadir) {
-		angleReading = AngleFromNadirVector(nadir, sideNormal);
-		infraredReading = AngleToInfrared(angleReading);
+	public double calculateInfraredReading(Vector3D nadir) {
+		angleReading = angleFromNadirVector(nadir, sideNormal);
+		infraredReading = angleToInfrared(angleReading);
 		return infraredReading;
 	}
 
@@ -84,6 +84,7 @@ public class InfraredSensor {
 	public double getAngle() {
 		return angleReading;
 	}
+
 	public Vector3D getSideNormal() {
 		return sideNormal;
 	}

@@ -10,45 +10,45 @@ import msp.simulator.satellite.sensors.InfraredSensor;
 public class TestInfraredSensor {
 
 	@Test
-	public void TestNadirVectorDetermination() {
+	public void testNadirVectorDetermination() {
 		InfraredSensor[] sensors = new InfraredSensor[6];
 		Vector3D result;
 		Vector3D expectedResult = Vector3D.PLUS_I;
 		sensors[0] = new InfraredSensor(Vector3D.PLUS_I);
-		sensors[0].CalculateInfraredReading(expectedResult);
+		sensors[0].calculateInfraredReading(expectedResult);
 		sensors[5] = new InfraredSensor(Vector3D.PLUS_J);
-		sensors[5].CalculateInfraredReading(expectedResult);
+		sensors[5].calculateInfraredReading(expectedResult);
 		sensors[1] = new InfraredSensor(Vector3D.PLUS_K);
-		sensors[1].CalculateInfraredReading(expectedResult);
+		sensors[1].calculateInfraredReading(expectedResult);
 		sensors[2] = new InfraredSensor(Vector3D.MINUS_I);
-		sensors[2].CalculateInfraredReading(expectedResult);
+		sensors[2].calculateInfraredReading(expectedResult);
 		sensors[4] = new InfraredSensor(Vector3D.MINUS_J);
-		sensors[4].CalculateInfraredReading(expectedResult);
+		sensors[4].calculateInfraredReading(expectedResult);
 		sensors[3] = new InfraredSensor(Vector3D.MINUS_K);
-		sensors[3].CalculateInfraredReading(expectedResult);
+		sensors[3].calculateInfraredReading(expectedResult);
 
-		result = NadirVectorDetermination(sensors);
+		result = nadirVectorDetermination(sensors);
 		Assert.assertTrue(result.equals(expectedResult));
 	}
 
 	@Test
-	public void TestAngleToInfrared() {
+	public void testAngleToInfrared() {
 		InfraredSensor sensor1 = new InfraredSensor(Vector3D.PLUS_I);
 		InfraredSensor sensor2 = new InfraredSensor(Vector3D.PLUS_I);
 		InfraredSensor sensor3 = new InfraredSensor(Vector3D.PLUS_I);
 		/* Angle of 0 */
-		double result1 = sensor1.CalculateInfraredReading(Vector3D.PLUS_I);
+		double result1 = sensor1.calculateInfraredReading(Vector3D.PLUS_I);
 		/* Angle of pi/2 */
-		double result2 = sensor2.CalculateInfraredReading(Vector3D.PLUS_J);
+		double result2 = sensor2.calculateInfraredReading(Vector3D.PLUS_J);
 		/* Angle of pi */
-		double result3 = sensor3.CalculateInfraredReading(Vector3D.MINUS_I);
+		double result3 = sensor3.calculateInfraredReading(Vector3D.MINUS_I);
 		Assert.assertEquals(result1, 0.987208931556143, 1e-6);
 		Assert.assertEquals(result2, 0.365192225102539, 1e-6);
 		Assert.assertEquals(result3, -8.375071744498586e-4, 1e-6);
 	}
 
 	@Test
-	public void TestAngleFromNadirVector() {
+	public void testAngleFromNadirVector() {
 		Vector3D nadirAlongXAxis = Vector3D.PLUS_I;
 		Vector3D nadir45BetweenXAndZAxis = new Vector3D(1, 0, 1);
 		double expectedAnswer1 = 0;
@@ -61,16 +61,16 @@ public class TestInfraredSensor {
 		InfraredSensor sensor2 = new InfraredSensor(Vector3D.MINUS_I);
 		InfraredSensor sensor3 = new InfraredSensor(Vector3D.PLUS_K);
 
-		sensor1.CalculateInfraredReading(nadirAlongXAxis);
-		sensor2.CalculateInfraredReading(nadirAlongXAxis);
-		sensor3.CalculateInfraredReading(nadirAlongXAxis);
+		sensor1.calculateInfraredReading(nadirAlongXAxis);
+		sensor2.calculateInfraredReading(nadirAlongXAxis);
+		sensor3.calculateInfraredReading(nadirAlongXAxis);
 		Assert.assertEquals(expectedAnswer1, sensor1.getAngle(), 1e-6);
 		Assert.assertEquals(expectedAnswer2, sensor2.getAngle(), 1e-6);
 		Assert.assertEquals(expectedAnswer3, sensor3.getAngle(), 1e-6);
 
-		sensor1.CalculateInfraredReading(nadir45BetweenXAndZAxis);
-		sensor2.CalculateInfraredReading(nadir45BetweenXAndZAxis);
-		sensor3.CalculateInfraredReading(nadir45BetweenXAndZAxis);
+		sensor1.calculateInfraredReading(nadir45BetweenXAndZAxis);
+		sensor2.calculateInfraredReading(nadir45BetweenXAndZAxis);
+		sensor3.calculateInfraredReading(nadir45BetweenXAndZAxis);
 
 		Assert.assertEquals(expectedAnswer4, sensor1.getAngle(), 1e-6);
 		Assert.assertEquals(expectedAnswer5, sensor2.getAngle(), 1e-6);
@@ -86,7 +86,7 @@ public class TestInfraredSensor {
 	 * @return nadirVector Vector directed along Nadir for the satellite 
 	 * 		orientation
 	 */
-	public Vector3D NadirVectorDetermination(InfraredSensor[] sensors) {
+	public Vector3D nadirVectorDetermination(InfraredSensor[] sensors) {
 		Vector3D xComponent, yComponent, zComponent;
 
 		/*
