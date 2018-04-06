@@ -5,7 +5,7 @@ import org.hipparchus.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
 
-import msp.simulator.satellite.sensors.infrared.InfraredSensor;
+import msp.simulator.satellite.sensors.InfraredSensor;
 
 public class TestInfraredSensor {
 
@@ -41,34 +41,38 @@ public class TestInfraredSensor {
 		/* Angle of pi/2 */
 		double result2 = sensor2.CalculateInfraredReading(Vector3D.PLUS_J);
 		/* Angle of pi */
-		double result3 = sensor3.CalculateInfraredReading(Vector3D.MINUS_I);
-		Assert.assertTrue(result1 == 0.9872);
-		/*
-		 * Expecting 0.3652 but receiving 0.3658 due to rounding differences between
-		 * MATLAB constants
-		 */
-		Assert.assertTrue(result2 > 0.3650 && result2 < 0.3660);
-		Assert.assertTrue(result3 == 0);
+		double result3 = sensor3.CalculateInfraredReading(Vector3D.MINUS_I);	
+		Assert.assertEquals(result1, 0.987208931556143, 1e-6);
+		Assert.assertEquals(result2,  0.365192225102539, 1e-6);
+		Assert.assertEquals(result3, -8.375071744498586e-4, 1e-6);
 	}
 
 	@Test
 	public void TestAngleFromNadirVector() {
-		Vector3D nadirAlongxAxis = Vector3D.PLUS_I;
+		Vector3D nadirAlongXAxis = Vector3D.PLUS_I;
 		double expectedAnswer1 = 0;
-		double expectedAnswer2 = Math.PI;
-		double expectedAnswer3 = Math.PI / 2;
+		double expectedAnswer2 = FastMath.PI;
+		double expectedAnswer3 = FastMath.PI / 2;
+		double expectedAnswer4 = FastMath.PI / 4;
+		double expectedAnswer5 = 3 * FastMath.PI / 4;
 		InfraredSensor sensor1 = new InfraredSensor(Vector3D.PLUS_I);
 		InfraredSensor sensor2 = new InfraredSensor(Vector3D.MINUS_I);
 		InfraredSensor sensor3 = new InfraredSensor(Vector3D.PLUS_K);
+		InfraredSensor sensor4 = new InfraredSensor(new Vector3D(FastMath.sqrt(2), 0, FastMath.sqrt(2)));
+		InfraredSensor sensor5 = new InfraredSensor(new Vector3D(-FastMath.sqrt(2), -FastMath.sqrt(2), 0));
 
-		sensor1.CalculateInfraredReading(nadirAlongxAxis);
-		sensor2.CalculateInfraredReading(nadirAlongxAxis);
-		sensor3.CalculateInfraredReading(nadirAlongxAxis);
-		Assert.assertTrue(expectedAnswer1 == sensor1.getAngleReading());
-		Assert.assertTrue(expectedAnswer2 == sensor2.getAngleReading());
-		Assert.assertTrue(expectedAnswer3 == sensor3.getAngleReading());
+		sensor1.CalculateInfraredReading(nadirAlongXAxis);
+		sensor2.CalculateInfraredReading(nadirAlongXAxis);
+		sensor3.CalculateInfraredReading(nadirAlongXAxis);
+		sensor4.CalculateInfraredReading(nadirAlongXAxis);
+		sensor5.CalculateInfraredReading(nadirAlongXAxis);
+		Assert.assertTrue(expectedAnswer1 == sensor1.getAngle());
+		Assert.assertTrue(expectedAnswer2 == sensor2.getAngle());
+		Assert.assertTrue(expectedAnswer3 == sensor3.getAngle());
+		Assert.assertTrue(expectedAnswer4 == sensor4.getAngle());
+		Assert.assertTrue(expectedAnswer5 == sensor5.getAngle());
 	}
-	
+
 	/**
 	 * Calculates the Nadir vector based upon readings obtained from the side
 	 * sensors
@@ -82,18 +86,18 @@ public class TestInfraredSensor {
 
 		/*
 		 * Computes the contribution of sensor readings to the Nadir vector along the
-		 * x-axis, y-axis and finally x-axis
+		 * x-axis, y-axis and finally z-axis
 		 */
-		xComponent = sensors[0].getSideNormal().scalarMultiply(FastMath.cos(sensors[0].getAngleReading()))
-				.subtract(sensors[0].getSideNormal().scalarMultiply(FastMath.cos(sensors[2].getAngleReading())));
+		xComponent = sensors[0].getSideNormal().scalarMultiply(FastMath.cos(sensors[0].getAngle()))
+				.subtract(sensors[0].getSideNormal().scalarMultiply(FastMath.cos(sensors[2].getAngle())));
 		xComponent = xComponent.scalarMultiply(
 				FastMath.pow(sensors[0].getSideNormal().getNorm() + sensors[2].getSideNormal().getNorm(), -1));
-		yComponent = sensors[1].getSideNormal().scalarMultiply(FastMath.cos(sensors[1].getAngleReading()))
-				.subtract(sensors[1].getSideNormal().scalarMultiply(FastMath.cos(sensors[3].getAngleReading())));
+		yComponent = sensors[1].getSideNormal().scalarMultiply(FastMath.cos(sensors[1].getAngle()))
+				.subtract(sensors[1].getSideNormal().scalarMultiply(FastMath.cos(sensors[3].getAngle())));
 		yComponent = yComponent.scalarMultiply(
 				FastMath.pow(sensors[1].getSideNormal().getNorm() + sensors[3].getSideNormal().getNorm(), -1));
-		zComponent = sensors[5].getSideNormal().scalarMultiply(FastMath.cos(sensors[5].getAngleReading()))
-				.subtract(sensors[5].getSideNormal().scalarMultiply(FastMath.cos(sensors[4].getAngleReading())));
+		zComponent = sensors[5].getSideNormal().scalarMultiply(FastMath.cos(sensors[5].getAngle()))
+				.subtract(sensors[5].getSideNormal().scalarMultiply(FastMath.cos(sensors[4].getAngle())));
 		zComponent = zComponent.scalarMultiply(
 				FastMath.pow(sensors[5].getSideNormal().getNorm() + sensors[4].getSideNormal().getNorm(), -1));
 		return xComponent.add(yComponent).add(zComponent);
