@@ -18,7 +18,8 @@ import msp.simulator.utils.logs.CustomLoggingTools;
 public class Sensors {
 
 	/** Logger of the class. */
-	private static final Logger logger = LoggerFactory.getLogger(Sensors.class);
+	private static final Logger logger = 
+			LoggerFactory.getLogger(Sensors.class);
 
 	/** Instance of environment of the simulation. */
 	private Environment environment;
@@ -32,7 +33,8 @@ public class Sensors {
 	private Magnetometer magnetometer;
 
 	/** Instance of Infrared Sensor in the simulation */
-	private InfraredSensor posXIRSensor, negXIRSensor, posYIRSensor, negYIRSensor, posZIRSensor, negZIRSensor;
+	private InfraredSensor posXIRSensor, negXIRSensor, posYIRSensor, 
+			negYIRSensor, posZIRSensor, negZIRSensor;
 
 	/**
 	 * Constructor of the satellite sensors.
@@ -41,7 +43,8 @@ public class Sensors {
 	 * @param assembly Instance of the simulation
 	 */
 	public Sensors(Environment environment, Assembly assembly) {
-		logger.info(CustomLoggingTools.indentMsg(logger, "Building the satellite Sensors..."));
+		logger.info(CustomLoggingTools.indentMsg(logger, 
+				"Building the satellite Sensors..."));
 
 		/* Linking the sensors class to the rest of the simulation. */
 		this.environment = environment;
