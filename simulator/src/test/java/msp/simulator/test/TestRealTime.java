@@ -19,7 +19,7 @@ import msp.simulator.user.Dashboard;
  */
 public class TestRealTime {
 
-	@Test
+	
 	public void testDetumblingRealTime() throws Exception {
 
 		Dashboard.setDefaultConfiguration();

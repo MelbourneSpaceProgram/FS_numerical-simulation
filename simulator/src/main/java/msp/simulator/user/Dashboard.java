@@ -19,6 +19,7 @@ import msp.simulator.dynamic.propagation.integration.Integration;
 import msp.simulator.dynamic.propagation.integration.RotAccProvider;
 import msp.simulator.dynamic.torques.MemCachedTorqueProvider;
 import msp.simulator.dynamic.torques.TorqueOverTimeScenarioProvider;
+import msp.simulator.dynamic.torques.TorqueOverTimeScenarioProvider.Step;
 import msp.simulator.dynamic.torques.TorqueProviderEnum;
 import msp.simulator.dynamic.torques.Torques;
 import msp.simulator.environment.orbit.OrbitWrapper;
@@ -81,7 +82,7 @@ public class Dashboard {
 		Dashboard.setInitialRotAcceleration(SatelliteStates.initialRotAcceleration);
 		Dashboard.setSatelliteInertiaMatrix(SatelliteBody.simpleBalancedInertiaMatrix);
 		Dashboard.setMagnetometerNoiseIntensity(Magnetometer.defaultNoiseIntensity);
-		Dashboard.setTorqueScenario(TorqueOverTimeScenarioProvider.TORQUE_SCENARIO);
+		Dashboard.setTorqueScenario(new ArrayList<Step>());
 		Dashboard.setTorqueProvider(TorqueProviderEnum.SCENARIO);
 
 		/* **** IO Settings **** */
