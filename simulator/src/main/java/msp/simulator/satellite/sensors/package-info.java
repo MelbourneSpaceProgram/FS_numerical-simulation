@@ -5,5 +5,6 @@
  * of the satellite.
  * 
  * @author Florian CHAUBEYRE
+ * @author Braeden BORG
  */
 package msp.simulator.satellite.sensors;

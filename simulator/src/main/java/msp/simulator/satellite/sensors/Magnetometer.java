@@ -3,11 +3,14 @@
 package msp.simulator.satellite.sensors;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
 import org.orekit.models.earth.GeoMagneticElements;
 import org.orekit.propagation.SpacecraftState;
+import org.orekit.frames.Transform;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -134,7 +137,7 @@ public class Magnetometer {
 		 * the altitude of the satellite is slightly shifted from the true 
 		 * one.
 		 */
-		GeoMagneticElements trueMagField = this.geomagField.getField().calculateField(
+		GeoMagneticElements trueMagField_ecef = this.geomagField.getField().calculateField(
 				FastMath.toDegrees(geodeticPosition.getLatitude()),	/* decimal deg */
 				FastMath.toDegrees(geodeticPosition.getLongitude()),	/* decimal deg */
 				(satState.getA() - this.earth.getRadius()) / 1e3		/* km */
@@ -144,10 +147,23 @@ public class Magnetometer {
 				"Latitude: " + FastMath.toDegrees(geodeticPosition.getLatitude()) + " °\n" +
 				"Longitud: " + FastMath.toDegrees(geodeticPosition.getLongitude()) + " °\n" +
 				"Altitude: " + (satState.getA() - this.earth.getRadius()) / 1e3 + " km\n" +
-				"True Geo" + trueMagField.toString()
+				"True Geo ECEF" + trueMagField_ecef.toString()
 				);
 
-		return trueMagField;
+
+    /* Rotate the magnetic field reading into the body frame */
+    // Assuming WMM outputs vectors in Earth-centred-Earth-fixed frame
+    // This might be backwards
+    Rotation rotation_ecef_to_body =
+        this.assembly.getStates()
+        .getCurrentState().getAttitude().getRotation();
+    Transform ecef_to_body = new Transform(null, rotation_ecef_to_body);
+    Vector3D trueMagField_body_vec =
+        ecef_to_body.transformVector(trueMagField_ecef.getFieldVector());
+    GeoMagneticElements trueMagField_body = new GeoMagneticElements(
+        trueMagField_body_vec);
+
+		return trueMagField_body;
 	}
 	
 	/**
