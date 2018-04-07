@@ -2,6 +2,7 @@
 
 package msp.simulator.test;
 
+import org.hipparchus.complex.Quaternion;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.junit.Test;
 
@@ -29,7 +30,7 @@ public class TestRealTime {
 		Dashboard.setEphemerisTimeStep(1.0);
 		Dashboard.setSatelliteInertiaMatrix(SatelliteBody.satInertiaMatrix);
 
-		Dashboard.setInitialAttitudeQuaternion(1, 0, 0, 0);
+		Dashboard.setInitialAttitudeQuaternion(new Quaternion(1, 0, 0, 0));
 		Dashboard.setInitialSpin(new Vector3D(1, 1, 1));
 		Dashboard.setInitialRotAcceleration(new Vector3D(0,0,0));
 

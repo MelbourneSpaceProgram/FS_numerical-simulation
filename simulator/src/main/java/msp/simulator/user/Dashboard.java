@@ -23,6 +23,7 @@ import msp.simulator.dynamic.torques.TorqueProviderEnum;
 import msp.simulator.dynamic.torques.Torques;
 import msp.simulator.environment.orbit.OrbitWrapper;
 import msp.simulator.environment.orbit.OrbitWrapper.OrbitalParameters;
+import msp.simulator.groundStation.GroundStation;
 import msp.simulator.satellite.assembly.SatelliteBody;
 import msp.simulator.satellite.assembly.SatelliteStates;
 import msp.simulator.satellite.io.IO;
@@ -36,7 +37,7 @@ import msp.simulator.utils.logs.ephemeris.EphemerisGenerator;
  * <p>
  * The configuration has to be set before any
  * simulation creation and can be used
- * anywhere by the user as the provided method 
+ * anywhere by the user as the provided methods
  * are static.
  * <p>
  * The configuration setting relies on the fact 
@@ -60,62 +61,34 @@ public class Dashboard {
 
 	/** Set the Configuration of the Simulation to the default Settings. */
 	public static void setDefaultConfiguration() {
-		
+
 		Dashboard.configureLogging();
 
 		logger.info(CustomLoggingTools.indentMsg(logger, 
 				"Setting Default Configuration..."));
 
-		Dashboard.setRealTimeProcessing(false);
-		Dashboard.setIntegrationTimeStep(0.1);
-		Dashboard.setEphemerisTimeStep(1.0);
-		Dashboard.setSimulationDuration(10);
-		Dashboard.setOrbitalParameters(new OrbitalParameters(
-				575000, 	
-				0,
-				0,
-				FastMath.toRadians(98),
-				FastMath.toRadians(269.939),
-				FastMath.toRadians(0),
-				"2018-12-21T22:23:00.000"
-				));
+		/* **** Dynamic Settings **** */
+		Dashboard.setRealTimeProcessing(NumericalSimulator.realTimeUserFlag);
+		Dashboard.setIntegrationTimeStep(Integration.integrationTimeStep);
+		Dashboard.setEphemerisTimeStep(EphemerisGenerator.ephemerisTimeStep);
+		Dashboard.setGroundStationWorkPeriod(GroundStation.periodicityOfWork);
+		Dashboard.setSimulationDuration(NumericalSimulator.simulationDuration);
+		Dashboard.setOrbitalParameters(OrbitWrapper.userOrbitalParameters);
 		Dashboard.setEphemerisFilesPath(EphemerisGenerator.DEFAULT_PATH);
-		Dashboard.setSatBoxSizeWithNoSolarPanel(new double[] {0.01, 0.01, 0.01});
-		Dashboard.setInitialAttitudeQuaternion(1, 0, 0, 0);
-		Dashboard.setInitialSpin(new Vector3D(
-				0.0,
-				0.0,
-				0.0	
-				));
-		Dashboard.setInitialRotAcceleration(new Vector3D(
-				0.0,
-				0.0,
-				0.0	
-				));
-
-		@SuppressWarnings("unused")
-		double[][] trueSatInertiaMatrix =  /* kg.m^2 */ {
-				{1191.648 * 1.3e-6,           0       ,           0        },
-				{         0       ,  1169.506 * 1.3e-6,           0        },
-				{         0       ,           0       ,  1203.969 * 1.3e-6 },
-		};
-
-		double[][] simpleBalancedInertiaMatrix = {
-				{ 1,   0,   0 },
-				{ 0,   1,   0 },
-				{ 0,   0,   1 }
-		};
-		Dashboard.setSatelliteInertiaMatrix(simpleBalancedInertiaMatrix);
-
+		Dashboard.setSatBoxSizeWithNoSolarPanel(SatelliteBody.satBoxSizeWithNoSolarPanel);
+		Dashboard.setInitialAttitudeQuaternion(SatelliteStates.initialAttitudeQuaternion);
+		Dashboard.setInitialSpin(SatelliteStates.initialSpin);
+		Dashboard.setInitialRotAcceleration(SatelliteStates.initialRotAcceleration);
+		Dashboard.setSatelliteInertiaMatrix(SatelliteBody.simpleBalancedInertiaMatrix);
 		Dashboard.setMagnetometerNoiseIntensity(Magnetometer.defaultNoiseIntensity);
-
-		Dashboard.setTorqueScenario(new ArrayList<TorqueOverTimeScenarioProvider.Step>());
+		Dashboard.setTorqueScenario(TorqueOverTimeScenarioProvider.TORQUE_SCENARIO);
 		Dashboard.setTorqueProvider(TorqueProviderEnum.SCENARIO);
 
 		/* **** IO Settings **** */
 		Dashboard.setMemCachedConnection(IO.connectMemCached, IO.memcachedSocketAddress);
 		Dashboard.setTorqueCommandKey(MemCachedTorqueProvider.torqueCommandKey);
 
+		/* Checking the overall configuration. */
 		try {
 			Dashboard.checkConfiguration();
 		} catch (Exception e) {
@@ -215,6 +188,16 @@ public class Dashboard {
 	}
 
 	/**
+	 * Set the period of work of the ground station, i.e. the time without
+	 * any update.
+	 * @param workPeriodicity in second.
+	 */
+	public static void setGroundStationWorkPeriod(long workPeriodicity) {
+		GroundStation.periodicityOfWork = workPeriodicity;
+	}
+
+
+	/**
 	 * Set the orbital parameters required to define the orbit in
 	 * the simulator.
 	 * @param param The appropriate orbital parameters
@@ -236,14 +219,10 @@ public class Dashboard {
 	 * Set the initial attitude quaternion. (Representing the rotation
 	 * from the inertial frame to the satellite frame).
 	 * This method normalize the quaternion.
-	 * @param q0 Scalar part
-	 * @param q1 First Vector Part
-	 * @param q2 Second Vector Part
-	 * @param q3 Third Vector Part
+	 * @param attitudeQuaternion Attitude Quaternion to set
 	 */
-	public static void setInitialAttitudeQuaternion(
-			double q0, double q1, double q2, double q3) {
-		SatelliteStates.initialAttitudeQuaternion = new Quaternion(q0, q1, q2, q3).normalize();
+	public static void setInitialAttitudeQuaternion(Quaternion attitudeQuaternion) {
+		SatelliteStates.initialAttitudeQuaternion = attitudeQuaternion.normalize();
 	}
 
 	/**

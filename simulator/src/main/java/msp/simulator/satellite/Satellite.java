@@ -33,7 +33,8 @@ public class Satellite {
 	private IO io;
 
 	/**
-	 * Build the intance of the Satellite in the simulation.
+	 * Build the intance of the Satellite in the simulation and connect
+	 * the required IO.
 	 * @param environment Instance of the Simulation
 	 */
 	public Satellite(Environment environment) {
@@ -62,7 +63,7 @@ public class Satellite {
 	public void executeStepMission() {
 
 		/* Sensor Measurement */
-		if (this.io.isConnectToMemCached()) {
+		if (this.io.isConnectedToMemCached()) {
 
 			/* Magnetometer Measurement of the Geomagnetic field vector. */
 			/* This import is done once to avoid multiple noise computation.
@@ -92,6 +93,7 @@ public class Satellite {
 					this.io.getRawTranscoder()
 					);			
 		}
+		
 	}
 
 

@@ -278,7 +278,7 @@ public class IO {
 	/**
 	 * @return the connectToMemCached
 	 */
-	public boolean isConnectToMemCached() {
+	public boolean isConnectedToMemCached() {
 		return connectToMemCached;
 	}
 
@@ -299,7 +299,7 @@ public class IO {
 	/**
 	 * @return Connection to VTS socket flag.
 	 */
-	public boolean isConnectToVts() {
+	public boolean isConnectedToVts() {
 		return connectToVts;
 	}
 
