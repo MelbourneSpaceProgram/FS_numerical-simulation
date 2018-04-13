@@ -199,7 +199,7 @@ public class TestSatellite {
 		/* Set up the simulation. */
 		NumericalSimulator simu = new NumericalSimulator();
 		Dashboard.setDefaultConfiguration();
-		Dashboard.setMagnetometerNoiseIntensity(Magnetometer.defaultNoiseIntensity);
+		Dashboard.setMagnetometerNoiseIntensity(1e2);
 
 		try {
 			simu.initialize();

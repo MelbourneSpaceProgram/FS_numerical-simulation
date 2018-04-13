@@ -63,7 +63,6 @@ public class Torques {
 					satellite.getAssembly().getStates().getInitialState().getDate());
 			break;
 		}
-
 	}
 	
 	/**

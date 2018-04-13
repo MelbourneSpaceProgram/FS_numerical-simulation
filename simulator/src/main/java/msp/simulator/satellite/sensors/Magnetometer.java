@@ -46,7 +46,7 @@ public class Magnetometer {
 	 * added to each components of the true magnetic field. 
 	 * (nanoTesla)
 	 */
-	public static double defaultNoiseIntensity = 1e2 ;
+	public static double defaultMagnetoNoiseIntensity = 1e2 ;
 
 	/* **************************************** */
 
@@ -68,7 +68,7 @@ public class Magnetometer {
 
 	public Magnetometer(Environment environment, Assembly assembly) {
 		logger.info(CustomLoggingTools.indentMsg(logger,
-				"Building the Magnetometer..."));
+				" -> Building the Magnetometer..."));
 
 		/* Linking the class to the rest of the simulation. */
 		this.geomagField = environment.getGeoMagneticField();
@@ -76,7 +76,7 @@ public class Magnetometer {
 		this.assembly = assembly;
 
 		/* Initializing the class. */
-		this.noiseIntensity = Magnetometer.defaultNoiseIntensity;
+		this.noiseIntensity = Magnetometer.defaultMagnetoNoiseIntensity;
 	}
 
 	/**
