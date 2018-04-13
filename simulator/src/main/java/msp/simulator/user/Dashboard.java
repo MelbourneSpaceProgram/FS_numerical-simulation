@@ -40,6 +40,7 @@ import msp.simulator.groundStation.GroundStation;
 import msp.simulator.satellite.assembly.SatelliteBody;
 import msp.simulator.satellite.assembly.SatelliteStates;
 import msp.simulator.satellite.io.IO;
+import msp.simulator.satellite.sensors.Gyrometer;
 import msp.simulator.satellite.sensors.Magnetometer;
 import msp.simulator.utils.logs.CustomLoggingTools;
 import msp.simulator.utils.logs.ephemeris.EphemerisGenerator;
@@ -74,9 +75,6 @@ import msp.simulator.utils.logs.ephemeris.EphemerisGenerator;
  * modified by different unit tests at the same time. Thus the initial
  * configuration of a given test during the initialization can be different
  * than the one set by the user.
- *
- *
- *
  *
  * @author Florian CHAUBEYRE <chaubeyre.f@gmail.com>
  */
@@ -123,8 +121,12 @@ public class Dashboard {
 		Dashboard.setSatBoxSizeWithNoSolarPanel(new double[]{0.01, 0.01, 0.01});
 		Dashboard.setSatelliteMass(1.0);
 		Dashboard.setSatelliteInertiaMatrix(SatelliteBody.simpleBalancedInertiaMatrix);
+		
+		/* **** Structure Settings **** */
 		Dashboard.setMagnetometerNoiseIntensity(1e2);
-
+		Dashboard.setGyroNoiseIntensity(1e-3);
+		
+		
 		/* **** IO Settings **** */
 		Dashboard.setMemCachedConnection(false, "127.0.0.1:11211");
 		Dashboard.setTorqueCommandKey("Simulation_Torque_");
@@ -353,7 +355,15 @@ public class Dashboard {
 	 * @param noiseIntensity order of intensity
 	 */
 	public static void setMagnetometerNoiseIntensity(double noiseIntensity) {
-		Magnetometer.defaultNoiseIntensity = noiseIntensity;
+		Magnetometer.defaultMagnetoNoiseIntensity = noiseIntensity;
+	}
+	
+	/**
+	 * Set the normally distributed noise intensity of the gyrometer.
+	 * @param noiseIntensity order of intensity
+	 */
+	public static void setGyroNoiseIntensity(double noiseIntensity) {
+		Gyrometer.defaultGyroNoiseIntensity = noiseIntensity;
 	}
 
 	/* ********************************************************* */

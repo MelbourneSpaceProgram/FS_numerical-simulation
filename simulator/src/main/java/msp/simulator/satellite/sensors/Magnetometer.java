@@ -46,7 +46,7 @@ public class Magnetometer {
 	 * added to each components of the true magnetic field. 
 	 * (nanoTesla)
 	 */
-	public static double defaultNoiseIntensity = 1e2 ;
+	public static double defaultMagnetoNoiseIntensity = 1e2 ;
 
 	/* **************************************** */
 
@@ -76,7 +76,7 @@ public class Magnetometer {
 		this.assembly = assembly;
 
 		/* Initializing the class. */
-		this.noiseIntensity = Magnetometer.defaultNoiseIntensity;
+		this.noiseIntensity = Magnetometer.defaultMagnetoNoiseIntensity;
 	}
 
 	/**

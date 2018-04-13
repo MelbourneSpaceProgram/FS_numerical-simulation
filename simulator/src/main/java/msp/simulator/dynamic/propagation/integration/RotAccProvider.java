@@ -67,11 +67,14 @@ public class RotAccProvider implements AdditionalStateProvider {
 	}
 
 	/**
-	 * Reverse the differential equation of motion to provide the rotational
-	 * acceleration - i.e. the derivative of the spin.
+	 * Provide the rotational acceleration of the satellite in the body
+	 * frame.
+	 * The torque provider in use is called and the rotational acceleration
+	 * is deduced.
 	 * <p>
 	 * The current algorithm uses the Euler equations of motion for a rotating 
-	 * rigid body to provide the spin derivative.
+	 * rigid body to provide the spin derivative, i.e. the rotational acceleration.
+	 * {@inheritDoc}
 	 */
 	@Override
 	public double[] getAdditionalState(SpacecraftState state) throws OrekitException {
