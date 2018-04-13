@@ -1,4 +1,16 @@
-/* Copyright 2017-2018 Melbourne Space Program */
+/* Copyright 20017-2018 Melbourne Space Program
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package msp.simulator.test;
 
@@ -26,7 +38,7 @@ import net.spy.memcached.MemcachedClient;
 
 /**
  *
- * @author Florian CHAUBEYRE
+ * @author Florian CHAUBEYRE <chaubeyre.f@gmail.com>
  */
 public class TestSatellite {
 
@@ -88,9 +100,11 @@ public class TestSatellite {
 		Dashboard.setRealTimeProcessing(false);
 		Dashboard.setSimulationDuration(accDuration);
 		Dashboard.setIntegrationTimeStep(0.1);
+		Dashboard.setGroundStationWorkPeriod(10);
+		Dashboard.setInitialSpin(Vector3D.ZERO);
 
 		Dashboard.setMemCachedConnection(true, "127.0.0.1:11211");
-		Dashboard.setTorqueProvider(TorqueProviderEnum.MEMCACHED);
+		Dashboard.setCommandTorqueProvider(TorqueProviderEnum.MEMCACHED);
 		Dashboard.setTorqueCommandKey(torqueKey);
 
 		Dashboard.setInitialRotAcceleration(
@@ -136,7 +150,7 @@ public class TestSatellite {
 		Assert.assertArrayEquals(
 				expectedRotAcc,
 				finalState.getAdditionalState("RotAcc"), 
-				1e-9);
+				1e-2);
 
 		/* Checking Spin */
 		Assert.assertArrayEquals(
@@ -144,7 +158,8 @@ public class TestSatellite {
 				SecondaryStates.extractState(
 						finalState.getAdditionalState(SecondaryStates.key), 
 						SecondaryStates.SPIN
-						),				1e-9);
+						),				
+				1e-2);
 
 		/* Check that the MMT sensor data are well exported to the common memory. */
 		Assert.assertArrayEquals(
@@ -185,7 +200,7 @@ public class TestSatellite {
 		/* Set up the simulation. */
 		NumericalSimulator simu = new NumericalSimulator();
 		Dashboard.setDefaultConfiguration();
-		Dashboard.setMagnetometerNoiseIntensity(Magnetometer.defaultNoiseIntensity);
+		Dashboard.setMagnetometerNoiseIntensity(1e2);
 
 		try {
 			simu.initialize();

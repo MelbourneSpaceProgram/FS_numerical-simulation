@@ -1,4 +1,16 @@
-/* Copyright 2017-2018 Melbourne Space Program */
+/* Copyright 20017-2018 Melbourne Space Program
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package msp.simulator;
 
@@ -16,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import msp.simulator.dynamic.Dynamic;
 import msp.simulator.environment.Environment;
+import msp.simulator.groundStation.GroundStation;
 import msp.simulator.satellite.Satellite;
 import msp.simulator.user.Dashboard;
 import msp.simulator.utils.architecture.OrekitConfiguration;
@@ -26,13 +39,14 @@ import msp.simulator.utils.logs.ephemeris.EphemerisGenerator;
  * This class is responsible to create the instance of the
  * numerical simulator. 
  * 
- * @author Florian CHAUBEYRE
+ * @author Florian CHAUBEYRE <chaubeyre.f@gmail.com>
  */
 public class NumericalSimulator {
 
 	/* ******* Public Static Attributes ******* */
 
-	/** Time duration of the simulation. (Always numerically finite) */
+	/** Time duration of the simulation. (Always numerically finite) 
+	 * Default value is Long.MAX_VALUE. */
 	public static long simulationDuration = Long.MAX_VALUE;
 
 	/** Real-time processing flag. */
@@ -63,8 +77,13 @@ public class NumericalSimulator {
 	/** Ephemeris Generator Instance of the simulator. */
 	private EphemerisGenerator ephemerisGenerator;
 
-	/* TODO: Enumerate the execution status. */
-	/** Execution status of the simulation. */
+	/** Ground Station Instance of the simulator. */
+	private GroundStation groundStation;
+
+	/** Execution status of the simulation.
+	 * TODO: Enumerate the execution status of the simulator.
+	 * (but also normalize the exception handling)
+	 */
 	private int executionStatus;
 
 	/** Computer date at simulation start. */
@@ -128,6 +147,12 @@ public class NumericalSimulator {
 					this.satellite
 					);
 
+			/* Ground Station Module */
+			this.groundStation = new GroundStation(
+					this.environment,
+					this.satellite
+					);
+
 			/* Ephemeris Generator Module */
 			this.ephemerisGenerator = new EphemerisGenerator();
 			this.ephemerisGenerator.start();
@@ -137,8 +162,13 @@ public class NumericalSimulator {
 			/* Writing initial step into the ephemeris. */ 
 			this.ephemerisGenerator.writeStep(this.satellite);
 
+			/* Sending the initial ground station data to the satellite. */
+			this.groundStation.executeMission(
+					this.satellite.getStates().getInitialState().getDate()
+					);
+
 			/* Pushing the initial state into the VTS socket. */
-			if (this.satellite.getIO().isConnectToVts()) {
+			if (this.satellite.getIO().isConnectedToVts()) {
 				this.satellite.getIO().exportToVts(
 						this.satellite.getStates().getInitialState()
 						);
@@ -164,6 +194,7 @@ public class NumericalSimulator {
 				this.environment,
 				this.dynamic,
 				this.satellite,
+				this.groundStation,
 				this.ephemerisGenerator
 				);
 
@@ -262,7 +293,7 @@ public class NumericalSimulator {
 	 * <i>Note that this implementation of JAVA does not insure strict real time
 	 * accuracy.</i>
 	 *
-	 * @author Florian CHAUBEYRE
+	 * @author Florian CHAUBEYRE <chaubeyre.f@gmail.com>
 	 */
 	private final class MainSimulationTask implements Runnable {
 
@@ -277,6 +308,9 @@ public class NumericalSimulator {
 
 		/** Satellite module of the simulation. */
 		private Satellite satellite;
+
+		/** Ground Station Instance of the simulation. */
+		private GroundStation groundStation;
 
 		/** Ephemeris Generator module of the simulation. */
 		private EphemerisGenerator ephemerisGenerator;
@@ -308,11 +342,13 @@ public class NumericalSimulator {
 				Environment environment,
 				Dynamic dynamic,
 				Satellite satellite,
+				GroundStation groundStation,
 				EphemerisGenerator ephemerisGenerator) {
 
 			this.environment = environment;
 			this.dynamic = dynamic;
 			this.satellite = satellite;
+			this.groundStation = groundStation;
 			this.ephemerisGenerator = ephemerisGenerator;
 
 			this.integrationTimeStep = dynamic.getPropagation().getIntegrationManager().getStepSize();
@@ -337,17 +373,26 @@ public class NumericalSimulator {
 				 * We are now at the new offset after the propagation. */
 				currentOffset += integrationTimeStep;
 
-				/* ******** PAYLOAD *********/
+				/* ******** GROUND STATION UPDATES ******** */
+
+				this.groundStation.executeMission(
+						this.satellite.getStates().getCurrentState().getDate()
+						);
+
+				/* **************************************** */
+
+
+				/* *************** PAYLOAD **************** */
 
 				/* Execute the mission of the satellite for the step. */
 				this.satellite.executeStepMission();
 
 				/* Export the satellite state to VTS for visualization. */
-				if(this.satellite.getIO().isConnectToVts()) {
+				if(this.satellite.getIO().isConnectedToVts()) {
 					this.satellite.getIO().exportToVts(
 							this.satellite.getStates().getCurrentState());
 				}
-				/* *************************/
+				/* **************************************** */
 
 
 				/* ********** Generate the Ephemeris ********** */

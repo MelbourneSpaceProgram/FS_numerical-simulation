@@ -1,10 +1,25 @@
-/* Copyright 2017-2018 Melbourne Space Program */
+/* Copyright 20017-2018 Melbourne Space Program
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package msp.simulator.dynamic.torques;
+
+import java.util.ArrayList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import msp.simulator.dynamic.torques.disturbances.SimpleTorqueDisturbances;
 import msp.simulator.environment.Environment;
 import msp.simulator.satellite.Satellite;
 import msp.simulator.utils.logs.CustomLoggingTools;
@@ -15,14 +30,14 @@ import msp.simulator.utils.logs.CustomLoggingTools;
  * on the satellite - in the satellite frame - to the
  * dynamic engine.
  *
- * @author Florian CHAUBEYRE
+ * @author Florian CHAUBEYRE <chaubeyre.f@gmail.com>
  */
 public class Torques {
 
 	/* ******* Public Static Attributes ******* */
 
 	/** Set the torque provider in use by the simulator. */
-	public static TorqueProviderEnum activeTorqueProvider = TorqueProviderEnum.SCENARIO;
+	public static TorqueProviderEnum commandTorqueProvider = TorqueProviderEnum.SCENARIO;
 
 	/* **************************************** */
 
@@ -30,7 +45,7 @@ public class Torques {
 	private static final Logger logger = LoggerFactory.getLogger(Torques.class);
 
 	/** Instance of Torque Provider. */
-	private TorqueProvider torqueProvider;
+	private ArrayList<TorqueProvider> torqueProviders;
 
 	/**
 	 * Build the Main Torque Provider of the dynamic module.
@@ -41,24 +56,39 @@ public class Torques {
 		logger.info(CustomLoggingTools.indentMsg(logger,
 				"Building the Torque Engine..."));
 
-		/* Build the torque provider in use in the simulation. */
-		switch (Torques.activeTorqueProvider) {
+		/* Build the torque providers in use in the simulation. 	*/
+		this.torqueProviders = new ArrayList<TorqueProvider>();
+		
+		/*  - Register the command provider.						*/
+		switch (Torques.commandTorqueProvider) {
 		case MEMCACHED:
-			this.torqueProvider = new MemCachedTorqueProvider(satellite);
+			this.torqueProviders.add(
+					TorqueProviderEnum.MEMCACHED.getIndex(),
+					new MemCachedTorqueProvider(satellite)
+					);
 			break;
 		case SCENARIO:
-			this.torqueProvider = new TorqueOverTimeScenarioProvider(
-					satellite.getAssembly().getStates().getInitialState().getDate());
+			this.torqueProviders.add(
+					TorqueProviderEnum.SCENARIO.getIndex(),
+					new TorqueOverTimeScenarioProvider(
+							satellite.getAssembly().getStates().getInitialState().getDate())
+					);
+			break;
+		default:
 			break;
 		}
 
+		/*  - Register the disturbances.							*/
+		this.torqueProviders.add(new SimpleTorqueDisturbances());
+
 	}
-	
+
 	/**
-	 * @return the torqueProvider
+	 * @return The list of registered torque provider in use 
+	 * in the simulation.
 	 */
-	public TorqueProvider getTorqueProvider() {
-		return torqueProvider;
+	public ArrayList<TorqueProvider> getTorqueProviders() {
+		return this.torqueProviders;
 	}
 
 }

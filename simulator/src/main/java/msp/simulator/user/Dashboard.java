@@ -1,4 +1,16 @@
-/* Copyright 2017-2018 Melbourne Space Program */
+/* Copyright 20017-2018 Melbourne Space Program
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package msp.simulator.user;
 
@@ -19,13 +31,16 @@ import msp.simulator.dynamic.propagation.integration.Integration;
 import msp.simulator.dynamic.propagation.integration.RotAccProvider;
 import msp.simulator.dynamic.torques.MemCachedTorqueProvider;
 import msp.simulator.dynamic.torques.TorqueOverTimeScenarioProvider;
+import msp.simulator.dynamic.torques.TorqueOverTimeScenarioProvider.Step;
 import msp.simulator.dynamic.torques.TorqueProviderEnum;
 import msp.simulator.dynamic.torques.Torques;
 import msp.simulator.environment.orbit.OrbitWrapper;
 import msp.simulator.environment.orbit.OrbitWrapper.OrbitalParameters;
+import msp.simulator.groundStation.GroundStation;
 import msp.simulator.satellite.assembly.SatelliteBody;
 import msp.simulator.satellite.assembly.SatelliteStates;
 import msp.simulator.satellite.io.IO;
+import msp.simulator.satellite.sensors.Gyrometer;
 import msp.simulator.satellite.sensors.Magnetometer;
 import msp.simulator.utils.logs.CustomLoggingTools;
 import msp.simulator.utils.logs.ephemeris.EphemerisGenerator;
@@ -36,7 +51,7 @@ import msp.simulator.utils.logs.ephemeris.EphemerisGenerator;
  * <p>
  * The configuration has to be set before any
  * simulation creation and can be used
- * anywhere by the user as the provided method 
+ * anywhere by the user as the provided methods
  * are static.
  * <p>
  * The configuration setting relies on the fact 
@@ -50,7 +65,18 @@ import msp.simulator.utils.logs.ephemeris.EphemerisGenerator;
  * influences the initialization and are not used within
  * the main processing.
  *
- * @author Florian CHAUBEYRE
+ * TODO: Implement an appropriate configuration handler for the simulation.
+ * The current implementation with "public static" attributes
+ * is highly unstable. It needs to be protected and accessed via a class
+ * handling the configuration of the current instance of the simulation.
+ * For instance, each instance of simulation can have its own instance of
+ * configuration class.
+ * Indeed, as the variables are public and static, they can be accessed and
+ * modified by different unit tests at the same time. Thus the initial
+ * configuration of a given test during the initialization can be different
+ * than the one set by the user.
+ *
+ * @author Florian CHAUBEYRE <chaubeyre.f@gmail.com>
  */
 public class Dashboard {	
 
@@ -60,62 +86,53 @@ public class Dashboard {
 
 	/** Set the Configuration of the Simulation to the default Settings. */
 	public static void setDefaultConfiguration() {
-		
+
+		/* **** Logging Settings **** */
 		Dashboard.configureLogging();
 
 		logger.info(CustomLoggingTools.indentMsg(logger, 
 				"Setting Default Configuration..."));
 
+		/* **** Simulation Settings **** */
 		Dashboard.setRealTimeProcessing(false);
 		Dashboard.setIntegrationTimeStep(0.1);
 		Dashboard.setEphemerisTimeStep(1.0);
+		Dashboard.setGroundStationWorkPeriod(10);
 		Dashboard.setSimulationDuration(10);
-		Dashboard.setOrbitalParameters(new OrbitalParameters(
-				575000, 	
-				0,
-				0,
-				FastMath.toRadians(98),
-				FastMath.toRadians(269.939),
-				FastMath.toRadians(0),
-				"2018-12-21T22:23:00.000"
-				));
-		Dashboard.setEphemerisFilesPath(EphemerisGenerator.DEFAULT_PATH);
-		Dashboard.setSatBoxSizeWithNoSolarPanel(new double[] {0.01, 0.01, 0.01});
-		Dashboard.setInitialAttitudeQuaternion(1, 0, 0, 0);
-		Dashboard.setInitialSpin(new Vector3D(
-				0.0,
-				0.0,
-				0.0	
-				));
-		Dashboard.setInitialRotAcceleration(new Vector3D(
-				0.0,
-				0.0,
-				0.0	
-				));
+		Dashboard.setEphemerisFilesPath(
+				System.getProperty("user.dir") + System.getProperty("file.separator") 
+				+ "src" + System.getProperty("file.separator")
+				+ "main" + System.getProperty("file.separator")
+				+ "resources" + System.getProperty("file.separator")
+				+ "ephemeris" + System.getProperty("file.separator")
+				);
 
-		@SuppressWarnings("unused")
-		double[][] trueSatInertiaMatrix =  /* kg.m^2 */ {
-				{1191.648 * 1.3e-6,           0       ,           0        },
-				{         0       ,  1169.506 * 1.3e-6,           0        },
-				{         0       ,           0       ,  1203.969 * 1.3e-6 },
-		};
+		/* **** Orbit Settings **** */
+		Dashboard.setOrbitalParameters(new OrbitWrapper.OrbitalParameters());
 
-		double[][] simpleBalancedInertiaMatrix = {
-				{ 1,   0,   0 },
-				{ 0,   1,   0 },
-				{ 0,   0,   1 }
-		};
-		Dashboard.setSatelliteInertiaMatrix(simpleBalancedInertiaMatrix);
+		/* **** Dynamic Settings **** */
+		Dashboard.setInitialAttitudeQuaternion(new Quaternion(1,0,0,0));
+		Dashboard.setInitialSpin(Vector3D.ZERO);
+		Dashboard.setInitialRotAcceleration(Vector3D.ZERO);
+		Dashboard.setCommandTorqueProvider(TorqueProviderEnum.SCENARIO);
+		Dashboard.setTorqueScenario(new ArrayList<Step>());
 
-		Dashboard.setMagnetometerNoiseIntensity(Magnetometer.defaultNoiseIntensity);
+		/* **** Structure Settings **** */
+		Dashboard.setSatBoxSizeWithNoSolarPanel(new double[]{0.01, 0.01, 0.01});
+		Dashboard.setSatelliteMass(1.0);
+		Dashboard.setSatelliteInertiaMatrix(SatelliteBody.simpleBalancedInertiaMatrix);
 
-		Dashboard.setTorqueScenario(new ArrayList<TorqueOverTimeScenarioProvider.Step>());
-		Dashboard.setTorqueProvider(TorqueProviderEnum.SCENARIO);
+		/* **** Structure Settings **** */
+		Dashboard.setMagnetometerNoiseIntensity(1e2);
+		Dashboard.setGyroNoiseIntensity(1e-3);
+
 
 		/* **** IO Settings **** */
-		Dashboard.setMemCachedConnection(IO.connectMemCached, IO.memcachedSocketAddress);
-		Dashboard.setTorqueCommandKey(MemCachedTorqueProvider.torqueCommandKey);
+		Dashboard.setMemCachedConnection(false, "127.0.0.1:11211");
+		Dashboard.setTorqueCommandKey("Simulation_Torque_");
+		Dashboard.setVtsConnection(false);
 
+		/* Checking the overall configuration. */
 		try {
 			Dashboard.checkConfiguration();
 		} catch (Exception e) {
@@ -215,6 +232,16 @@ public class Dashboard {
 	}
 
 	/**
+	 * Set the period of work of the ground station, i.e. the time without
+	 * any update.
+	 * @param workPeriodicity in second.
+	 */
+	public static void setGroundStationWorkPeriod(long workPeriodicity) {
+		GroundStation.periodicityOfWork = workPeriodicity;
+	}
+
+
+	/**
 	 * Set the orbital parameters required to define the orbit in
 	 * the simulator.
 	 * @param param The appropriate orbital parameters
@@ -236,14 +263,10 @@ public class Dashboard {
 	 * Set the initial attitude quaternion. (Representing the rotation
 	 * from the inertial frame to the satellite frame).
 	 * This method normalize the quaternion.
-	 * @param q0 Scalar part
-	 * @param q1 First Vector Part
-	 * @param q2 Second Vector Part
-	 * @param q3 Third Vector Part
+	 * @param attitudeQuaternion Attitude Quaternion to set
 	 */
-	public static void setInitialAttitudeQuaternion(
-			double q0, double q1, double q2, double q3) {
-		SatelliteStates.initialAttitudeQuaternion = new Quaternion(q0, q1, q2, q3).normalize();
+	public static void setInitialAttitudeQuaternion(Quaternion attitudeQuaternion) {
+		SatelliteStates.initialAttitudeQuaternion = attitudeQuaternion.normalize();
 	}
 
 	/**
@@ -290,8 +313,8 @@ public class Dashboard {
 	 * Set the torque provider to be use by the simulator.
 	 * @param torqueProviderInUse Instance of the simulation
 	 */
-	public static void setTorqueProvider(TorqueProviderEnum torqueProviderInUse) {
-		Torques.activeTorqueProvider = torqueProviderInUse;
+	public static void setCommandTorqueProvider(TorqueProviderEnum commandTorqueProvider) {
+		Torques.commandTorqueProvider = commandTorqueProvider;
 	}
 
 	/**
@@ -332,7 +355,15 @@ public class Dashboard {
 	 * @param noiseIntensity order of intensity
 	 */
 	public static void setMagnetometerNoiseIntensity(double noiseIntensity) {
-		Magnetometer.defaultNoiseIntensity = noiseIntensity;
+		Magnetometer.defaultMagnetoNoiseIntensity = noiseIntensity;
+	}
+
+	/**
+	 * Set the normally distributed noise intensity of the gyrometer.
+	 * @param noiseIntensity order of intensity
+	 */
+	public static void setGyroNoiseIntensity(double noiseIntensity) {
+		Gyrometer.defaultGyroNoiseIntensity = noiseIntensity;
 	}
 
 	/* ********************************************************* */
@@ -413,7 +444,7 @@ public class Dashboard {
 		/* When a MemCached torque provider is set, the MemCached connection 
 		 * should be enable in the satellite IO. 
 		 */
-		status = (Torques.activeTorqueProvider != TorqueProviderEnum.MEMCACHED)
+		status = (Torques.commandTorqueProvider != TorqueProviderEnum.MEMCACHED)
 				||
 				IO.connectMemCached ;
 		if (!status) {
@@ -423,11 +454,19 @@ public class Dashboard {
 		mainStatus &= status;
 
 		/* Check */
+		/* The command torque provider should have an index of 0. */
+		status = (Torques.commandTorqueProvider.getIndex() == 0);
+		if (!status) {
+			logger.error("The specified command torque provider is not a command provider.");
+		}
+		mainStatus &= status;
+
+		/* Check */
 		/* In case the active torque provider is a scenario beginning at the initial
 		 * date of the simulation, the first step should provide a torque that match 
 		 * the initial rotational acceleration of the satellite.
 		 */
-		status = Torques.activeTorqueProvider != TorqueProviderEnum.SCENARIO
+		status = Torques.commandTorqueProvider != TorqueProviderEnum.SCENARIO
 				|| 
 				TorqueOverTimeScenarioProvider.TORQUE_SCENARIO.isEmpty()
 				||

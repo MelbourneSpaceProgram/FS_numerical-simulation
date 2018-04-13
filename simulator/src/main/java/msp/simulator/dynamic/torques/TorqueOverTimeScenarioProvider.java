@@ -1,4 +1,16 @@
-/* Copyright 2017-2018 Melbourne Space Program */
+/* Copyright 20017-2018 Melbourne Space Program
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package msp.simulator.dynamic.torques;
 
@@ -16,7 +28,7 @@ import org.orekit.time.AbsoluteDate;
  * the implementation of the dynamic engine to provide some
  * context scenario of validation
  *
- * @author Florian CHAUBEYRE
+ * @author Florian CHAUBEYRE <chaubeyre.f@gmail.com>
  */
 public class TorqueOverTimeScenarioProvider implements TorqueProvider {
 
@@ -33,7 +45,7 @@ public class TorqueOverTimeScenarioProvider implements TorqueProvider {
 	 * a certain duration otherwise the returned torque is zero
 	 * on the defined rotation axis.
 	 *
-	 * @author Florian CHAUBEYRE
+	 * @author Florian CHAUBEYRE <chaubeyre.f@gmail.com>
 	 */
 	public static class Step {
 		private double start;
