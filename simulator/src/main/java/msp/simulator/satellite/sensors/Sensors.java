@@ -52,6 +52,9 @@ public class Sensors {
 	negYIRSensor,
 	posZIRSensor,
 	negZIRSensor;
+	
+	/** Instance of gyrometer in the simulation. */
+	private Gyrometer gyrometer;
 
 	/**
 	 * Constructor of the satellite sensors.
@@ -73,6 +76,7 @@ public class Sensors {
 		
 		/* Building the sensors. */
 		this.magnetometer = new Magnetometer(this.environment, this.assembly);
+		this.gyrometer = new Gyrometer(this.environment, this.assembly);
 		
 		this.posXIRSensor = new InfraredSensor(Vector3D.PLUS_I);
 		this.negXIRSensor = new InfraredSensor(Vector3D.MINUS_I);
@@ -87,6 +91,13 @@ public class Sensors {
 	 */
 	public Magnetometer getMagnetometer() {
 		return magnetometer;
+	}
+	
+	/**
+	 * @return the gyrometer
+	 */
+	public Gyrometer getGyrometer() {
+		return gyrometer;
 	}
 
 	/**
