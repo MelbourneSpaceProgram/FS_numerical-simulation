@@ -15,11 +15,38 @@
 package msp.simulator.dynamic.torques;
 
 /**
- * Enumerate the different torque provider available in the simulator.
+ * Enumerate the different torque providers available in the simulator.
  *
  * @author Florian CHAUBEYRE <chaubeyre.f@gmail.com>
  */
 public enum TorqueProviderEnum {
-	MEMCACHED,
-	SCENARIO
+	/* Command torque provider. */
+	MEMCACHED(0),
+	SCENARIO(0),
+	
+	/* Disturbances. */
+	GRAVITY(1),
+	ATMOSPHERIC(2),
+	MAGNETIC(3),
+	SOLAR_PRESSURE(4)
+	;
+	
+	/** Define the nature of the provided torque. */
+	private int id;
+	
+	/**
+	 * Constructor of a torque provider enumerate.
+	 * @param id Defines the nature of the provided torque.
+	 */
+	private TorqueProviderEnum(int id) {
+		this.id = id;
+	}
+	
+	/**
+	 * Get the ID describing the nature of the provided torque.
+	 * @return The ID of the Enumerate.
+	 */
+	public int getIndex() {
+		return this.id;
+	}
 }

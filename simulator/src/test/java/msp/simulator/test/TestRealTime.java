@@ -53,7 +53,7 @@ public class TestRealTime {
 		Dashboard.setInitialSpin(new Vector3D(1, 1, 1));
 		Dashboard.setInitialRotAcceleration(new Vector3D(0,0,0));
 
-		Dashboard.setTorqueProvider(TorqueProviderEnum.MEMCACHED);
+		Dashboard.setCommandTorqueProvider(TorqueProviderEnum.MEMCACHED);
 		Dashboard.setMemCachedConnection(true, "127.0.0.1:11211");
 
 		//Dashboard.setVtsConnection(true);

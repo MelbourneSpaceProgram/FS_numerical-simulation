@@ -114,19 +114,19 @@ public class Dashboard {
 		Dashboard.setInitialAttitudeQuaternion(new Quaternion(1,0,0,0));
 		Dashboard.setInitialSpin(Vector3D.ZERO);
 		Dashboard.setInitialRotAcceleration(Vector3D.ZERO);
-		Dashboard.setTorqueProvider(TorqueProviderEnum.SCENARIO);
+		Dashboard.setCommandTorqueProvider(TorqueProviderEnum.SCENARIO);
 		Dashboard.setTorqueScenario(new ArrayList<Step>());
 
 		/* **** Structure Settings **** */
 		Dashboard.setSatBoxSizeWithNoSolarPanel(new double[]{0.01, 0.01, 0.01});
 		Dashboard.setSatelliteMass(1.0);
 		Dashboard.setSatelliteInertiaMatrix(SatelliteBody.simpleBalancedInertiaMatrix);
-		
+
 		/* **** Structure Settings **** */
 		Dashboard.setMagnetometerNoiseIntensity(1e2);
 		Dashboard.setGyroNoiseIntensity(1e-3);
-		
-		
+
+
 		/* **** IO Settings **** */
 		Dashboard.setMemCachedConnection(false, "127.0.0.1:11211");
 		Dashboard.setTorqueCommandKey("Simulation_Torque_");
@@ -313,8 +313,8 @@ public class Dashboard {
 	 * Set the torque provider to be use by the simulator.
 	 * @param torqueProviderInUse Instance of the simulation
 	 */
-	public static void setTorqueProvider(TorqueProviderEnum torqueProviderInUse) {
-		Torques.activeTorqueProvider = torqueProviderInUse;
+	public static void setCommandTorqueProvider(TorqueProviderEnum commandTorqueProvider) {
+		Torques.commandTorqueProvider = commandTorqueProvider;
 	}
 
 	/**
@@ -357,7 +357,7 @@ public class Dashboard {
 	public static void setMagnetometerNoiseIntensity(double noiseIntensity) {
 		Magnetometer.defaultMagnetoNoiseIntensity = noiseIntensity;
 	}
-	
+
 	/**
 	 * Set the normally distributed noise intensity of the gyrometer.
 	 * @param noiseIntensity order of intensity
@@ -444,7 +444,7 @@ public class Dashboard {
 		/* When a MemCached torque provider is set, the MemCached connection 
 		 * should be enable in the satellite IO. 
 		 */
-		status = (Torques.activeTorqueProvider != TorqueProviderEnum.MEMCACHED)
+		status = (Torques.commandTorqueProvider != TorqueProviderEnum.MEMCACHED)
 				||
 				IO.connectMemCached ;
 		if (!status) {
@@ -454,11 +454,19 @@ public class Dashboard {
 		mainStatus &= status;
 
 		/* Check */
+		/* The command torque provider should have an index of 0. */
+		status = (Torques.commandTorqueProvider.getIndex() == 0);
+		if (!status) {
+			logger.error("The specified command torque provider is not a command provider.");
+		}
+		mainStatus &= status;
+
+		/* Check */
 		/* In case the active torque provider is a scenario beginning at the initial
 		 * date of the simulation, the first step should provide a torque that match 
 		 * the initial rotational acceleration of the satellite.
 		 */
-		status = Torques.activeTorqueProvider != TorqueProviderEnum.SCENARIO
+		status = Torques.commandTorqueProvider != TorqueProviderEnum.SCENARIO
 				|| 
 				TorqueOverTimeScenarioProvider.TORQUE_SCENARIO.isEmpty()
 				||

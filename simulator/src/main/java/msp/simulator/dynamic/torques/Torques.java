@@ -14,6 +14,8 @@
 
 package msp.simulator.dynamic.torques;
 
+import java.util.ArrayList;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +36,7 @@ public class Torques {
 	/* ******* Public Static Attributes ******* */
 
 	/** Set the torque provider in use by the simulator. */
-	public static TorqueProviderEnum activeTorqueProvider = TorqueProviderEnum.SCENARIO;
+	public static TorqueProviderEnum commandTorqueProvider = TorqueProviderEnum.SCENARIO;
 
 	/* **************************************** */
 
@@ -42,7 +44,7 @@ public class Torques {
 	private static final Logger logger = LoggerFactory.getLogger(Torques.class);
 
 	/** Instance of Torque Provider. */
-	private TorqueProvider torqueProvider;
+	private ArrayList<TorqueProvider> torqueProviders;
 
 	/**
 	 * Build the Main Torque Provider of the dynamic module.
@@ -53,23 +55,39 @@ public class Torques {
 		logger.info(CustomLoggingTools.indentMsg(logger,
 				"Building the Torque Engine..."));
 
-		/* Build the torque provider in use in the simulation. */
-		switch (Torques.activeTorqueProvider) {
+		/* Build the torque providers in use in the simulation. 	*/
+		this.torqueProviders = new ArrayList<TorqueProvider>();
+		
+		/*  - Register the command provider.						*/
+		switch (Torques.commandTorqueProvider) {
 		case MEMCACHED:
-			this.torqueProvider = new MemCachedTorqueProvider(satellite);
+			this.torqueProviders.add(
+					TorqueProviderEnum.MEMCACHED.getIndex(),
+					new MemCachedTorqueProvider(satellite)
+					);
 			break;
 		case SCENARIO:
-			this.torqueProvider = new TorqueOverTimeScenarioProvider(
-					satellite.getAssembly().getStates().getInitialState().getDate());
+			this.torqueProviders.add(
+					TorqueProviderEnum.SCENARIO.getIndex(),
+					new TorqueOverTimeScenarioProvider(
+							satellite.getAssembly().getStates().getInitialState().getDate())
+					);
+			break;
+		default:
 			break;
 		}
+
+		/*  - Register the disturbances.							*/
+		/* ........ */
+
 	}
-	
+
 	/**
-	 * @return the torqueProvider
+	 * @return The list of registered torque provider in use 
+	 * in the simulation.
 	 */
-	public TorqueProvider getTorqueProvider() {
-		return torqueProvider;
+	public ArrayList<TorqueProvider> getTorqueProviders() {
+		return this.torqueProviders;
 	}
 
 }

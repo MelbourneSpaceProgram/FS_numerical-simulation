@@ -104,7 +104,7 @@ public class TestSatellite {
 		Dashboard.setInitialSpin(Vector3D.ZERO);
 
 		Dashboard.setMemCachedConnection(true, "127.0.0.1:11211");
-		Dashboard.setTorqueProvider(TorqueProviderEnum.MEMCACHED);
+		Dashboard.setCommandTorqueProvider(TorqueProviderEnum.MEMCACHED);
 		Dashboard.setTorqueCommandKey(torqueKey);
 
 		Dashboard.setInitialRotAcceleration(

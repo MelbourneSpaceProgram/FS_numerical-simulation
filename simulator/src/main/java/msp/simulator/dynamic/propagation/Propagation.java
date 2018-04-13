@@ -85,7 +85,10 @@ public class Propagation {
 		this.satelliteStates = satellite.getStates();
 
 		/* Building the integration manager. */
-		this.integrationManager = new Integration(satellite, torques.getTorqueProvider());
+		this.integrationManager = new Integration(
+				satellite, 
+				torques
+				);
 
 		try {
 			/* Creating the Instance of Propagator. 

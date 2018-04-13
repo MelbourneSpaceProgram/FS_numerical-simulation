@@ -60,7 +60,7 @@ public class TestDynamic {
 		Dashboard.setRealTimeProcessing(false);
 		Dashboard.setSimulationDuration(accDuration);
 		Dashboard.setIntegrationTimeStep(1);
-		Dashboard.setTorqueProvider(TorqueProviderEnum.SCENARIO);
+		Dashboard.setCommandTorqueProvider(TorqueProviderEnum.SCENARIO);
 	
 		/* Writing the torque scenario. */
 		ArrayList<TorqueOverTimeScenarioProvider.Step> torqueScenario = 
@@ -144,14 +144,14 @@ public class TestDynamic {
 	public void testRotation() throws Exception {
 
 		/* *** CONFIGURATION *** */
-		long rotationTime = 10;
-		Vector3D n = new Vector3D(1,0,0).normalize();
+		long rotationTime = 3;
+		Vector3D n = new Vector3D(1,2,3).normalize();
 		/* ********************* */
 
 		Dashboard.setDefaultConfiguration();
 		Dashboard.setRealTimeProcessing(true);
 
-		Dashboard.setTorqueProvider(TorqueProviderEnum.SCENARIO);
+		Dashboard.setCommandTorqueProvider(TorqueProviderEnum.SCENARIO);
 		Dashboard.setTorqueScenario(new ArrayList<Step>());
 		Dashboard.setIntegrationTimeStep(0.1);
 		Dashboard.setEphemerisTimeStep(1.0);

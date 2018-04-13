@@ -17,7 +17,7 @@ package msp.simulator.dynamic.propagation.integration;
 import org.hipparchus.ode.ODEIntegrator;
 import org.hipparchus.ode.nonstiff.ClassicalRungeKuttaIntegrator;
 
-import msp.simulator.dynamic.torques.TorqueProvider;
+import msp.simulator.dynamic.torques.Torques;
 import msp.simulator.satellite.Satellite;
 
 /**
@@ -55,14 +55,14 @@ public class Integration {
 	 * @param satellite Instance of the simulation
 	 * @param torqueProvider Instance of the simulation in use
 	 */
-	public Integration(Satellite satellite, TorqueProvider torqueProvider) {
+	public Integration(Satellite satellite, Torques torquesManager) {
 		/* Integration parameters. */
 		this.stepSize = integrationTimeStep;
 		this.integrator = new ClassicalRungeKuttaIntegrator(this.stepSize);
 		
 		/* Providers for additional states. */
 		this.rotAccProvider = new RotAccProvider(
-				torqueProvider,
+				torquesManager.getTorqueProviders(),
 				satellite.getAssembly().getBody());
 		
 		/* Equation for additional states. */
