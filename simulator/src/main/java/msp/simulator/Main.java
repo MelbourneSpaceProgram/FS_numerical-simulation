@@ -14,7 +14,12 @@
 
 package msp.simulator;
 
+import org.hipparchus.complex.Quaternion;
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
+
 import msp.simulator.NumericalSimulator;
+import msp.simulator.dynamic.torques.TorqueProviderEnum;
+import msp.simulator.satellite.assembly.SatelliteBody;
 import msp.simulator.user.Dashboard;
 
 /**
@@ -24,16 +29,30 @@ import msp.simulator.user.Dashboard;
 public class Main {
 	
 	/**
-	 * Main method: Create an instance of the numerical simulator
-	 * and launch it.
+	 * Main method: compute the main use-case of the simulator.
 	 * @param args - unused
 	 */
 	public static void main(String[] args) {
 		try {
-			/* *** Configuration of the simulator. */
+			/* *** Configuration of the simulator. *** */
 			Dashboard.setDefaultConfiguration();
+			Dashboard.setRealTimeProcessing(true);
+			Dashboard.setSimulationDuration(1000000);
 			
-			/* *** Creating and launching the simulation. */
+			Dashboard.setIntegrationTimeStep(0.1);
+			Dashboard.setEphemerisTimeStep(1.0);
+			Dashboard.setSatelliteInertiaMatrix(SatelliteBody.satInertiaMatrix);
+
+			Dashboard.setInitialAttitudeQuaternion(new Quaternion(1, 0, 0, 0));
+			Dashboard.setInitialSpin(new Vector3D(0.5, 0.5, 0.5));
+			Dashboard.setInitialRotAcceleration(new Vector3D(0,0,0));
+
+			Dashboard.setCommandTorqueProvider(TorqueProviderEnum.MEMCACHED);
+			Dashboard.setMemCachedConnection(true, "127.0.0.1:11211");
+
+			//Dashboard.setVtsConnection(true);
+			
+			/* *** Creating and launching the simulation. *** */
 			NumericalSimulator simulator = new NumericalSimulator();
 			simulator.initialize();
 			simulator.process();
