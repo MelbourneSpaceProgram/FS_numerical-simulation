@@ -1,4 +1,16 @@
-/* Copyright 2017-2018 Melbourne Space Program */
+/* Copyright 20017-2018 Melbourne Space Program
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package msp.simulator.satellite.sensors;
 
@@ -12,7 +24,7 @@ import msp.simulator.utils.logs.CustomLoggingTools;
 
 /**
  *
- * @author Florian CHAUBEYRE
+ * @author Florian CHAUBEYRE <chaubeyre.f@gmail.com>
  * @author Braeden BORG
  */
 public class Sensors {
@@ -29,12 +41,17 @@ public class Sensors {
 
 	/* ***** Instances of the different sensors. ***** */
 
-	/** Instance of Magnetometer in the simulation */
+	/** Instance of magnetometer in the simulation */
 	private Magnetometer magnetometer;
 
-	/** Instance of Infrared Sensor in the simulation */
-	private InfraredSensor posXIRSensor, negXIRSensor, posYIRSensor, 
-			negYIRSensor, posZIRSensor, negZIRSensor;
+	/** Instance of infrared Sensors in the simulation */
+	private InfraredSensor 
+	posXIRSensor,
+	negXIRSensor,
+	posYIRSensor, 
+	negYIRSensor,
+	posZIRSensor,
+	negZIRSensor;
 
 	/**
 	 * Constructor of the satellite sensors.
@@ -50,8 +67,13 @@ public class Sensors {
 		this.environment = environment;
 		this.assembly = assembly;
 
+		/* TODO: Normalize the construction and the use of the sensors.
+		 * Typically by extending a minimal abstract class Sensor.
+		 */
+		
 		/* Building the sensors. */
 		this.magnetometer = new Magnetometer(this.environment, this.assembly);
+		
 		this.posXIRSensor = new InfraredSensor(Vector3D.PLUS_I);
 		this.negXIRSensor = new InfraredSensor(Vector3D.MINUS_I);
 		this.posYIRSensor = new InfraredSensor(Vector3D.PLUS_J);

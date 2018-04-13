@@ -1,4 +1,16 @@
-/* Copyright 2017-2018 Melbourne Space Program */
+/* Copyright 20017-2018 Melbourne Space Program
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package msp.simulator.satellite.assembly;
 
@@ -14,7 +26,7 @@ import msp.simulator.utils.logs.CustomLoggingTools;
  * Represents the physical satellite body of the satellite: 
  * dimensions, mass, inertia...
  * 
- * @author Florian CHAUBEYRE
+ * @author Florian CHAUBEYRE <chaubeyre.f@gmail.com>
  */
 public class SatelliteBody extends BoxAndSolarArraySpacecraft {
 
@@ -37,7 +49,7 @@ public class SatelliteBody extends BoxAndSolarArraySpacecraft {
 	};
 
 	/** Simple balance inertia matrix (Unit matrix). */
-	public static double[][] simpleBalancedInertiaMatrix = {
+	public static final double[][] simpleBalancedInertiaMatrix = {
 			{ 1,   0,   0 },
 			{ 0,   1,   0 },
 			{ 0,   0,   1 }
@@ -57,7 +69,15 @@ public class SatelliteBody extends BoxAndSolarArraySpacecraft {
 	/** Inertia matrix of the satellite. */
 	private double[][] inertiaMatrix;
 
-	/** TODO: Initialize properly. */
+	/** 
+	 * Drag coefficient of the satellite.
+	 * <p>
+	 * TODO: Define properly and implement a dynamic drag coefficient.
+	 * Calculate the coefficient at each step using the atmospheric model
+	 * (to access the density) and compute the apparent face of the satellite.
+	 * The coefficient is at the moment always zero, it needs to be updated
+	 * through the ParameterDriver.
+	 */
 	private static final double initialDragCoeff = 0;
 
 	/**

@@ -11,7 +11,7 @@ import net.spy.memcached.CachedData;
  * clients.
  * 
  * @author Rowan SKEWES
- * @author Florian CHAUBEYRE
+ * @author Florian CHAUBEYRE <chaubeyre.f@gmail.com>
  */
 public class MemcachedRawTranscoder implements Transcoder<byte[]>{
 	
