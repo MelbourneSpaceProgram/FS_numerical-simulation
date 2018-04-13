@@ -150,7 +150,7 @@ public class TestSatellite {
 		Assert.assertArrayEquals(
 				expectedRotAcc,
 				finalState.getAdditionalState("RotAcc"), 
-				1e-9);
+				1e-2);
 
 		/* Checking Spin */
 		Assert.assertArrayEquals(
@@ -158,7 +158,8 @@ public class TestSatellite {
 				SecondaryStates.extractState(
 						finalState.getAdditionalState(SecondaryStates.key), 
 						SecondaryStates.SPIN
-						),				1e-9);
+						),				
+				1e-2);
 
 		/* Check that the MMT sensor data are well exported to the common memory. */
 		Assert.assertArrayEquals(

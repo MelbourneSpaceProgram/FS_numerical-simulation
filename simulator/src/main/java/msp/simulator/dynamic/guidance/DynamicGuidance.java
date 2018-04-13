@@ -108,7 +108,7 @@ public class DynamicGuidance implements AttitudeProvider {
 
 	/**
 	 * Do nothing and return null.
-	 * @deprecated
+	 * @deprecated Not implemented.
 	 */
 	@Override
 	@Deprecated

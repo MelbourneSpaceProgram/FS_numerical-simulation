@@ -88,6 +88,8 @@ public class GroundStation {
 			final KeplerianOrbit currentKeplerianOrbit = (KeplerianOrbit) 
 					OrbitType.KEPLERIAN.convertType(currentOrbit);
 
+			/** TODO: Update the balistic coefficient with the drag coefficient. */
+			
 			/* Current Approximations of the TLE. */
 			int 		tleNumber 			= 1;
 			String 	launchPiece 			= "A";
