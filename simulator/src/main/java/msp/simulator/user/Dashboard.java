@@ -116,6 +116,7 @@ public class Dashboard {
 		Dashboard.setInitialRotAcceleration(Vector3D.ZERO);
 		Dashboard.setCommandTorqueProvider(TorqueProviderEnum.SCENARIO);
 		Dashboard.setTorqueScenario(new ArrayList<Step>());
+		Dashboard.setTorqueDisturbances(true);
 
 		/* **** Structure Settings **** */
 		Dashboard.setSatBoxSizeWithNoSolarPanel(new double[]{0.01, 0.01, 0.01});
@@ -283,6 +284,14 @@ public class Dashboard {
 	 */
 	public static void setInitialRotAcceleration(Vector3D accRot) {
 		SatelliteStates.initialRotAcceleration = accRot;
+	}
+	
+	/**
+	 * Allow the torque disturbances in the simulation.
+	 * @param flag True if allowed, false otherwise.
+	 */
+	public static void setTorqueDisturbances(boolean flag) {
+		Torques.allowDisturbances = flag;
 	}
 
 	/**

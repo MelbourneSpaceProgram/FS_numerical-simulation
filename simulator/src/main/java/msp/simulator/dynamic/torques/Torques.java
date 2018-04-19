@@ -39,6 +39,9 @@ public class Torques {
 	/** Set the torque provider in use by the simulator. */
 	public static TorqueProviderEnum commandTorqueProvider = TorqueProviderEnum.SCENARIO;
 
+	/** Allow the torque disturbances in the simulation. */
+	public static boolean allowDisturbances = true;
+
 	/* **************************************** */
 
 	/** Instance of the Logger of the class. */
@@ -46,6 +49,9 @@ public class Torques {
 
 	/** Instance of Torque Provider. */
 	private ArrayList<TorqueProvider> torqueProviders;
+
+	/** Private flag to allow torque disturbances in the simulation. */
+	private boolean isDisturbances;
 
 	/**
 	 * Build the Main Torque Provider of the dynamic module.
@@ -58,7 +64,10 @@ public class Torques {
 
 		/* Build the torque providers in use in the simulation. 	*/
 		this.torqueProviders = new ArrayList<TorqueProvider>();
-		
+
+		/* Set the use of torque disturbances. */
+		this.isDisturbances = Torques.allowDisturbances;
+
 		/*  - Register the command provider.						*/
 		switch (Torques.commandTorqueProvider) {
 		case MEMCACHED:
@@ -71,16 +80,19 @@ public class Torques {
 			this.torqueProviders.add(
 					TorqueProviderEnum.SCENARIO.getIndex(),
 					new TorqueOverTimeScenarioProvider(
-							satellite.getAssembly().getStates().getInitialState().getDate())
+							satellite,
+							satellite.getAssembly().getStates().getInitialState().getDate()
+							)
 					);
 			break;
 		default:
 			break;
 		}
 
-		/*  - Register the disturbances.							*/
-		this.torqueProviders.add(new SimpleTorqueDisturbances());
-
+		/*  - Register the disturbances.	*/
+		if (this.isDisturbances) {						
+			this.torqueProviders.add(new SimpleTorqueDisturbances());
+		}
 	}
 
 	/**

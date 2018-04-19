@@ -46,11 +46,12 @@ public class Main {
 			Dashboard.setInitialAttitudeQuaternion(new Quaternion(1, 0, 0, 0));
 			Dashboard.setInitialSpin(new Vector3D(0.5, 0.5, 0.5));
 			Dashboard.setInitialRotAcceleration(new Vector3D(0,0,0));
+			Dashboard.setTorqueDisturbances(true);
 
 			Dashboard.setCommandTorqueProvider(TorqueProviderEnum.MEMCACHED);
 			Dashboard.setMemCachedConnection(true, "127.0.0.1:11211");
 
-			//Dashboard.setVtsConnection(true);
+			Dashboard.setVtsConnection(false);
 			
 			/* *** Creating and launching the simulation. *** */
 			NumericalSimulator simulator = new NumericalSimulator();
