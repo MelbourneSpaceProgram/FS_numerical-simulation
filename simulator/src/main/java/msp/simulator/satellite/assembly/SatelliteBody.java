@@ -33,16 +33,16 @@ public class SatelliteBody extends BoxAndSolarArraySpacecraft {
 	/* ******* Public Static Attributes ******* */
 
 	/** Size of the satellite box in meters - (x, y, z) */
-	public static double[] satBoxSizeWithNoSolarPanel = new double[] {0.01, 0.01, 0.01} ;
+	public static final double[] satBoxSizeWithNoSolarPanel = new double[] {0.01, 0.01, 0.01} ;
 
 	/* Note that the size of the solar panels is set to zero in the class constructor.*/
 
 	/** Mass of the satellite in kilogram. */
-	public static double satelliteMass = 1.04;
+	public static final double satelliteMass = 1.04;
 
 	/* TODO(rskew) update inertia matrix. */
 	/** Inertia matrix of the satellite. */
-	public static double[][] satInertiaMatrix =  /* kg.m^2 */ {
+	public static final double[][] satInertiaMatrix =  /* kg.m^2 */ {
 			{1191.648 * 1.3e-6,           0       ,           0        },
 			{         0       ,  1169.506 * 1.3e-6,           0        },
 			{         0       ,           0       ,  1203.969 * 1.3e-6 },
@@ -101,7 +101,8 @@ public class SatelliteBody extends BoxAndSolarArraySpacecraft {
 		/* Copy the user value into a protected variable. */
 		this.satBoxSize = SatelliteBody.satBoxSizeWithNoSolarPanel;
 		this.satMass = SatelliteBody.satelliteMass;
-		this.inertiaMatrix = SatelliteBody.satInertiaMatrix;
+		//this.inertiaMatrix = SatelliteBody.satInertiaMatrix;
+		this.inertiaMatrix = SatelliteBody.simpleBalancedInertiaMatrix;
 
 		SatelliteBody.logger.info(CustomLoggingTools.indentMsg(SatelliteBody.logger, 
 				" -> Building the CubeSat body: Success."));

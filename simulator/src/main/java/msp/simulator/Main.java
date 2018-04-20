@@ -40,13 +40,14 @@ public class Main {
 			Dashboard.setSimulationDuration(1000000);
 			
 			Dashboard.setIntegrationTimeStep(0.1);
-			Dashboard.setEphemerisTimeStep(1.0);
-			Dashboard.setSatelliteInertiaMatrix(SatelliteBody.satInertiaMatrix);
+			Dashboard.setEphemerisTimeStep(0.1);
+			//Dashboard.setSatelliteInertiaMatrix(SatelliteBody.satInertiaMatrix);
+			Dashboard.setStepDelay(0.1);
 
 			Dashboard.setInitialAttitudeQuaternion(new Quaternion(1, 0, 0, 0));
 			Dashboard.setInitialSpin(new Vector3D(0.5, 0.5, 0.5));
 			Dashboard.setInitialRotAcceleration(new Vector3D(0,0,0));
-			Dashboard.setTorqueDisturbances(true);
+			Dashboard.setTorqueDisturbances(false);
 
 			Dashboard.setCommandTorqueProvider(TorqueProviderEnum.MEMCACHED);
 			Dashboard.setMemCachedConnection(true, "127.0.0.1:11211");

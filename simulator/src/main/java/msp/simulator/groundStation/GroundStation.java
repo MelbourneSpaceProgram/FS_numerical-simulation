@@ -158,7 +158,7 @@ public class GroundStation {
 					byte[] raan = MemcachedRawTranscoder.toRawByteArray(
 							Double.valueOf(tle.getLine2().substring(17, 25)));
 
-					byte[] eccentricity = MemcachedRawTranscoder.toRawByteArray(
+					byte[] eccentricity1e7 = MemcachedRawTranscoder.toRawByteArray(
 							Double.valueOf(tle.getLine2().substring(26, 33)));
 
 					byte[] argPerigee = MemcachedRawTranscoder.toRawByteArray(
@@ -175,7 +175,7 @@ public class GroundStation {
 					memcached.set("Simulation_TLE_Mean_Motion_First_Deriv"	, 0, meanMotionFirstDerivative);
 					memcached.set("Simulation_TLE_Mean_Motion"				, 0, meanMotion);
 					memcached.set("Simulation_TLE_Argument_Perigee"		, 0, argPerigee);
-					memcached.set("Simulation_TLE_Eccentricity"			, 0, eccentricity);
+					memcached.set("Simulation_TLE_Eccentricity_1e7"			, 0, eccentricity1e7);
 					memcached.set("Simulation_TLE_Mean_Anomaly"			, 0, meanAnomaly);
 					memcached.set("Simulation_TLE_Inclination"			, 0, inclination);
 					memcached.set("Simulation_TLE_Bstar"		, 0, bStar);
@@ -213,8 +213,8 @@ public class GroundStation {
 									+ "TLE_Epoch: " + 
 									+ ByteBuffer.wrap(epoch).getDouble()
 									+ "\n"
-									+ "TLE_Eccentricity: " + 
-									+ ByteBuffer.wrap(eccentricity).getDouble()
+									+ "TLE_Eccentricity_1e7: " + 
+									+ ByteBuffer.wrap(eccentricity1e7).getDouble()
 									+ "\n"
 									+ "TLE_Argument_Perigee: " + 
 									+ ByteBuffer.wrap(argPerigee).getDouble()
