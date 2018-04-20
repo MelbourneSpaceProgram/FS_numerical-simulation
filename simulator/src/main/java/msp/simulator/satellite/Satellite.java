@@ -15,6 +15,7 @@
 package msp.simulator.satellite;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.orekit.time.AbsoluteDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,9 +74,7 @@ public class Satellite {
 	 * externalization of the sensors etc.
 	 */
 	public void executeStepMission() {
-
-		this.getSensors().getGyrometer().getData_rotAcc();
-
+		AbsoluteDate date = this.getStates().getCurrentState().getDate();
 
 		/* Export Sensor Measurements */
 		if (this.io.isConnectedToMemCached()) {
@@ -104,7 +103,7 @@ public class Satellite {
 					"Simulation_Magnetometer_Z", 0, 
 					rawMag_z
 					);		
-			
+
 			/* Gyrometer Sensor Measurement */
 			Vector3D gyroMeasure = this.getSensors().getGyrometer().getData_rotAcc();
 			byte[] rawGyro_x = MemcachedRawTranscoder.toRawByteArray(gyroMeasure.getX());
@@ -123,11 +122,11 @@ public class Satellite {
 					"Simulation_Gyrometer_Z", 0, 
 					rawGyro_z
 					);
-			
+
 			/* Infrared Sensor Measurement */
-			Vector3D nadir_ecef = Vector3D.MINUS_K;
-			Vector3D nadir_body = this.assembly.getStates().getCurrentState()
-					.toTransform().transformVector(nadir_ecef);
+			Vector3D nadir_itrf = Vector3D.MINUS_K;
+			Vector3D nadir_body = this.assembly.getItrf2body(date)
+					.transformVector(nadir_itrf);
 
 			double posXIR = this.sensors.getPosXIRSensor()
 					.calculateInfraredReading(nadir_body);
