@@ -175,7 +175,7 @@ public class GroundStation {
 					memcached.set("Simulation_TLE_Mean_Motion_First_Deriv"	, 0, meanMotionFirstDerivative);
 					memcached.set("Simulation_TLE_Mean_Motion"				, 0, meanMotion);
 					memcached.set("Simulation_TLE_Argument_Perigee"		, 0, argPerigee);
-					memcached.set("Simulation_TLE_Eccentricity_1e7"			, 0, eccentricity1e7);
+					memcached.set("Simulation_TLE_Eccentricity_1e7"		, 0, eccentricity1e7);
 					memcached.set("Simulation_TLE_Mean_Anomaly"			, 0, meanAnomaly);
 					memcached.set("Simulation_TLE_Inclination"			, 0, inclination);
 					memcached.set("Simulation_TLE_Bstar"		, 0, bStar);
@@ -219,9 +219,9 @@ public class GroundStation {
 									+ "TLE_Argument_Perigee: " + 
 									+ ByteBuffer.wrap(argPerigee).getDouble()
 									+ "\n"
-									+ "Raw : " + tle.getLine1() 
+									+ "Raw: " + tle.getLine1() 
 									+ "\n"
-									+ "Raw : " + tle.getLine2()
+									+ "Raw: " + tle.getLine2()
 									;
 
 					logger.info(tleUpdate);

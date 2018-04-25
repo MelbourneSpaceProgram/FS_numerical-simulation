@@ -75,7 +75,7 @@ public class Satellite {
 	 */
 	public void executeStepMission() {
 		AbsoluteDate date = this.getStates().getCurrentState().getDate();
-
+		
 		/* Export Sensor Measurements */
 		if (this.io.isConnectedToMemCached()) {
 
