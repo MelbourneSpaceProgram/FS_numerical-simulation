@@ -314,9 +314,9 @@ public class Dashboard {
 	 * Set the user-specified inertia matrix of the satellite.
 	 * @param iMatrix Inertia Matrix to be set
 	 */
-	//public static void setSatelliteInertiaMatrix(double[][] iMatrix) {
-	//	SatelliteBody.satInertiaMatrix = iMatrix;
-	//}
+	public static void setSatelliteInertiaMatrix(double[][] iMatrix) {
+		SatelliteBody.satInertiaMatrix = iMatrix;
+	}
 
 	/**
 	 * Set the file path of the output ephemeris.
