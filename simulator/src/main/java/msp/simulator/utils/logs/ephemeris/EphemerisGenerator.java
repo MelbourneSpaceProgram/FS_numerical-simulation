@@ -300,7 +300,6 @@ public class EphemerisGenerator {
 			
 			/** Writing to the angular velocity file */ 
 			Vector3D vel = satellite.getStates().getCurrentState().getAttitude().getSpin();
-			vel.normalize();
 			if (vel.getNorm() != 0) {
 				vel = vel.normalize();
 			}
