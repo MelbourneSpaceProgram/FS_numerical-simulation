@@ -49,6 +49,9 @@ public class NumericalSimulator {
 	 * Default value is Long.MAX_VALUE. */
 	public static long simulationDuration = Long.MAX_VALUE;
 
+  /** Wall clock time between computing steps of the simulation. */
+  public static double stepDelay = 0.1;
+
 	/** Real-time processing flag. */
 	public static boolean realTimeUserFlag = false;
 
@@ -215,8 +218,7 @@ public class NumericalSimulator {
 					scheduler.scheduleAtFixedRate(
 							mainSimulationTask, 
 							0, 
-							(long) (this.dynamic.getPropagation().getIntegrationManager()
-									.getStepSize() * 1000), 
+							(long) (stepDelay * 1000), 
 							TimeUnit.MILLISECONDS);
 
 

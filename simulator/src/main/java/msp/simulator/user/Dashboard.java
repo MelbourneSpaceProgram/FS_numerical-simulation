@@ -116,11 +116,12 @@ public class Dashboard {
 		Dashboard.setInitialRotAcceleration(Vector3D.ZERO);
 		Dashboard.setCommandTorqueProvider(TorqueProviderEnum.SCENARIO);
 		Dashboard.setTorqueScenario(new ArrayList<Step>());
+		Dashboard.setTorqueDisturbances(true);
 
 		/* **** Structure Settings **** */
-		Dashboard.setSatBoxSizeWithNoSolarPanel(new double[]{0.01, 0.01, 0.01});
-		Dashboard.setSatelliteMass(1.0);
-		Dashboard.setSatelliteInertiaMatrix(SatelliteBody.simpleBalancedInertiaMatrix);
+		//Dashboard.setSatBoxSizeWithNoSolarPanel(new double[]{0.01, 0.01, 0.01});
+		//Dashboard.setSatelliteMass(1.0);
+		//Dashboard.setSatelliteInertiaMatrix(SatelliteBody.simpleBalancedInertiaMatrix);
 
 		/* **** Structure Settings **** */
 		Dashboard.setMagnetometerNoiseIntensity(1e2);
@@ -231,6 +232,14 @@ public class Dashboard {
 		NumericalSimulator.simulationDuration = duration ; /* s. */
 	}
 
+  /**
+   * Set the wall clock time daley between comuting steps
+   * @param stepDelay in seconds
+   */
+  public static void setStepDelay(double stepDelay) {
+    NumericalSimulator.stepDelay = stepDelay;
+  }
+
 	/**
 	 * Set the period of work of the ground station, i.e. the time without
 	 * any update.
@@ -255,9 +264,9 @@ public class Dashboard {
 	 * Set the size of the satellite box without solar panel.
 	 * @param xyzSize a three-dimension array (x, y, z) in meter.
 	 */
-	public static void setSatBoxSizeWithNoSolarPanel(double[] xyzSize) {
-		SatelliteBody.satBoxSizeWithNoSolarPanel = xyzSize;
-	}
+	//public static void setSatBoxSizeWithNoSolarPanel(double[] xyzSize) {
+	//	SatelliteBody.satBoxSizeWithNoSolarPanel = xyzSize;
+	//}
 
 	/**
 	 * Set the initial attitude quaternion. (Representing the rotation
@@ -284,14 +293,22 @@ public class Dashboard {
 	public static void setInitialRotAcceleration(Vector3D accRot) {
 		SatelliteStates.initialRotAcceleration = accRot;
 	}
+	
+	/**
+	 * Allow the torque disturbances in the simulation.
+	 * @param flag True if allowed, false otherwise.
+	 */
+	public static void setTorqueDisturbances(boolean flag) {
+		Torques.allowDisturbances = flag;
+	}
 
 	/**
 	 * Set the user-defined satellite mass.
 	 * @param mass in kilogram
 	 */
-	public static void setSatelliteMass(double mass) {
-		SatelliteBody.satelliteMass = mass;
-	}
+	//public static void setSatelliteMass(double mass) {
+	//	SatelliteBody.satelliteMass = mass;
+	//}
 
 	/**
 	 * Set the user-specified inertia matrix of the satellite.

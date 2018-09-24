@@ -254,14 +254,16 @@ public class EphemerisGenerator {
 							"Attitude: [{}, {}, {}, {}] \n" +
 							"Spin    : {} \n" +
 							"RotAcc  : {}\n" +
-							"Momentum: {}",
+							"Momentum: {}\n" +
+              "Momentum Norm: {}",
 							newState.getAttitude().getRotation().getQ0(),
 							newState.getAttitude().getRotation().getQ1(),
 							newState.getAttitude().getRotation().getQ2(),
 							newState.getAttitude().getRotation().getQ3(),
 							newState.getAttitude().getSpin().toString(),
 							newState.getAttitude().getRotationAcceleration().toString(),
-							satellite.getAssembly().getAngularMomentum()
+              satellite.getAssembly().getAngularMomentum(),
+              satellite.getAssembly().getAngularMomentum().getNorm()
 					);
 
 		} catch (OrekitException | IOException e) {

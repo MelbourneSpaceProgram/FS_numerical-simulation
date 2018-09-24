@@ -34,7 +34,8 @@ public class Gyrometer {
 	/** This intensity is used to generate a random number to be
 	 * added to each components of the sensor data.
 	 */
-	public static double defaultGyroNoiseIntensity = 1e-3;
+	//public static double defaultGyroNoiseIntensity = 1e-3;
+  public static double defaultGyroNoiseIntensity = 0;
 
 	/* **************************************** */
 
@@ -65,13 +66,13 @@ public class Gyrometer {
 	 * Retrieve the data from the sensor.
 	 * @return Rotational Acceleration
 	 */
-	public Vector3D getData_rotAcc() {
-		/* Get the acceleration from the satellite state. */
+	public Vector3D getData_angularVelocity() {
+		/* Get the angular velocity from the satellite state. */
 		/* Note that these data are already in the satellite
 		 * body frame!
 		 */
 		Vector3D data = this.assembly.getStates()
-				.getCurrentState().getAttitude().getRotationAcceleration();
+				.getCurrentState().getAttitude().getSpin();
 		
 		/* Add the noise contribution. */
 		Vector3D noise = new Vector3D(

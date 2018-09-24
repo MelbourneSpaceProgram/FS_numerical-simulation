@@ -15,17 +15,21 @@
 package msp.simulator.satellite.assembly;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.orekit.errors.OrekitException;
 import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
+import org.orekit.frames.Transform;
+import org.orekit.time.AbsoluteDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import msp.simulator.environment.Environment;
+import msp.simulator.environment.solarSystem.Earth;
 import msp.simulator.utils.logs.CustomLoggingTools;
 
 /**
  * The assembly describes the entity of the satellite and gathers
- * both its physical and state representation.
+ * both its physical and state representations.
  *
  * @author Florian CHAUBEYRE <chaubeyre.f@gmail.com>
  */
@@ -33,6 +37,9 @@ public class Assembly {
 
 	/** Logger of the class */
 	private static final Logger logger = LoggerFactory.getLogger(Assembly.class);
+
+	/** Earth instance of the simulation. */
+	private Earth earth;
 
 	/** Instance of the satellite body for the assembly. */
 	private SatelliteBody satelliteBody;
@@ -52,6 +59,7 @@ public class Assembly {
 
 		this.satelliteBody = new SatelliteBody(environment);
 		this.satelliteStates = new SatelliteStates(environment, satelliteBody);
+		this.earth = environment.getSolarSystem().getEarth();
 	}
 
 	/**
@@ -93,7 +101,7 @@ public class Assembly {
 	public Vector3D getAngularMomentum() {
 		Vector3D rotationRate = this.satelliteStates
 				.getCurrentState().getAttitude().getSpin();
-		
+
 		double[][] inertiaMatrix = this.satelliteBody.getInertiaMatrix();
 
 		Vector3D row0 = new Vector3D(inertiaMatrix[0]);
@@ -107,6 +115,25 @@ public class Assembly {
 				);
 
 		return angularMomentum;
+	}
+
+	/**
+	 * Compute the transformation from the ITRF frame to the 
+	 * satellite body frame at the specified date.
+	 * @return The ITRF to Body frame transformation.
+	 */
+	public Transform getItrf2body(AbsoluteDate date) {
+		Transform itrf2body = null;
+		try {
+			itrf2body = this.earth.getRotatingFrame().getTransformTo(
+					this.getSatelliteFrame(), 
+					date
+					);
+		} catch (OrekitException e) {
+			e.printStackTrace();
+		}
+
+		return itrf2body;
 	}
 
 

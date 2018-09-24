@@ -170,7 +170,7 @@ public class MemCachedTorqueProvider implements TorqueProvider {
 			}
 
 			/* Debug Information */
-			logger.debug("Torque Provider (Acquisition): " + date.toString() +" - " +
+			logger.info("Torque Provider (Acquisition): " + date.toString() +" - " +
 					this.stepTorque.toString());
 
 		} else {
