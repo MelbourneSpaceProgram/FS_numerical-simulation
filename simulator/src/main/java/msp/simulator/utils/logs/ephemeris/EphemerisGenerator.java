@@ -258,12 +258,58 @@ public class EphemerisGenerator {
 					);
 			int days = (int) (seconds / Constants.JULIAN_DAY);
 			seconds = seconds - days * Constants.JULIAN_DAY;
+		
+			StringBuffer buff = new StringBuffer();
 			
 			/** Writing to the torque file */ 
-			/** Writing to the angular velocity file */ 
-			/** Writing to the angular momentum file */ 
+			buff
+			.append(days)
+			.append(" ") 					/* Column Separator */
+			.append(seconds)
+			.append(" ")
+			.append(" ")
+			.append(" ")
+			;
+			this.writerAEM_torque.append(buff+LS);
+			this.writerAEM_torque.flush();
 			
-			StringBuffer buff = new StringBuffer();
+			buff = new StringBuffer();
+			
+			/** Writing to the angular velocity file */ 
+			Vector3D vel = satellite.getAssembly().getAngularMomentum(); 
+			buff
+			.append(days)
+			.append(" ") 					/* Column Separator */
+			.append(seconds)
+			.append(" ")
+			.append(vel.getX()) 	
+			.append(" ")
+			.append(vel.getY())
+			.append(" ")
+			.append(vel.getZ())
+			;
+			this.writerAEM_angVel.append(buff+LS);
+			this.writerAEM_angVel.flush();
+			
+			buff = new StringBuffer();
+			
+			/** Writing to the angular momentum file */ 
+			Vector3D mom = satellite.getAssembly().getAngularMomentum();
+			buff
+			.append(days)
+			.append(" ") 					/* Column Separator */
+			.append(seconds)
+			.append(" ")
+			.append(mom.getX()) 	
+			.append(" ")
+			.append(mom.getY())
+			.append(" ")
+			.append(mom.getZ())
+			;
+			this.writerAEM_angMomentum.append(buff+LS);
+			this.writerAEM_angMomentum.flush();
+			
+			buff = new StringBuffer();
 			
 			/* Writing the current mag field to the log file. */ 
 			Vector3D mag_field = satellite.getSensors().getMagnetometer().retrievePerfectField().getFieldVector();
