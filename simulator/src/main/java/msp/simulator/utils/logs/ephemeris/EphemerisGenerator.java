@@ -262,18 +262,24 @@ public class EphemerisGenerator {
 			StringBuffer buff = new StringBuffer();
 			
 			/** Writing to the torque file */ 
-			Vector3D torque = satellite.getStates().getCurrentState().getAttitude().getRotationAcceleration();
-			//TODO Change this to take in the actual torque!!!!		
+			
+			/** TODO - rewrite this section to be more elegant and correct*/
+			
+			Vector3D ang_accel = satellite.getStates().getCurrentState().getAttitude().getRotationAcceleration();
+			double torqueX = ang_accel.getX()/satellite.getAssembly().getBody().getInertiaMatrix()[0][0];
+			double torqueY = ang_accel.getY()/satellite.getAssembly().getBody().getInertiaMatrix()[1][1];
+			double torqueZ = ang_accel.getZ()/satellite.getAssembly().getBody().getInertiaMatrix()[2][2];
+			
 			buff
 			.append(days)
 			.append(" ") 					/* Column Separator */
 			.append(seconds)
 			.append(" ")
-			.append(torque.getX())
+			.append(torqueX)
 			.append(" ")
-			.append(torque.getY())
+			.append(torqueY)
 			.append(" ")
-			.append(torque.getZ())
+			.append(torqueZ)
 			;
 			this.writerAEM_torque.append(buff+LS);
 			this.writerAEM_torque.flush();
