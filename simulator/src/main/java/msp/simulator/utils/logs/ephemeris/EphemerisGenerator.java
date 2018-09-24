@@ -26,6 +26,7 @@ import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.orekit.errors.OrekitException;
 import org.orekit.frames.FramesFactory;
+import org.orekit.models.earth.GeoMagneticElements;
 import org.orekit.propagation.SpacecraftState;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScalesFactory;
@@ -214,7 +215,22 @@ public class EphemerisGenerator {
 					);
 			int days = (int) (seconds / Constants.JULIAN_DAY);
 			seconds = seconds - days * Constants.JULIAN_DAY;
-
+			/* Writing the current mag field to the log file. */ 
+			Vector3D mag_field = satellite.getSensors().getMagnetometer().retrievePerfectField().getFieldVector();
+			buff
+			.append(days)
+			.append(" ") 					/* Column Separator */
+			.append(seconds)
+			.append(" ")
+			.append(mag_field.getX() * 1e-3) 	/* Conversion to KM */
+			.append(" ")
+			.append(mag_field.getY() * 1e-3)
+			.append(" ")
+			.append(mag_field.getZ() * 1e-3)
+			;
+			this.writerAEM_mag.append(buff.toString()+ LS);
+			this.writerAEM_mag.flush();
+			buff = new StringBuffer();
 			/* Writing the OEM Ephemeris. */
 			Vector3D position = newState
 					.getPVCoordinates(FramesFactory.getEME2000())
@@ -231,6 +247,7 @@ public class EphemerisGenerator {
 			.append(" ")
 			.append(position.getZ() * 1e-3)
 			;
+			
 
 			this.writerOEM.append(buff.toString() + LS);
 			this.writerOEM.flush();
