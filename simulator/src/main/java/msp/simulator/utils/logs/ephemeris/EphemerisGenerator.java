@@ -262,13 +262,18 @@ public class EphemerisGenerator {
 			StringBuffer buff = new StringBuffer();
 			
 			/** Writing to the torque file */ 
+			Vector3D torque = satellite.getStates().getCurrentState().getAttitude().getRotationAcceleration();
+			//TODO Change this to take in the actual torque!!!!		
 			buff
 			.append(days)
 			.append(" ") 					/* Column Separator */
 			.append(seconds)
 			.append(" ")
+			.append(torque.getX())
 			.append(" ")
+			.append(torque.getY())
 			.append(" ")
+			.append(torque.getZ())
 			;
 			this.writerAEM_torque.append(buff+LS);
 			this.writerAEM_torque.flush();
@@ -276,7 +281,7 @@ public class EphemerisGenerator {
 			buff = new StringBuffer();
 			
 			/** Writing to the angular velocity file */ 
-			Vector3D vel = satellite.getAssembly().getAngularMomentum(); 
+			Vector3D vel = satellite.getStates().getCurrentState().getAttitude().getSpin();
 			buff
 			.append(days)
 			.append(" ") 					/* Column Separator */
