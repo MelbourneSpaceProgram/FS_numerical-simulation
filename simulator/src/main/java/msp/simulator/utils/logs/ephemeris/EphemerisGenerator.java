@@ -276,17 +276,22 @@ public class EphemerisGenerator {
 			double torqueX = ang_accel.getX()/satellite.getAssembly().getBody().getInertiaMatrix()[0][0];
 			double torqueY = ang_accel.getY()/satellite.getAssembly().getBody().getInertiaMatrix()[1][1];
 			double torqueZ = ang_accel.getZ()/satellite.getAssembly().getBody().getInertiaMatrix()[2][2];
-			
+			Vector3D torque = new Vector3D(torqueX,torqueY,torqueZ);
+			if (torque.getNorm() != 0) {
+				torque = torque.normalize();
+			}
 			buff
 			.append(days)
 			.append(" ") 					/* Column Separator */
 			.append(seconds)
 			.append(" ")
-			.append(torqueX)
+			.append(torque.getX())
 			.append(" ")
-			.append(torqueY)
+			.append(torque.getY())
 			.append(" ")
-			.append(torqueZ)
+			.append(torque.getZ())
+			.append(" ")
+			.append(0)
 			;
 			this.writerAEM_torque.append(buff+LS);
 			this.writerAEM_torque.flush();
@@ -295,6 +300,10 @@ public class EphemerisGenerator {
 			
 			/** Writing to the angular velocity file */ 
 			Vector3D vel = satellite.getStates().getCurrentState().getAttitude().getSpin();
+			vel.normalize();
+			if (vel.getNorm() != 0) {
+				vel = vel.normalize();
+			}
 			buff
 			.append(days)
 			.append(" ") 					/* Column Separator */
@@ -305,6 +314,8 @@ public class EphemerisGenerator {
 			.append(vel.getY())
 			.append(" ")
 			.append(vel.getZ())
+			.append(" ")
+			.append(0)
 			;
 			this.writerAEM_angVel.append(buff+LS);
 			this.writerAEM_angVel.flush();
@@ -313,6 +324,9 @@ public class EphemerisGenerator {
 			
 			/** Writing to the angular momentum file */ 
 			Vector3D mom = satellite.getAssembly().getAngularMomentum();
+			if(mom.getNorm()!= 0) {
+				mom = mom.normalize();	
+			}
 			buff
 			.append(days)
 			.append(" ") 					/* Column Separator */
@@ -323,6 +337,8 @@ public class EphemerisGenerator {
 			.append(mom.getY())
 			.append(" ")
 			.append(mom.getZ())
+			.append(" ")
+			.append(0)
 			;
 			this.writerAEM_angMomentum.append(buff+LS);
 			this.writerAEM_angMomentum.flush();
@@ -331,6 +347,7 @@ public class EphemerisGenerator {
 			
 			/* Writing the current mag field to the log file. */ 
 			Vector3D mag_field = satellite.getSensors().getMagnetometer().retrievePerfectField().getFieldVector();
+			mag_field = mag_field.normalize();
 			buff
 			.append(days)
 			.append(" ") 					/* Column Separator */
@@ -341,6 +358,8 @@ public class EphemerisGenerator {
 			.append(mag_field.getY())
 			.append(" ")
 			.append(mag_field.getZ())
+			.append(" ")
+			.append(0)
 			;
 			this.writerAEM_mag.append(buff.toString()+ LS);
 			this.writerAEM_mag.flush();
