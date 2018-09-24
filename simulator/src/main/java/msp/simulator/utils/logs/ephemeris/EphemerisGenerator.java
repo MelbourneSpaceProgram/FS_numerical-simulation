@@ -94,7 +94,8 @@ public class EphemerisGenerator {
 
 	/** Attitude AEM ephemeris. */
 	private File fileAEM;
-	/** Vector for the mag field */
+	
+	/** Vector for the magnetic field */
 	
 	private File fileAEM_mag; 
 
@@ -148,7 +149,7 @@ public class EphemerisGenerator {
 		String common = this.path + this.simuName;
 		this.fileOEM = new File(common + "OEM.txt");
 		this.fileAEM = new File(common + "AEM.txt");
-		this.fileAEM_mag = new File(common + "body_mag" + "AEM.txt");
+		this.fileAEM_mag = new File(common + "body_mag-" + "AEM.txt");
 
 		if (!fileOEM.getParentFile().exists()) {
 			fileOEM.getParentFile().mkdirs();
@@ -164,15 +165,18 @@ public class EphemerisGenerator {
 			/* Creating the files. */
 			fileOEM.createNewFile();
 			fileAEM.createNewFile();
-
+			fileAEM_mag.createNewFile(); 
 			/* Creating each associated Writer. */
 			this.writerOEM = new FileWriter(this.fileOEM);
 			this.writerAEM = new FileWriter(this.fileAEM);
-
+			this.writerAEM_mag = new FileWriter(this.fileAEM_mag);
 			/* Generating the headers. */
 			this.writerAEM.write(this.getAemHeader(OBJECT_NAME, SIMU_ID));
 			this.writerOEM.write(this.getOemHeader(OBJECT_NAME, SIMU_ID));
-
+			this.writerAEM_mag.write(this.getAemHeader(OBJECT_NAME, SIMU_ID));
+			this.writerOEM.flush();
+			this.writerAEM.flush();
+			this.writerAEM_mag.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
