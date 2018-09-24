@@ -94,8 +94,13 @@ public class EphemerisGenerator {
 
 	/** Attitude AEM ephemeris. */
 	private File fileAEM;
+	/** Vector for the mag field */
+	
+	private File fileAEM_mag; 
 
 	/** Attitude AEM File Writer. */
+	private FileWriter writerAEM_mag; 
+	
 	private FileWriter writerAEM;
 
 	/** OrbitWrapper OEM File Writer */
@@ -143,12 +148,16 @@ public class EphemerisGenerator {
 		String common = this.path + this.simuName;
 		this.fileOEM = new File(common + "OEM.txt");
 		this.fileAEM = new File(common + "AEM.txt");
+		this.fileAEM_mag = new File(common + "body_mag" + "AEM.txt");
 
 		if (!fileOEM.getParentFile().exists()) {
 			fileOEM.getParentFile().mkdirs();
 		}
 		if (!fileAEM.getParentFile().exists()) {
 			fileAEM.getParentFile().mkdir();
+		}
+		if (!fileAEM_mag.getParentFile().exists()) {
+			fileAEM_mag.getParentFile().mkdir(); 
 		}
 
 		try {
