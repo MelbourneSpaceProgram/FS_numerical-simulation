@@ -266,6 +266,13 @@ public class EphemerisGenerator {
 			/** TODO - rewrite this section to be more elegant and correct*/
 			
 			Vector3D ang_accel = satellite.getStates().getCurrentState().getAttitude().getRotationAcceleration();
+			
+			/** 
+			 * 
+			 *  WARNING!: THis only works for diagonal inertia matrices. 
+			 *  TODO Resolve this so it works for non diagonal systems.
+			 *  */
+			
 			double torqueX = ang_accel.getX()/satellite.getAssembly().getBody().getInertiaMatrix()[0][0];
 			double torqueY = ang_accel.getY()/satellite.getAssembly().getBody().getInertiaMatrix()[1][1];
 			double torqueZ = ang_accel.getZ()/satellite.getAssembly().getBody().getInertiaMatrix()[2][2];
