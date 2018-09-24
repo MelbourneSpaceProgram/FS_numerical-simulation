@@ -99,11 +99,27 @@ public class EphemerisGenerator {
 	/** Vector for the magnetic field */
 	
 	private File fileAEM_mag; 
+	
+	/** Vector for the angular momentum */ 
+	
+	private File fileAEM_angMomentum; 
+	
+	/** vector for the angular velocity */
+	
+	private File fileAEM_angVelocity; 
+	
+	/** Vector for applied torque */ 
+	
+	private File fileAEM_torque; 
 
 	/** Attitude AEM File Writer. */
 	private FileWriter writerAEM_mag; 
 	
 	private FileWriter writerAEM;
+	
+	private FileWriter writerAEM_angMomentum; 
+	private FileWriter writerAEM_angVel;
+	private FileWriter writerAEM_torque;
 
 	/** OrbitWrapper OEM File Writer */
 	private FileWriter writerOEM;
@@ -151,6 +167,9 @@ public class EphemerisGenerator {
 		this.fileOEM = new File(common + "OEM.txt");
 		this.fileAEM = new File(common + "AEM.txt");
 		this.fileAEM_mag = new File(common + "body_mag-" + "AEM.txt");
+		this.fileAEM_angVelocity = new File(common + "ang_mom-" + "AEM.txt");
+		this.fileAEM_angMomentum = new File(common + "ang_vel-" + "AEM.txt");
+		this.fileAEM_torque = new File(common + "torque-" + "AEM.txt");
 
 		if (!fileOEM.getParentFile().exists()) {
 			fileOEM.getParentFile().mkdirs();
@@ -161,23 +180,47 @@ public class EphemerisGenerator {
 		if (!fileAEM_mag.getParentFile().exists()) {
 			fileAEM_mag.getParentFile().mkdir(); 
 		}
+		if (!fileAEM_angVelocity.getParentFile().exists()) {
+			fileAEM_angVelocity.getParentFile().mkdir(); 
+		}
+		if (!fileAEM_angMomentum.getParentFile().exists()) {
+			fileAEM_angMomentum.getParentFile().mkdir(); 
+		}
+		if (!fileAEM_torque.getParentFile().exists()) {
+			fileAEM_torque.getParentFile().mkdir(); 
+		}
+		
 
 		try {
+			
 			/* Creating the files. */
 			fileOEM.createNewFile();
 			fileAEM.createNewFile();
 			fileAEM_mag.createNewFile(); 
+			fileAEM_angMomentum.createNewFile();
+			fileAEM_angVelocity.createNewFile(); 
+			fileAEM_torque.createNewFile();
+			
 			/* Creating each associated Writer. */
 			this.writerOEM = new FileWriter(this.fileOEM);
 			this.writerAEM = new FileWriter(this.fileAEM);
 			this.writerAEM_mag = new FileWriter(this.fileAEM_mag);
+			this.writerAEM_angVel = new FileWriter(this.fileAEM_angVelocity); 
+			this.writerAEM_angMomentum = new FileWriter(this.fileAEM_angMomentum);
+			this.writerAEM_torque = new FileWriter(this.fileAEM_torque);
 			/* Generating the headers. */
 			this.writerAEM.write(this.getAemHeader(OBJECT_NAME, SIMU_ID));
 			this.writerOEM.write(this.getOemHeader(OBJECT_NAME, SIMU_ID));
 			this.writerAEM_mag.write(this.getVectorVisHeader("MAGNETIC_FIELD",OBJECT_NAME, SIMU_ID));
+			this.writerAEM_angMomentum.write(this.getVectorVisHeader("ANGULAR-MOMENTUM", OBJECT_NAME,SIMU_ID));
+			this.writerAEM_angVel.write(this.getVectorVisHeader("ANGULAR-VELOCITY", OBJECT_NAME,SIMU_ID));
+			this.writerAEM_torque.write(this.getVectorVisHeader("TORQUE", OBJECT_NAME,SIMU_ID));
 			this.writerOEM.flush();
 			this.writerAEM.flush();
 			this.writerAEM_mag.flush();
+			this.writerAEM_angMomentum.flush();
+			this.writerAEM_angVel.flush();
+			this.writerAEM_torque.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -203,7 +246,7 @@ public class EphemerisGenerator {
 	public void writeStep(Satellite satellite) {
 		SpacecraftState newState = satellite.getStates().getCurrentState();
 		try {
-			StringBuffer buff = new StringBuffer();
+	
 
 			/* Determining the time of the state (in offset). */
 			AbsoluteDate currentDate = newState.getDate();
@@ -215,6 +258,13 @@ public class EphemerisGenerator {
 					);
 			int days = (int) (seconds / Constants.JULIAN_DAY);
 			seconds = seconds - days * Constants.JULIAN_DAY;
+			
+			/** Writing to the torque file */ 
+			/** Writing to the angular velocity file */ 
+			/** Writing to the angular momentum file */ 
+			
+			StringBuffer buff = new StringBuffer();
+			
 			/* Writing the current mag field to the log file. */ 
 			Vector3D mag_field = satellite.getSensors().getMagnetometer().retrievePerfectField().getFieldVector();
 			buff
@@ -222,11 +272,11 @@ public class EphemerisGenerator {
 			.append(" ") 					/* Column Separator */
 			.append(seconds)
 			.append(" ")
-			.append(mag_field.getX() * 1e-3) 	/* Conversion to KM */
+			.append(mag_field.getX()) 	
 			.append(" ")
-			.append(mag_field.getY() * 1e-3)
+			.append(mag_field.getY())
 			.append(" ")
-			.append(mag_field.getZ() * 1e-3)
+			.append(mag_field.getZ())
 			;
 			this.writerAEM_mag.append(buff.toString()+ LS);
 			this.writerAEM_mag.flush();
