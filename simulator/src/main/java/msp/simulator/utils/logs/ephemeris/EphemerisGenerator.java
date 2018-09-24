@@ -173,7 +173,7 @@ public class EphemerisGenerator {
 			/* Generating the headers. */
 			this.writerAEM.write(this.getAemHeader(OBJECT_NAME, SIMU_ID));
 			this.writerOEM.write(this.getOemHeader(OBJECT_NAME, SIMU_ID));
-			this.writerAEM_mag.write(this.getAemHeader(OBJECT_NAME, SIMU_ID));
+			this.writerAEM_mag.write(this.getVectorVisHeader("MAGNETIC_FIELD",OBJECT_NAME, SIMU_ID));
 			this.writerOEM.flush();
 			this.writerAEM.flush();
 			this.writerAEM_mag.flush();
@@ -281,8 +281,47 @@ public class EphemerisGenerator {
 			e.printStackTrace();
 		}
 	}
+	/** 
+	 * Returns the header of the Attitude file for VTS vector visualization
+	 * @param vector name - name of the vector
+	 * @param objectName For the Satellite Object
+	 * @param simuIdentifier Current Simulation ID
+	 * @return Header as a string
+	 */
+private String getVectorVisHeader(String vectorName, String objectName, String simuIdentifier) {
+	try {
+		String headerAEM = new String();
 
+		AbsoluteDate currentDate = new AbsoluteDate(
+				new GregorianCalendar(TimeZone.getTimeZone("GMT+00")).getTime(),
+				TimeScalesFactory.getUTC()
+				);
 
+		headerAEM += "CIC_AEM_VERS = 1.0" + LS ;
+		headerAEM += ("CREATION_DATE = " + 
+				currentDate.toString(TimeScalesFactory.getUTC()) ) + LS ;
+		headerAEM += ("ORIGINATOR = ") + simuIdentifier + LS ;
+		headerAEM += ("     ") + LS ;
+		headerAEM += ("META_START") + LS ;
+		headerAEM += ("") + LS ;
+		headerAEM += ("OBJECT_NAME = ") + objectName +"-"+ vectorName + LS ;
+		headerAEM += ("OBJECT_ID = MSP001") + LS ;
+		headerAEM += ("CENTER_NAME = EARTH") + LS ;
+		headerAEM += ("REF_FRAME_A = EME2000") + LS ;
+		headerAEM += ("REF_FRAME_B = SC_BODY_1") + LS ;
+		headerAEM += ("ATTITUDE_DIR = A2B") + LS ;
+		headerAEM += ("TIME_SYSTEM = UTC") + LS ;
+		headerAEM += ("ATTITUDE_TYPE = QUATERNION") + LS ;
+		headerAEM += ("") + LS ;
+		headerAEM += ("META_STOP") + LS ;
+
+		return headerAEM; 
+		}
+	catch (OrekitException e) {
+		e.printStackTrace();
+	}
+	return null; 
+}
 	/**
 	 * Return the header of an AEM ephemeris.
 	 * @param objectName For the Satellite Object
