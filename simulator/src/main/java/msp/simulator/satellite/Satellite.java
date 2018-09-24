@@ -75,7 +75,7 @@ public class Satellite {
 	 */
 	public void executeStepMission() {
 		AbsoluteDate date = this.getStates().getCurrentState().getDate();
-
+		
 		/* Export Sensor Measurements */
 		if (this.io.isConnectedToMemCached()) {
 
@@ -105,7 +105,7 @@ public class Satellite {
 					);		
 
 			/* Gyrometer Sensor Measurement */
-			Vector3D gyroMeasure = this.getSensors().getGyrometer().getData_rotAcc();
+			Vector3D gyroMeasure = this.getSensors().getGyrometer().getData_angularVelocity();
 			byte[] rawGyro_x = MemcachedRawTranscoder.toRawByteArray(gyroMeasure.getX());
 			byte[] rawGyro_y = MemcachedRawTranscoder.toRawByteArray(gyroMeasure.getY());
 			byte[] rawGyro_z = MemcachedRawTranscoder.toRawByteArray(gyroMeasure.getZ());

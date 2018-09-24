@@ -146,24 +146,32 @@ public class Magnetometer {
 		 * the altitude of the satellite is slightly shifted from the true 
 		 * one.
 		 */
+//		GeoMagneticElements trueField_itrf = this.geomagField.getField().calculateField(
+//				FastMath.toDegrees(geodeticPosition.getLatitude()),	/* decimal deg */
+//				FastMath.toDegrees(geodeticPosition.getLongitude()),	/* decimal deg */
+//				(satState.getA() - this.earth.getRadius()) / 1e3		/* km */
+//				);
+		
 		GeoMagneticElements trueField_itrf = this.geomagField.getField().calculateField(
-				FastMath.toDegrees(geodeticPosition.getLatitude()),	/* decimal deg */
-				FastMath.toDegrees(geodeticPosition.getLongitude()),	/* decimal deg */
-				(satState.getA() - this.earth.getRadius()) / 1e3		/* km */
+				0.007707323868690944,	/* decimal deg */
+				-156.00687854677085,	/* decimal deg */
+				574.9999944513394/* km */
 				);
 
 		logger.debug("Magnetometer Measurement: \n" +
 				"Latitude: " + FastMath.toDegrees(geodeticPosition.getLatitude()) + " °\n" +
 				"Longitud: " + FastMath.toDegrees(geodeticPosition.getLongitude()) + " °\n" +
 				"Altitude: " + (satState.getA() - this.earth.getRadius()) / 1e3 + " km\n" +
-				"True Geo ITRF" + trueField_itrf.toString()
+				"(ITRF): " + trueField_itrf.toString()
 				);
 
 		/* Rotate the magnetic field reading into the body frame */
 		Vector3D trueField_body = this.assembly.getItrf2body(satState.getDate())
 				.transformVector(trueField_itrf.getFieldVector());
 
-		return new GeoMagneticElements(trueField_body);
+		GeoMagneticElements trueGeoMag_body = new GeoMagneticElements(trueField_body);
+		
+		return trueGeoMag_body;
 	}
 
 	/**

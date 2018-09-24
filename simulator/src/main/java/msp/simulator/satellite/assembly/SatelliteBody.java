@@ -33,26 +33,33 @@ public class SatelliteBody extends BoxAndSolarArraySpacecraft {
 	/* ******* Public Static Attributes ******* */
 
 	/** Size of the satellite box in meters - (x, y, z) */
-	public static double[] satBoxSizeWithNoSolarPanel = new double[] {0.01, 0.01, 0.01} ;
+	public static final double[] satBoxSizeWithNoSolarPanel = new double[] {0.01, 0.01, 0.01} ;
 
 	/* Note that the size of the solar panels is set to zero in the class constructor.*/
 
 	/** Mass of the satellite in kilogram. */
-	public static double satelliteMass = 1.04;
+	public static final double satelliteMass = 1.04;
 
-	/* TODO(rskew) update inertia matrix. */
-	/** Inertia matrix of the satellite. */
+	/** Default inertia matrix, set by the Dashboard. */
 	public static double[][] satInertiaMatrix =  /* kg.m^2 */ {
 			{1191.648 * 1.3e-6,           0       ,           0        },
 			{         0       ,  1169.506 * 1.3e-6,           0        },
 			{         0       ,           0       ,  1203.969 * 1.3e-6 },
 	};
 
+  /* TODO(rskew) update inertia matrix. */
+  /** Inertia matrix of ACRUX1. */
+  public static final double[][] ACRUX1InertiaMatrix =  /* kg.m^2 */ {
+      {1191.648 * 1.3e-6,           0       ,           0        },
+      {         0       ,  1169.506 * 1.3e-6,           0        },
+      {         0       ,           0       ,  1203.969 * 1.3e-6 },
+  };
+
 	/** Simple balance inertia matrix (Unit matrix). */
 	public static final double[][] simpleBalancedInertiaMatrix = {
-			{ 1,   0,   0 },
-			{ 0,   1,   0 },
-			{ 0,   0,   1 }
+			{ 1e-3,   0   ,   0 },
+			{ 0   ,   1e-3,   0 },
+			{ 0   ,   0   ,   1e-3 }
 	};
 
 	/* **************************************** */
@@ -102,6 +109,7 @@ public class SatelliteBody extends BoxAndSolarArraySpacecraft {
 		this.satBoxSize = SatelliteBody.satBoxSizeWithNoSolarPanel;
 		this.satMass = SatelliteBody.satelliteMass;
 		this.inertiaMatrix = SatelliteBody.satInertiaMatrix;
+		//this.inertiaMatrix = SatelliteBody.simpleBalancedInertiaMatrix;
 
 		SatelliteBody.logger.info(CustomLoggingTools.indentMsg(SatelliteBody.logger, 
 				" -> Building the CubeSat body: Success."));
