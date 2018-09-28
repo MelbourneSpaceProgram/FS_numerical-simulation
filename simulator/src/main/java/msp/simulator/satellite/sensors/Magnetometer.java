@@ -49,7 +49,7 @@ public class Magnetometer {
 	 * added to each components of the true magnetic field. 
 	 * (nanoTesla)
 	 */
-	public static double defaultMagnetoNoiseIntensity = 0.5918*1000;
+	public static double defaultMagnetoNoiseIntensity = 4.156*1000;
 
 	/* **************************************** */
 
