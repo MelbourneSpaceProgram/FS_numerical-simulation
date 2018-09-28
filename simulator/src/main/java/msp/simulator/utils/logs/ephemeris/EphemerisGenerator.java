@@ -112,6 +112,10 @@ public class EphemerisGenerator {
 	
 	private File fileAEM_torque; 
 
+  /** vector for the change in the magnetic field vector */
+	
+  private File fileAEM_bDot; 
+	
 	/** Attitude AEM File Writer. */
 	private FileWriter writerAEM_mag; 
 	
@@ -120,6 +124,7 @@ public class EphemerisGenerator {
 	private FileWriter writerAEM_angMomentum; 
 	private FileWriter writerAEM_angVel;
 	private FileWriter writerAEM_torque;
+  private FileWriter writerAEM_bDot;
 
 	/** OrbitWrapper OEM File Writer */
 	private FileWriter writerOEM;
@@ -170,6 +175,7 @@ public class EphemerisGenerator {
 		this.fileAEM_angVelocity = new File(common + "ang_mom-" + "AEM.txt");
 		this.fileAEM_angMomentum = new File(common + "ang_vel-" + "AEM.txt");
 		this.fileAEM_torque = new File(common + "torque-" + "AEM.txt");
+		this.fileAEM_bDot = new File(common + "b_dot-" + "AEM.txt");
 
 		if (!fileOEM.getParentFile().exists()) {
 			fileOEM.getParentFile().mkdirs();
@@ -189,6 +195,9 @@ public class EphemerisGenerator {
 		if (!fileAEM_torque.getParentFile().exists()) {
 			fileAEM_torque.getParentFile().mkdir(); 
 		}
+		if (!fileAEM_bDot.getParentFile().exists()) {
+        fileAEM_bDot.getParentFile().mkdir(); 
+		}
 		
 
 		try {
@@ -200,6 +209,7 @@ public class EphemerisGenerator {
 			fileAEM_angMomentum.createNewFile();
 			fileAEM_angVelocity.createNewFile(); 
 			fileAEM_torque.createNewFile();
+			fileAEM_bDot.createNewFile();
 			
 			/* Creating each associated Writer. */
 			this.writerOEM = new FileWriter(this.fileOEM);
@@ -208,6 +218,7 @@ public class EphemerisGenerator {
 			this.writerAEM_angVel = new FileWriter(this.fileAEM_angVelocity); 
 			this.writerAEM_angMomentum = new FileWriter(this.fileAEM_angMomentum);
 			this.writerAEM_torque = new FileWriter(this.fileAEM_torque);
+			this.writerAEM_bDot = new FileWriter(this.fileAEM_bDot);
 			/* Generating the headers. */
 			this.writerAEM.write(this.getAemHeader(OBJECT_NAME, SIMU_ID));
 			this.writerOEM.write(this.getOemHeader(OBJECT_NAME, SIMU_ID));
@@ -215,12 +226,14 @@ public class EphemerisGenerator {
 			this.writerAEM_angMomentum.write(this.getVectorVisHeader("ANGULAR-MOMENTUM", OBJECT_NAME,SIMU_ID));
 			this.writerAEM_angVel.write(this.getVectorVisHeader("ANGULAR-VELOCITY", OBJECT_NAME,SIMU_ID));
 			this.writerAEM_torque.write(this.getVectorVisHeader("TORQUE", OBJECT_NAME,SIMU_ID));
+			this.writerAEM_bDot.write(this.getVectorVisHeader("B_DOT", OBJECT_NAME,SIMU_ID));
 			this.writerOEM.flush();
 			this.writerAEM.flush();
 			this.writerAEM_mag.flush();
 			this.writerAEM_angMomentum.flush();
 			this.writerAEM_angVel.flush();
 			this.writerAEM_torque.flush();
+			this.writerAEM_bDot.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -233,6 +246,11 @@ public class EphemerisGenerator {
 		try {
 			this.writerOEM.close();
 			this.writerAEM.close();
+			this.writerAEM_mag.close();
+			this.writerAEM_angMomentum.close();
+			this.writerAEM_angVel.close();
+			this.writerAEM_torque.close();
+			this.writerAEM_bDot.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -362,6 +380,32 @@ public class EphemerisGenerator {
 			;
 			this.writerAEM_mag.append(buff.toString()+ LS);
 			this.writerAEM_mag.flush();
+
+
+			buff = new StringBuffer();
+
+			/** Writing to the b dot file */
+      /* Ignore the rotation of the magnetic field due to the linear movement of
+       * the spacecraft
+       */
+      Vector3D b_dot = Vector3D.crossProduct(vel, mag_field);
+			buff
+          .append(days)
+          .append(" ") 					/* Column Separator */
+          .append(seconds)
+          .append(" ")
+          .append(b_dot.getX())
+          .append(" ")
+          .append(b_dot.getY())
+          .append(" ")
+          .append(b_dot.getZ())
+          .append(" ")
+          .append(0)
+          ;
+			this.writerAEM_bDot.append(buff+LS);
+			this.writerAEM_bDot.flush();
+
+
 			buff = new StringBuffer();
 			/* Writing the OEM Ephemeris. */
 			Vector3D position = newState
@@ -379,7 +423,7 @@ public class EphemerisGenerator {
 			.append(" ")
 			.append(position.getZ() * 1e-3)
 			;
-			
+
 
 			this.writerOEM.append(buff.toString() + LS);
 			this.writerOEM.flush();
@@ -416,14 +460,18 @@ public class EphemerisGenerator {
 							"Attitude: [{}, {}, {}, {}] \n" +
 							"Spin    : {} \n" +
 							"RotAcc  : {}\n" +
-							"Momentum: {}",
+              "B Dot   : {}\n" +
+							"Momentum: {}\n" +
+              "Momentum Norm: {}",
 							newState.getAttitude().getRotation().getQ0(),
 							newState.getAttitude().getRotation().getQ1(),
 							newState.getAttitude().getRotation().getQ2(),
 							newState.getAttitude().getRotation().getQ3(),
 							newState.getAttitude().getSpin().toString(),
 							newState.getAttitude().getRotationAcceleration().toString(),
-							satellite.getAssembly().getAngularMomentum()
+              b_dot,
+              satellite.getAssembly().getAngularMomentum(),
+              satellite.getAssembly().getAngularMomentum().getNorm()
 					);
 
 		} catch (OrekitException | IOException e) {
