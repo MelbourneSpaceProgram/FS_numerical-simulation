@@ -22,6 +22,7 @@ import org.orekit.models.earth.GeoMagneticElements;
 import org.orekit.propagation.SpacecraftState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.hipparchus.random.RandomDataGenerator;
 
 import msp.simulator.environment.Environment;
 import msp.simulator.environment.geomagneticField.EarthMagneticField;
@@ -36,9 +37,14 @@ import msp.simulator.utils.logs.CustomLoggingTools;
  * @author Florian CHAUBEYRE <chaubeyre.f@gmail.com>
  */
 public class Magnetometer {
+	
 
 	/* ******* Public Static Attributes ******* */
-
+	
+	
+	/* Random number generator */
+	private RandomDataGenerator randomDataGenerator = new RandomDataGenerator(1000);
+	
 	/** This intensity is used to generate a random number to be
 	 * added to each components of the true magnetic field. 
 	 * (nanoTesla)
@@ -85,13 +91,15 @@ public class Magnetometer {
 	 */
 	public GeoMagneticElements retrieveNoisyField() {
 		/* Perfect Measure. */
+
+		
 		GeoMagneticElements perfectMeasure = this.retrievePerfectField();
 
 		/* Normally distributed random noise contribution. */
 		Vector3D noise = new Vector3D ( new double[] { 
-				2 * (FastMath.random() - 0.5) * this.noiseIntensity,
-				2 * (FastMath.random() - 0.5) * this.noiseIntensity,
-				2 * (FastMath.random() - 0.5) * this.noiseIntensity
+				randomDataGenerator.nextNormal(0, this.noiseIntensity),
+				randomDataGenerator.nextNormal(0, this.noiseIntensity),
+				randomDataGenerator.nextNormal(0, this.noiseIntensity)
 		});
 
 		/* Disturbing the perfect measurement. */
