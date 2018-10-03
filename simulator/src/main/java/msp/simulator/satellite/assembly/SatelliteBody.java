@@ -40,7 +40,6 @@ public class SatelliteBody extends BoxAndSolarArraySpacecraft {
 	/** Mass of the satellite in kilogram. */
 	public static double satelliteMass = 1.04;
 
-	/* TODO(rskew) update inertia matrix. */
 	/** Inertia matrix of the satellite. */
 	public static double[][] satInertiaMatrix =  /* kg.m^2 */ {
 			{1.9002 * 1e-3,           0       ,           0        },
