@@ -364,17 +364,18 @@ public class EphemerisGenerator {
 			
 			/* Writing the current mag field to the log file. */ 
 			Vector3D mag_field = satellite.getSensors().getMagnetometer().retrievePerfectField().getFieldVector();
-			mag_field = mag_field.normalize();
+			Vector3D mag_unit; 
+			mag_unit = mag_field.normalize();
 			buff
 			.append(days)
 			.append(" ") 					/* Column Separator */
 			.append(seconds)
 			.append(" ")
-			.append(mag_field.getX()) 	
+			.append(mag_unit.getX()) 	
 			.append(" ")
-			.append(mag_field.getY())
+			.append(mag_unit.getY())
 			.append(" ")
-			.append(mag_field.getZ())
+			.append(mag_unit.getZ())
 			.append(" ")
 			.append(0)
 			;
