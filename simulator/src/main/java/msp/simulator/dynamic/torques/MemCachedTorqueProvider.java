@@ -78,7 +78,7 @@ public class MemCachedTorqueProvider implements TorqueProvider {
 	/* Copy of the sensor object*/ 
 	private Magnetometer magnetometer; 
 	
-	private final double[] magnetorquerMaxDipole = {0.2,0.2,0.02};
+	private final double[] magnetorquerMaxDipole = {0.2,0.2,0.2};
 	
 	private Vector3D Pwm2Torque(Vector3D pwm) {
 		double x = pwm.getX() * magnetorquerMaxDipole[0];
