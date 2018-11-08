@@ -121,7 +121,7 @@ public class Dashboard {
 		/* **** Structure Settings **** */
 		Dashboard.setSatBoxSizeWithNoSolarPanel(new double[]{0.01, 0.01, 0.01});
 		Dashboard.setSatelliteMass(1.0);
-		Dashboard.setSatelliteInertiaMatrix(SatelliteBody.simpleBalancedInertiaMatrix);
+		Dashboard.setSatelliteInertiaMatrix(SatelliteBody.satInertiaMatrix);
 
 		/* **** Structure Settings **** */
 		Dashboard.setMagnetometerNoiseIntensity(1e2);
