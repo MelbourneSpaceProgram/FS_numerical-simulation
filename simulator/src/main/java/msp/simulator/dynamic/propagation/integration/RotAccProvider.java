@@ -138,8 +138,8 @@ public class RotAccProvider implements AdditionalStateProvider {
 		 * the Euler Equations of motion for a rotating rigid body. 
 		 */
 		rotAcc[0] = (M1 - (I3 - I2) * W2 * W3) / I1 ;
-		rotAcc[1] = (M2 - (I1 - I3) * W3 * W1) / I1 ; 
-		rotAcc[2] = (M3 - (I2 - I1) * W1 * W2) / I1 ;
+		rotAcc[1] = (M2 - (I1 - I3) * W3 * W1) / I2 ; 
+		rotAcc[2] = (M3 - (I2 - I1) * W1 * W2) / I3 ;
 
 		return rotAcc;
 	}
