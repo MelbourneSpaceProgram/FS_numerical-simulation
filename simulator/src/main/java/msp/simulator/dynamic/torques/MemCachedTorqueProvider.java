@@ -87,7 +87,7 @@ public class MemCachedTorqueProvider implements TorqueProvider {
 		Vector3D dipole = new Vector3D(x,y,z);
 		Vector3D torque; 
 		logger.info("PWM SIGNAL:"+dipole.toString());
-		torque = Vector3D.crossProduct(dipole,this.b_field);
+		torque = Vector3D.crossProduct(this.b_field,dipole); //TODO review this !
 		return torque;
 	}
 
