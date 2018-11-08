@@ -43,7 +43,7 @@ public class Main {
 			Dashboard.setEphemerisTimeStep(0.1);
 
 			Dashboard.setInitialAttitudeQuaternion(new Quaternion(1, 0, 0, 0));
-			Dashboard.setInitialSpin(new Vector3D(0.5, 0.5, 0.5));
+			Dashboard.setInitialSpin(new Vector3D(0.3, 0.3, 0.3)); // tip off 30 degrees per second
 			Dashboard.setInitialRotAcceleration(new Vector3D(0,0,0));
 			Dashboard.setTorqueDisturbances(false);
 
