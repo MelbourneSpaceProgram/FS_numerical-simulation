@@ -37,7 +37,7 @@ public class Assembly {
 
 	/** Logger of the class */
 	private static final Logger logger = LoggerFactory.getLogger(Assembly.class);
-	
+
 	/** Earth instance of the simulation. */
 	private Earth earth;
 
@@ -46,9 +46,6 @@ public class Assembly {
 
 	/** Instance of the satellite initial state in space. */
 	private SatelliteStates satelliteStates;
-	
-	/** Satellite frame. */
-	private Frame satelliteFrame;
 
 	/**
 	 * Build the satellite as a body and a state vector.
@@ -62,11 +59,6 @@ public class Assembly {
 
 		this.satelliteBody = new SatelliteBody(environment);
 		this.satelliteStates = new SatelliteStates(environment, satelliteBody);
-		this.satelliteFrame = new Frame (
-				FramesFactory.getEME2000(),
-				this.getStates().getCurrentState().toTransform(),
-				"SatelliteFrame"
-				);
 		this.earth = environment.getSolarSystem().getEarth();
 	}
 
@@ -95,7 +87,11 @@ public class Assembly {
 	 * frame fixed with the axis body.
 	 */
 	public Frame getSatelliteFrame() {
-		return this.satelliteFrame;
+		return new Frame (
+				FramesFactory.getEME2000(),
+				this.getStates().getCurrentState().toTransform(),
+				"SatelliteFrame"
+				);
 	}
 
 	/**
@@ -105,7 +101,7 @@ public class Assembly {
 	public Vector3D getAngularMomentum() {
 		Vector3D rotationRate = this.satelliteStates
 				.getCurrentState().getAttitude().getSpin();
-		
+
 		double[][] inertiaMatrix = this.satelliteBody.getInertiaMatrix();
 
 		Vector3D row0 = new Vector3D(inertiaMatrix[0]);
@@ -130,13 +126,13 @@ public class Assembly {
 		Transform itrf2body = null;
 		try {
 			itrf2body = this.earth.getRotatingFrame().getTransformTo(
-					this.satelliteFrame, 
+					this.getSatelliteFrame(), 
 					date
 					);
 		} catch (OrekitException e) {
 			e.printStackTrace();
 		}
-		
+
 		return itrf2body;
 	}
 
