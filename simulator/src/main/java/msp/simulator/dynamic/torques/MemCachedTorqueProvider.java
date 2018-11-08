@@ -86,6 +86,7 @@ public class MemCachedTorqueProvider implements TorqueProvider {
 		double z = pwm.getZ() * magnetorquerMaxDipole[2]; 
 		Vector3D dipole = new Vector3D(x,y,z);
 		Vector3D torque; 
+		logger.info("PWM SIGNAL:"+dipole.toString());
 		torque = Vector3D.crossProduct(dipole,this.b_field);
 		return torque;
 	}
