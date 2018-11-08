@@ -41,7 +41,6 @@ public class Main {
 			
 			Dashboard.setIntegrationTimeStep(0.1);
 			Dashboard.setEphemerisTimeStep(0.1);
-			Dashboard.setSatelliteInertiaMatrix(SatelliteBody.satInertiaMatrix);
 
 			Dashboard.setInitialAttitudeQuaternion(new Quaternion(1, 0, 0, 0));
 			Dashboard.setInitialSpin(new Vector3D(0.5, 0.5, 0.5));
