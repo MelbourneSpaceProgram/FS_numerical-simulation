@@ -19,8 +19,8 @@ The simulator project is now set up. You can launch the main method and some tes
 ## Command Line Execution of Simulation 
 ### Linux 
 - cd into /simulator
-- mvn compile
-- mvn exec:java-D"exec.mainClass"="msp.simulator.Main" 
+- $mvn compile
+- $mvn exec:java-D"exec.mainClass"="msp.simulator.Main" 
 ## Simple Test Execution:
 - In Eclipse, select the test to run in src/test/java/msp/simulator
 - Run As > JUnit Test
