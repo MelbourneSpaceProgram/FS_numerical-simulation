@@ -49,6 +49,13 @@ public class LowPassFilter {
 		this.state = this.alpha * this.state + (1 - this.alpha) * new_sample;
 		return this.state;
 	}
+	public Vector3D ProcessSample(Vector3D new_sample) {
+		double x = this.alpha * this.state3d.getX() + (1 - this.alpha) * new_sample.getX();
+		double y = this.alpha * this.state3d.getY() + (1 - this.alpha) * new_sample.getY();
+		double z = this.alpha * this.state3d.getZ() + (1 - this.alpha) * new_sample.getZ();
+		this.state3d = new Vector3D(x,y,z);
+		return this.state3d;
+	}
 	public double getSamplePeriod() {
 		return this.samplePeriodMili/1000.0;
 	}

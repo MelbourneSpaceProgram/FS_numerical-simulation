@@ -13,25 +13,16 @@
  */
 package msp.simulator.satellite.ADCS.Estimators.BdotEstimator;
 
-import org.hipparchus.geometry.euclidean.threed.Vector3D;
-
-import msp.simulator.satellite.ADACS.sensors.Magnetometer;
-import msp.simulator.satellite.assembly.SatelliteBody;
-
 /**
  *
  * @author Jack McRobbie
  */
-public class BdotEstimator {
-	private LowPassFilter lowpassfilter;
-	private Magnetometer mag; 
+public class FirstOrderDiff {
+	private double timestep; 
 	
-	public BdotEstimator(SatelliteBody sat) {
-		Vector3D initalState = new Vector3D(0.0,0.0,0.0);
-		lowpassfilter = new LowPassFilter(5.0,0.25,initalState);
-	}
-	public Vector3D computeDutyCycle() { 
-
+	
+	public FirstOrderDiff() {
+		
 	}
 
 }
