@@ -25,13 +25,27 @@ import msp.simulator.satellite.assembly.SatelliteBody;
 public class BdotEstimator {
 	private LowPassFilter lowpassfilter;
 	private Magnetometer mag; 
+	private Vector3D lastMagFieldReading; 
+	private final double timestep;
 	
 	public BdotEstimator(SatelliteBody sat) {
 		Vector3D initalState = new Vector3D(0.0,0.0,0.0);
 		lowpassfilter = new LowPassFilter(5.0,0.25,initalState);
+		timestep = 0.1; // TODO make equal to Controller frequency!
 	}
-	public Vector3D computeDutyCycle() { 
-
+	public Vector3D computeBdot() {
+		Vector3D bDotUnfiltered = this.getFirstOrderDiff(); 
+		Vector3D bdot = lowpassfilter.ProcessSample(bDotUnfiltered);
+		return bdot; 
+	}
+	private Vector3D getFirstOrderDiff() {
+		Vector3D magreading = mag.retrieveNoisyField().getFieldVector();
+		double x  = magreading.getX() - this.lastMagFieldReading.getX();
+		double y  = magreading.getY() - this.lastMagFieldReading.getY();
+		double z  = magreading.getZ() - this.lastMagFieldReading.getZ();
+		this.lastMagFieldReading = magreading;
+		Vector3D result = new Vector3D(x/this.timestep,y/this.timestep,z/this.timestep); 
+		return result;
 	}
 
 }
