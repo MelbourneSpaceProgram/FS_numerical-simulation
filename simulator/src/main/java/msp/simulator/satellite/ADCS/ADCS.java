@@ -15,12 +15,14 @@ package msp.simulator.satellite.ADCS;
 
 import java.util.function.Consumer;
 
-import org.orekit.files.general.EphemerisFile.SatelliteEphemeris;
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
 
+import msp.simulator.environment.Environment;
+import msp.simulator.satellite.Satellite;
 import msp.simulator.satellite.ADACS.sensors.Sensors;
+import msp.simulator.satellite.ADCS.Actuators.Actuators;
 import msp.simulator.satellite.ADCS.Controller.Controller;
 import msp.simulator.satellite.ADCS.Estimators.Estimators;
-import msp.simulator.satellite.actuators.Actuators;
 /**
  *
  * @author Jack McRobbie 
@@ -31,8 +33,11 @@ public class ADCS {
 	private Controller controllers; 
 	private Actuators actuators; 
 	
-	public ADCS(SatelliteEphemeris sat) {
-		
+	public ADCS(Satellite sat,Environment environment) {
+		this.sensors = new Sensors(environment, sat.getAssembly());
+		this.estimators = new Estimators(sat);
+		this.controllers = new Controller(sat);		
 	}
+	
 
 }

@@ -13,10 +13,19 @@
  */
 package msp.simulator.satellite.ADCS.Controller;
 
+import msp.simulator.satellite.Satellite;
+
 /**
  *
- * @author Jack McRobbie <chaubeyre.f@gmail.com>
+ * @author Jack McRobbie 
  */
 public class Controller {
+	B_Dot bdot;
+	Satellite sat; 
+	public Controller(Satellite satellite) {
+		this.sat = satellite; 
+		bdot = new B_Dot(this.sat);
+		
+	}
 
 }

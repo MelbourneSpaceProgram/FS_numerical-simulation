@@ -15,9 +15,8 @@ package msp.simulator.satellite.ADCS.Estimators.BdotEstimator;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 
+import msp.simulator.satellite.Satellite;
 import msp.simulator.satellite.ADACS.sensors.Magnetometer;
-import msp.simulator.satellite.assembly.SatelliteBody;
-
 /**
  *
  * @author Jack McRobbie
@@ -28,7 +27,7 @@ public class BdotEstimator {
 	private Vector3D lastMagFieldReading; 
 	private final double timestep;
 	
-	public BdotEstimator(SatelliteBody sat) {
+	public BdotEstimator(Satellite sat) {
 		Vector3D initalState = new Vector3D(0.0,0.0,0.0);
 		lowpassfilter = new LowPassFilter(5.0,0.25,initalState);
 		timestep = 0.1; // TODO make equal to Controller frequency!

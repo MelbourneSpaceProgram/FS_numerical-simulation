@@ -17,7 +17,7 @@ import msp.simulator.satellite.Satellite;
 
 /**
  *
- * @author Florian CHAUBEYRE <chaubeyre.f@gmail.com>
+ * @author Jack McRobbie
  */
 public class Estimators {
 

@@ -16,7 +16,8 @@ package msp.simulator.satellite.ADCS.Controller;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 
 import msp.simulator.satellite.Satellite;
-import msp.simulator.satellite.ADCS.Estimators.Estimators;
+import msp.simulator.satellite.ADCS.Actuators.Actuators;
+import msp.simulator.satellite.ADCS.Estimators.BdotEstimator.BdotEstimator;
 
 /**
  *
@@ -24,11 +25,15 @@ import msp.simulator.satellite.ADCS.Estimators.Estimators;
  */
 public class B_Dot {
 	private static final Vector3D bdotGains = new Vector3D(-54000,-54000,-54000);
-	private Estimators est; 
+	private Actuators magnetorquers; 
+	private BdotEstimator est; 
 	
-	public void B_dot(Satellite sat) {
-		this.est = new Estimators(sat);
-		return;
+	public B_Dot(Satellite sat) {
+		this.est = new BdotEstimator(sat);
+		magnetorquers = new Actuators();
 	}
-
+	public Vector3D computeDipole() {
+		Vector3D result = new Vector3D(1.0,est.computeBdot(),1.0,this.bdotGains);
+		return result;
+	}
 }
