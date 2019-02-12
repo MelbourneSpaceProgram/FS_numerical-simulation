@@ -11,24 +11,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package msp.simulator.satellite.ADCS.Controller;
+package msp.simulator.satellite.ADCS.Estimators.BdotEstimator;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 
-import msp.simulator.satellite.Satellite;
-import msp.simulator.satellite.ADCS.Estimators.Estimators;
+import msp.simulator.satellite.ADACS.sensors.Magnetometer;
+import msp.simulator.satellite.assembly.SatelliteBody;
 
 /**
  *
- * @author Jack McRobbie>
+ * @author Jack McRobbie
  */
-public class B_Dot {
-	private static final Vector3D bdotGains = new Vector3D(-54000,-54000,-54000);
-	private Estimators est; 
+public class BdotEstimator {
+	private LowPassFilter lowpassfilter;
+	private Magnetometer mag; 
 	
-	public void B_dot(Satellite sat) {
-		this.est = new Estimators(sat);
-		return;
+	public BdotEstimator(SatelliteBody sat) {
+		lowpassfilter = new LowPassFilter(5,0.25);
+	}
+	public Vector3D computeDutyCycle() { 
+		Vector3D dutyCycle = new Vector3D(
+				);
+				
+		return dutyCycle;
 	}
 
 }

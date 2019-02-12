@@ -13,10 +13,19 @@
  */
 package msp.simulator.satellite.ADCS.Estimators;
 
+import msp.simulator.satellite.Satellite;
+
 /**
  *
  * @author Florian CHAUBEYRE <chaubeyre.f@gmail.com>
  */
 public class Estimators {
+
+	/**
+	 * @param sat
+	 */
+	public Estimators(Satellite sat) {
+		// TODO Auto-generated constructor stub
+	}
 
 }
