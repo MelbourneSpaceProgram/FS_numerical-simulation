@@ -11,29 +11,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package msp.simulator.dynamic.torques;
+package msp.simulator.satellite.ADCS.ADCSPhysics;
+
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.orekit.time.AbsoluteDate;
 
 import msp.simulator.environment.Environment;
 import msp.simulator.satellite.Satellite;
-import msp.simulator.satellite.ADCS.ADCS;
+import msp.simulator.satellite.ADACS.sensors.Sensors;
+import msp.simulator.satellite.ADCS.Actuators.MagnetoTorquers;
+
 /**
  *
- * @author Jack McRobbie
- * This class represents the satellites own method 
- * for providing stabilization and control 
+ * @author Florian CHAUBEYRE <chaubeyre.f@gmail.com>
  */
-public class ControllerTorqueProvider implements TorqueProvider{
-	private ADCS adcsModule;
-	
-	public ControllerTorqueProvider(Satellite satellite, AbsoluteDate date, Environment environment) {
-		adcsModule = new ADCS(satellite,environment);
-		
+public class ADCSPhysics {
+	private Satellite satellite; 
+	private Environment environment; 
+	private Sensors sensor;
+	public ADCSPhysics(Satellite satellite, Environment environemt) {
+		this.satellite = satellite; 
+		this.environment = environment; 
 	}
-	@Override
-	public Vector3D getTorque(AbsoluteDate date) {
-		Vector3D a = this.adcsModule.ComputeTorque();
-		return a; //TODO 
+	public Vector3D ComputeMagnetorquerTorque(Vector3D magneticDipole) {
+		Vector3D result = Vector3D.crossProduct(magneticDipole, 
+				this.sensor.getMagnetometer().retrievePerfectField().getFieldVector());
+		return result;
 	}
+
 }

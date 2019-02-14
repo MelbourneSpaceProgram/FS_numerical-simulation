@@ -20,6 +20,7 @@ import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import msp.simulator.environment.Environment;
 import msp.simulator.satellite.Satellite;
 import msp.simulator.satellite.ADACS.sensors.Sensors;
+import msp.simulator.satellite.ADCS.ADCSPhysics.ADCSPhysics;
 import msp.simulator.satellite.ADCS.Actuators.Actuators;
 import msp.simulator.satellite.ADCS.Controller.Controller;
 import msp.simulator.satellite.ADCS.Estimators.Estimators;
@@ -32,15 +33,17 @@ public class ADCS {
 	private Estimators estimators;
 	private Controller controllers; 
 	private Actuators actuators;
+	private ADCSPhysics physics; 
 	
 	
 	public ADCS(Satellite sat,Environment environment) {
 		this.sensors = new Sensors(environment, sat.getAssembly());
 		this.estimators = new Estimators(sat);
-		this.controllers = new Controller(sat);		
+		this.controllers = new Controller(sat);	
+		this.physics = new ADCSPhysics(sat, environment);
 	}
 	public Vector3D ComputeTorque() {
-		
-		return this.controllers.getTorque();
+		Vector3D magneticDipole = this.controllers.getDipole(); 
+		return this.physics.ComputeMagnetorquerTorque(magneticDipole);
 	}
 }

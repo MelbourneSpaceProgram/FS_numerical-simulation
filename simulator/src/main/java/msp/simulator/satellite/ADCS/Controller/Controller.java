@@ -32,5 +32,4 @@ public class Controller {
 	public Vector3D getDipole() {
 		return this.bdot.computeDipole(); 
 	}
-
 }

@@ -44,5 +44,4 @@ public class Actuators {
 		// TODO Auto-generated method stub
 		return this.magnetorquer;
 	}
-
 }
