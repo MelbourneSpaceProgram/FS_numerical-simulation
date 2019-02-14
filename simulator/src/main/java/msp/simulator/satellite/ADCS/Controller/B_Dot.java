@@ -25,15 +25,16 @@ import msp.simulator.satellite.ADCS.Estimators.BdotEstimator.BdotEstimator;
  */
 public class B_Dot {
 	private static final Vector3D bdotGains = new Vector3D(-54000,-54000,-54000);
-	private Actuators magnetorquers; 
+	private Actuators actuators; 
 	private BdotEstimator est; 
 	
 	public B_Dot(Satellite sat) {
 		this.est = new BdotEstimator(sat);
-		magnetorquers = new Actuators();
+		this.actuators = new Actuators();
 	}
 	public Vector3D computeDipole() {
-		Vector3D result = new Vector3D(1.0,est.computeBdot(),1.0,this.bdotGains);
+		Vector3D dutyCycle = new Vector3D(1.0,est.computeBdot(),1.0,this.bdotGains);
+		Vector3D result = this.actuators.getMagnetorquers().computeDipole(dutyCycle);
 		return result;
 	}
 }

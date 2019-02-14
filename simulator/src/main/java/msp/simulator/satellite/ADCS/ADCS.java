@@ -31,13 +31,16 @@ public class ADCS {
 	private Sensors sensors; 
 	private Estimators estimators;
 	private Controller controllers; 
-	private Actuators actuators; 
+	private Actuators actuators;
+	
 	
 	public ADCS(Satellite sat,Environment environment) {
 		this.sensors = new Sensors(environment, sat.getAssembly());
 		this.estimators = new Estimators(sat);
 		this.controllers = new Controller(sat);		
 	}
-	
-
+	public Vector3D ComputeTorque() {
+		
+		return this.controllers.getTorque();
+	}
 }

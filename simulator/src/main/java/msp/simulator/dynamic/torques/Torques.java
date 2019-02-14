@@ -70,6 +70,13 @@ public class Torques {
 
 		/*  - Register the command provider.						*/
 		switch (Torques.commandTorqueProvider) {
+		case CONTROLLER:
+			this.torqueProviders.add(
+					TorqueProviderEnum.CONTROLLER.getIndex(), new ControllerTorqueProvider(
+							satellite,
+							satellite.getAssembly().getStates().getInitialState().getDate(), 
+							environment
+							));
 		case MEMCACHED:
 			this.torqueProviders.add(
 					TorqueProviderEnum.MEMCACHED.getIndex(),

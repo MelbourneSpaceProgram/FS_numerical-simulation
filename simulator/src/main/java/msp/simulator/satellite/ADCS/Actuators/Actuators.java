@@ -27,13 +27,22 @@ public class Actuators {
 	
 	/** Logger of the class */
 	private static final Logger logger = LoggerFactory.getLogger(Actuators.class);
-
+	private static MagnetoTorquers magnetorquer;
 	/**
 	 * 
 	 */
 	public Actuators() {
+		this.magnetorquer = new MagnetoTorquers();
 		logger.info(CustomLoggingTools.indentMsg(logger,
 				"Building the Actuators..."));
+	}
+
+	/**
+	 * @return
+	 */
+	public MagnetoTorquers getMagnetorquers() {
+		// TODO Auto-generated method stub
+		return this.magnetorquer;
 	}
 
 }

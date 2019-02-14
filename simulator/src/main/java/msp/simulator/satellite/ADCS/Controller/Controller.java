@@ -13,6 +13,8 @@
  */
 package msp.simulator.satellite.ADCS.Controller;
 
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
+
 import msp.simulator.satellite.Satellite;
 
 /**
@@ -26,6 +28,9 @@ public class Controller {
 		this.sat = satellite; 
 		bdot = new B_Dot(this.sat);
 		
+	}
+	public Vector3D getDipole() {
+		return this.bdot.computeDipole(); 
 	}
 
 }

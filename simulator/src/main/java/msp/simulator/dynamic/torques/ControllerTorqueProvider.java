@@ -12,30 +12,28 @@
  * limitations under the License.
  */
 package msp.simulator.dynamic.torques;
-
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.orekit.time.AbsoluteDate;
 
+import msp.simulator.environment.Environment;
 import msp.simulator.satellite.Satellite;
-
+import msp.simulator.satellite.ADCS.ADCS;
 /**
  *
  * @author Jack McRobbie
  * This class represents the satellites own method 
  * for providing stabilization and control 
  */
-
-
 public class ControllerTorqueProvider implements TorqueProvider{
-	public ControllerTorqueProvider(Satellite satellite, AbsoluteDate date) {
+	private ADCS adcsModule;
+	
+	public ControllerTorqueProvider(Satellite satellite, AbsoluteDate date, Environment environment) {
+		adcsModule = new ADCS(satellite,environment);
 		
 	}
-	
+	@Override
 	public Vector3D getTorque(AbsoluteDate date) {
 		Vector3D a = new Vector3D(null); 
 		return a; //TODO 
 	}
-	
-	
-	
 }
