@@ -34,6 +34,6 @@ public class ControllerTorqueProvider implements TorqueProvider{
 	@Override
 	public Vector3D getTorque(AbsoluteDate date) {
 		Vector3D a = this.adcsModule.ComputeTorque();
-		return a; //TODO 
+		return a; 
 	}
 }

@@ -43,7 +43,7 @@ public class ADCS {
 		this.physics = new ADCSPhysics(sat, environment);
 	}
 	public Vector3D ComputeTorque() {
-		Vector3D magneticDipole = this.controllers.getDipole(); 
+		Vector3D magneticDipole = this.controllers.getDipole();
 		return this.physics.ComputeMagnetorquerTorque(magneticDipole);
 	}
 }

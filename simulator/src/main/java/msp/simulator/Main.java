@@ -48,7 +48,6 @@ public class Main {
 			Dashboard.setTorqueDisturbances(false);
 
 			Dashboard.setCommandTorqueProvider(TorqueProviderEnum.CONTROLLER);
-//			Dashboard.setMemCachedConnection(true, "127.0.0.1:11211");
 
 			Dashboard.setVtsConnection(false);
 			
