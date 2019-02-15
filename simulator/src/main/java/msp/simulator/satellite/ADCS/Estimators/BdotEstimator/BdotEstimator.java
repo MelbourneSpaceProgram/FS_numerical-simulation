@@ -26,11 +26,14 @@ public class BdotEstimator {
 	private Magnetometer mag; 
 	private Vector3D lastMagFieldReading; 
 	private final double timestep;
+	private Satellite satellite; 
 	
 	public BdotEstimator(Satellite sat) {
 		Vector3D initalState = new Vector3D(0.0,0.0,0.0);
 		lowpassfilter = new LowPassFilter(5.0,0.25,initalState);
 		timestep = 0.1; // TODO make equal to Controller frequency!
+		satellite = sat;
+		this.lastMagFieldReading= Vector3D.NEGATIVE_INFINITY;
 	}
 	public Vector3D computeBdot() {
 		Vector3D bDotUnfiltered = this.getFirstOrderDiff(); 
@@ -38,7 +41,12 @@ public class BdotEstimator {
 		return bdot; 
 	}
 	private Vector3D getFirstOrderDiff() {
-		Vector3D magreading = mag.retrieveNoisyField().getFieldVector();
+		this.mag = this.satellite.getADCS().getSensors().getMagnetometer();
+		Vector3D magreading = mag.retrieveNoisyField().getFieldVector().scalarMultiply(10^-9);
+		if(this.lastMagFieldReading == Vector3D.NEGATIVE_INFINITY) {
+			this.lastMagFieldReading = magreading;
+			return Vector3D.ZERO;
+		}
 		double x  = magreading.getX() - this.lastMagFieldReading.getX();
 		double y  = magreading.getY() - this.lastMagFieldReading.getY();
 		double z  = magreading.getZ() - this.lastMagFieldReading.getZ();

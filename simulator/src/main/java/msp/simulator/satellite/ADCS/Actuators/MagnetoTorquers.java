@@ -44,12 +44,31 @@ public class MagnetoTorquers {
 		
 	}
 	public Vector3D computeDipole(Vector3D dutyCycle) {
-		Vector3D dipole = new Vector3D(
-				 dutyCycle.getX() * orientation.getX(),
-				 dutyCycle.getY() * orientation.getY(), 
-				 dutyCycle.getZ() * orientation.getZ()
-				 ); 
-		return dipole;
+		return this.constrainDipole(dutyCycle);
+	}
+	/**
+	 * @param dutyCycle requested duty cycle for the magnetorquers
+	 */
+	private Vector3D constrainDipole(Vector3D dutyCycle) {
+		double x = dutyCycle.getX();
+		double y = dutyCycle.getY(); 
+		double z = dutyCycle.getZ();
+		int sign;
+		if(Math.abs(x)>this.MaxDipole.getX()) {
+			sign = (0 > dutyCycle.getX())?-1:1;
+			x = this.MaxDipole.getX() * sign;
+		}
+		if(Math.abs(y)>this.MaxDipole.getY()) {
+			sign = (0 > dutyCycle.getY())?-1:1;
+			y = this.MaxDipole.getY() * sign;
+		}
+		if(Math.abs(z)>this.MaxDipole.getZ()) {
+			sign = (0 > dutyCycle.getZ())?-1:1;
+			z = this.MaxDipole.getZ() * sign;
+		}
+		Vector3D result = new Vector3D(x,y,z);
+		logger.info(result.toString());
+		return result;
 	}
 
 }

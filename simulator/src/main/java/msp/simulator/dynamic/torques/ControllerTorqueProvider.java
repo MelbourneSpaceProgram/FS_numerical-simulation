@@ -15,9 +15,10 @@ package msp.simulator.dynamic.torques;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.orekit.time.AbsoluteDate;
 
+import msp.simulator.NumericalSimulator;
+import msp.simulator.dynamic.torques.TorqueOverTimeScenarioProvider.Step;
 import msp.simulator.environment.Environment;
 import msp.simulator.satellite.Satellite;
-import msp.simulator.satellite.ADCS.ADCS;
 /**
  *
  * @author Jack McRobbie
@@ -25,15 +26,17 @@ import msp.simulator.satellite.ADCS.ADCS;
  * for providing stabilization and control 
  */
 public class ControllerTorqueProvider implements TorqueProvider{
-	private ADCS adcsModule;
-	
+	private Satellite sat;
+	private Vector3D steptorque;
 	public ControllerTorqueProvider(Satellite satellite, AbsoluteDate date, Environment environment) {
-		adcsModule = new ADCS(satellite,environment);
-		
+		this.sat = satellite;
+		this.steptorque = Vector3D.ZERO; 
 	}
+	/** {@inheritDoc} */
 	@Override
 	public Vector3D getTorque(AbsoluteDate date) {
-		Vector3D a = this.adcsModule.ComputeTorque();
-		return a; 
+		this.steptorque = sat.getADCS().ComputeTorque();
+		/* Finally returns the torque of the step (updated if needed). */
+		return this.steptorque;
 	}
 }

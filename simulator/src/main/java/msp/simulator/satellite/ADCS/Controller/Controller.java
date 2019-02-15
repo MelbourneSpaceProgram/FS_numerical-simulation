@@ -14,19 +14,29 @@
 package msp.simulator.satellite.ADCS.Controller;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import msp.simulator.satellite.Satellite;
+import msp.simulator.satellite.ADCS.ADCSPhysics.ADCSPhysics;
+import msp.simulator.utils.logs.CustomLoggingTools;
 
 /**
  *
  * @author Jack McRobbie 
  */
 public class Controller {
+	
+	private static final Logger logger = 
+			LoggerFactory.getLogger(Controller.class);
+	
 	B_Dot bdot;
 	Satellite sat; 
 	public Controller(Satellite satellite) {
 		this.sat = satellite; 
 		bdot = new B_Dot(this.sat);
+		this.logger.info(CustomLoggingTools.indentMsg(this.logger, 
+				" -> Building the ADCS Controller: Success."));
 		
 	}
 	public Vector3D getDipole() {

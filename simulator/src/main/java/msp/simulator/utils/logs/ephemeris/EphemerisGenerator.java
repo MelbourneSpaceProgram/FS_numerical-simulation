@@ -363,7 +363,7 @@ public class EphemerisGenerator {
 			buff = new StringBuffer();
 			
 			/* Writing the current mag field to the log file. */ 
-			Vector3D mag_field = satellite.getSensors().getMagnetometer().retrievePerfectField().getFieldVector();
+			Vector3D mag_field = satellite.getADCS().getSensors().getMagnetometer().retrievePerfectField().getFieldVector();
 			Vector3D mag_unit; 
 			mag_unit = mag_field.normalize();
 			buff

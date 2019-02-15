@@ -29,7 +29,7 @@ import msp.simulator.satellite.io.IO;
 import msp.simulator.satellite.io.MemcachedRawTranscoder;
 import msp.simulator.utils.logs.CustomLoggingTools;
 import net.spy.memcached.MemcachedClient;
-import msp.simulator.satellite.sensors.Magnetometer;
+import msp.simulator.satellite.ADACS.sensors.*;;
 /**
  *
  * @author Florian CHAUBEYRE <chaubeyre.f@gmail.com>
@@ -108,8 +108,8 @@ public class MemCachedTorqueProvider implements TorqueProvider {
 			this.stepStart = this.satState.getCurrentState().getDate();
 			this.nextAcquisitionDate = this.satState.getInitialState().getDate();
 			this.stepTorque = Vector3D.ZERO;
-			this.b_field = satellite.getSensors().getMagnetometer().retrievePerfectField().getFieldVector();
-			this.magnetometer = satellite.getSensors().getMagnetometer(); 
+			this.b_field = satellite.getADCS().getSensors().getMagnetometer().retrievePerfectField().getFieldVector();
+			this.magnetometer = satellite.getADCS().getSensors().getMagnetometer(); 
 			this.torqueKey = MemCachedTorqueProvider.torqueCommandKey;
 			this.pwmKey = MemCachedTorqueProvider.pwmCommandKey; 
 			

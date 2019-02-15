@@ -40,11 +40,11 @@ import msp.simulator.groundStation.GroundStation;
 import msp.simulator.satellite.assembly.SatelliteBody;
 import msp.simulator.satellite.assembly.SatelliteStates;
 import msp.simulator.satellite.io.IO;
-import msp.simulator.satellite.sensors.Gyrometer;
-import msp.simulator.satellite.sensors.Magnetometer;
 import msp.simulator.utils.logs.CustomLoggingTools;
 import msp.simulator.utils.logs.ephemeris.EphemerisGenerator;
-
+import msp.simulator.satellite.ADACS.*;
+import msp.simulator.satellite.ADACS.sensors.Gyrometer;
+import msp.simulator.satellite.ADACS.sensors.Magnetometer;;;
 /**
  * This class handles the user-configuration 
  * of the numerical simulator.
@@ -114,7 +114,7 @@ public class Dashboard {
 		Dashboard.setInitialAttitudeQuaternion(new Quaternion(1,0,0,0));
 		Dashboard.setInitialSpin(Vector3D.ZERO);
 		Dashboard.setInitialRotAcceleration(Vector3D.ZERO);
-		Dashboard.setCommandTorqueProvider(TorqueProviderEnum.SCENARIO);
+		Dashboard.setCommandTorqueProvider(TorqueProviderEnum.CONTROLLER);
 		Dashboard.setTorqueScenario(new ArrayList<Step>());
 		Dashboard.setTorqueDisturbances(true);
 

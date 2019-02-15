@@ -37,7 +37,7 @@ public class Torques {
 	/* ******* Public Static Attributes ******* */
 
 	/** Set the torque provider in use by the simulator. */
-	public static TorqueProviderEnum commandTorqueProvider = TorqueProviderEnum.SCENARIO;
+	public static TorqueProviderEnum commandTorqueProvider = TorqueProviderEnum.CONTROLLER;
 
 	/** Allow the torque disturbances in the simulation. */
 	public static boolean allowDisturbances = true;
@@ -77,6 +77,7 @@ public class Torques {
 							satellite.getAssembly().getStates().getInitialState().getDate(), 
 							environment
 							));
+			break;
 		case MEMCACHED:
 			this.torqueProviders.add(
 					TorqueProviderEnum.MEMCACHED.getIndex(),

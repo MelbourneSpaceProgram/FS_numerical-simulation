@@ -16,6 +16,8 @@ package msp.simulator.satellite.ADCS;
 import java.util.function.Consumer;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import msp.simulator.environment.Environment;
 import msp.simulator.satellite.Satellite;
@@ -24,11 +26,13 @@ import msp.simulator.satellite.ADCS.ADCSPhysics.ADCSPhysics;
 import msp.simulator.satellite.ADCS.Actuators.Actuators;
 import msp.simulator.satellite.ADCS.Controller.Controller;
 import msp.simulator.satellite.ADCS.Estimators.Estimators;
+import msp.simulator.utils.logs.CustomLoggingTools;
 /**
  *
  * @author Jack McRobbie 
  */
 public class ADCS {
+	private static final Logger logger = LoggerFactory.getLogger(ADCS.class);
 	private Sensors sensors; 
 	private Estimators estimators;
 	private Controller controllers; 
@@ -41,9 +45,19 @@ public class ADCS {
 		this.estimators = new Estimators(sat);
 		this.controllers = new Controller(sat);	
 		this.physics = new ADCSPhysics(sat, environment);
+		ADCS.logger.info(CustomLoggingTools.indentMsg(ADCS.logger,
+				"Building the ADCS Module: Success..."));
 	}
 	public Vector3D ComputeTorque() {
 		Vector3D magneticDipole = this.controllers.getDipole();
+		logger.info(this.physics.ComputeMagnetorquerTorque(magneticDipole).toString());
 		return this.physics.ComputeMagnetorquerTorque(magneticDipole);
+//		return new Vector3D(0.01,0.01,0.01);
+	}
+	/**
+	 * @return
+	 */
+	public Sensors getSensors() {
+		return sensors;
 	}
 }
