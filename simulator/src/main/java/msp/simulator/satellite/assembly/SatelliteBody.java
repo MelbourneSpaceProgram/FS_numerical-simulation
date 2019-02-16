@@ -42,9 +42,9 @@ public class SatelliteBody extends BoxAndSolarArraySpacecraft {
 
 	/** Inertia matrix of the satellite. */
 	public static double[][] satInertiaMatrix =  /* kg.m^2 */ {
-			{1,           0       ,           0        },
-			{         0       ,  1,           0        },
-			{         0       ,           0       ,  1 },
+			{0.001,           0       ,           0        },
+			{         0       ,  0.001,           0        },
+			{         0       ,           0       ,  0.001 },
 	};
 
 	/** Simple balance inertia matrix (Unit matrix). */

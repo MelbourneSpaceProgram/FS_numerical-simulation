@@ -14,9 +14,13 @@
 package msp.simulator.satellite.ADCS.Estimators.BdotEstimator;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import msp.simulator.satellite.Satellite;
 import msp.simulator.satellite.ADACS.sensors.Magnetometer;
+import msp.simulator.satellite.ADCS.Actuators.Actuators;
+import msp.simulator.utils.logs.CustomLoggingTools;
 /**
  *
  * @author Jack McRobbie
@@ -27,6 +31,7 @@ public class BdotEstimator {
 	private Vector3D lastMagFieldReading; 
 	private final double timestep;
 	private Satellite satellite; 
+	private static final Logger logger = LoggerFactory.getLogger(BdotEstimator.class);
 	
 	public BdotEstimator(Satellite sat) {
 		Vector3D initalState = new Vector3D(0.0,0.0,0.0);
@@ -34,10 +39,13 @@ public class BdotEstimator {
 		timestep = 0.1; // TODO make equal to Controller frequency!
 		satellite = sat;
 		this.lastMagFieldReading= Vector3D.NEGATIVE_INFINITY;
+		BdotEstimator.logger.info(CustomLoggingTools.indentMsg(BdotEstimator.logger,
+				"Building the Bdot Estimator..."));
 	}
 	public Vector3D computeBdot() {
 		Vector3D bDotUnfiltered = this.getFirstOrderDiff(); 
 		Vector3D bdot = lowpassfilter.ProcessSample(bDotUnfiltered);
+		logger.info("Bdot estimate" + bdot.toString());
 		return bdot; 
 	}
 	private Vector3D getFirstOrderDiff() {

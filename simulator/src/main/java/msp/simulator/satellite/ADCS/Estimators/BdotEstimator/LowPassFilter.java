@@ -39,7 +39,7 @@ public class LowPassFilter {
 	public LowPassFilter(double tc, double spms, Vector3D initState) {
 		this.timeConstant = tc; 
 		this.samplePeriodMili = spms; 
-		this.alpha = Math.exp(spms/tc);
+		this.alpha = Math.exp(-spms/tc);
 		
 		/* Utilize multiplicative class constructor returns same as initState */
 		state3d = new Vector3D(1.0,initState); 
