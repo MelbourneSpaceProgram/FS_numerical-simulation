@@ -50,7 +50,7 @@ public class ADCS {
 	}
 	public Vector3D ComputeTorque() {
 		Vector3D magneticDipole = this.controllers.getDipole();
-		logger.info(this.physics.ComputeMagnetorquerTorque(magneticDipole).toString());
+
 		return this.physics.ComputeMagnetorquerTorque(magneticDipole);
 //		return new Vector3D(0.01,0.01,0.01);
 	}

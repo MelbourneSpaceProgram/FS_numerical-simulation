@@ -37,7 +37,7 @@ public class MagnetoTorquers {
 	 * 
 	 */
 	public MagnetoTorquers() {
-		logger.info(CustomLoggingTools.indentMsg(logger,
+		MagnetoTorquers.logger.info(CustomLoggingTools.indentMsg(logger,
 				"Building the MagnetoTorquers..."));
 		this.orientation = new Vector3D(1,1,1);
 		this.MaxDipole = new Vector3D(0.1,0.1,0.1); //TODO make configurable from simulation initialization 
@@ -54,6 +54,7 @@ public class MagnetoTorquers {
 		double y = dutyCycle.getY(); 
 		double z = dutyCycle.getZ();
 		int sign;
+		Vector3D result = new Vector3D(x,y,z);		
 		if(Math.abs(x)>this.MaxDipole.getX()) {
 			sign = (0 > dutyCycle.getX())?-1:1;
 			x = this.MaxDipole.getX() * sign;
@@ -66,8 +67,7 @@ public class MagnetoTorquers {
 			sign = (0 > dutyCycle.getZ())?-1:1;
 			z = this.MaxDipole.getZ() * sign;
 		}
-		Vector3D result = new Vector3D(x,y,z);
-		logger.info(result.toString());
+		result = new Vector3D(x,y,z);
 		return result;
 	}
 

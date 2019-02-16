@@ -24,7 +24,7 @@ import msp.simulator.satellite.ADCS.Estimators.BdotEstimator.BdotEstimator;
  * @author Jack McRobbie>
  */
 public class B_Dot {
-	private static final Vector3D bdotGains = new Vector3D(-54000,-54000,-54000);
+	private static final Vector3D bdotGains = new Vector3D(54000,54000,54000);
 	private Actuators actuators; 
 	private BdotEstimator est; 
 	
@@ -33,7 +33,10 @@ public class B_Dot {
 		this.actuators = new Actuators();
 	}
 	public Vector3D computeDipole() {
-		Vector3D dutyCycle = new Vector3D(1.0,est.computeBdot(),1.0,this.bdotGains);
+		Vector3D dutyCycle = new Vector3D(this.bdotGains.getX()*this.est.computeBdot().getX(),
+				this.bdotGains.getY()*this.est.computeBdot().getY(),
+				this.bdotGains.getZ()*this.est.computeBdot().getZ()
+				);
 		Vector3D result = this.actuators.getMagnetorquers().computeDipole(dutyCycle);
 		return result;
 	}

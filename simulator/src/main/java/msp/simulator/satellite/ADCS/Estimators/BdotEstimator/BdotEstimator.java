@@ -35,7 +35,7 @@ public class BdotEstimator {
 	
 	public BdotEstimator(Satellite sat) {
 		Vector3D initalState = new Vector3D(0.0,0.0,0.0);
-		lowpassfilter = new LowPassFilter(5.0,0.25,initalState);
+		lowpassfilter = new LowPassFilter(1.0,0.1,initalState);
 		timestep = 0.1; // TODO make equal to Controller frequency!
 		satellite = sat;
 		this.lastMagFieldReading= Vector3D.NEGATIVE_INFINITY;
@@ -45,7 +45,6 @@ public class BdotEstimator {
 	public Vector3D computeBdot() {
 		Vector3D bDotUnfiltered = this.getFirstOrderDiff(); 
 		Vector3D bdot = lowpassfilter.ProcessSample(bDotUnfiltered);
-		logger.info("Bdot estimate" + bdot.toString());
 		return bdot; 
 	}
 	private Vector3D getFirstOrderDiff() {
@@ -55,11 +54,11 @@ public class BdotEstimator {
 			this.lastMagFieldReading = magreading;
 			return Vector3D.ZERO;
 		}
-		double x  = magreading.getX() - this.lastMagFieldReading.getX();
-		double y  = magreading.getY() - this.lastMagFieldReading.getY();
-		double z  = magreading.getZ() - this.lastMagFieldReading.getZ();
+		double x  = (magreading.getX() - this.lastMagFieldReading.getX())/this.timestep;
+		double y  = (magreading.getY() - this.lastMagFieldReading.getY())/this.timestep;
+		double z  = (magreading.getZ() - this.lastMagFieldReading.getZ())/this.timestep;
 		this.lastMagFieldReading = magreading;
-		Vector3D result = new Vector3D(x/this.timestep,y/this.timestep,z/this.timestep); 
+		Vector3D result = new Vector3D(x,y,z); 
 		return result;
 	}
 

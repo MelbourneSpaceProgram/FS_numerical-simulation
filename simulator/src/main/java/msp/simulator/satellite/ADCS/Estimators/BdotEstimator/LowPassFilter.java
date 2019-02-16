@@ -32,7 +32,7 @@ public class LowPassFilter {
 	public LowPassFilter(double tc, double spms,double initialState) {
 		this.timeConstant = tc; 
 		this.samplePeriodMili = spms; 
-		this.alpha = Math.exp(spms/tc);
+		this.alpha = Math.exp(-spms/tc);
 		state = initialState;
 		this.flag = this.ConstructorDouble;
 	}
