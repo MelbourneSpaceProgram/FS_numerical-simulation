@@ -49,7 +49,7 @@ public class BdotEstimator {
 	}
 	private Vector3D getFirstOrderDiff() {
 		this.mag = this.satellite.getADCS().getSensors().getMagnetometer();
-		Vector3D magreading = mag.retrieveNoisyField().getFieldVector().scalarMultiply(10^-9);
+		Vector3D magreading = mag.retrieveNoisyField().getFieldVector().scalarMultiply(0.000000001);
 		if(this.lastMagFieldReading == Vector3D.NEGATIVE_INFINITY) {
 			this.lastMagFieldReading = magreading;
 			return Vector3D.ZERO;

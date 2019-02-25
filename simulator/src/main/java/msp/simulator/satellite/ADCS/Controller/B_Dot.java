@@ -24,7 +24,7 @@ import msp.simulator.satellite.ADCS.Estimators.BdotEstimator.BdotEstimator;
  * @author Jack McRobbie>
  */
 public class B_Dot {
-	private static final Vector3D bdotGains = new Vector3D(54000,54000,54000);
+	private static final Vector3D bdotGains = new Vector3D(-100000,-100000,-100000);
 	private Actuators actuators; 
 	private BdotEstimator est; 
 	

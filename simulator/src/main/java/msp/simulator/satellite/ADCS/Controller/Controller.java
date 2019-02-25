@@ -35,11 +35,14 @@ public class Controller {
 	public Controller(Satellite satellite) {
 		this.sat = satellite; 
 		bdot = new B_Dot(this.sat);
-		this.logger.info(CustomLoggingTools.indentMsg(this.logger, 
+		Controller.logger.info(CustomLoggingTools.indentMsg(this.logger, 
 				" -> Building the ADCS Controller: Success."));
 		
 	}
 	public Vector3D getDipole() {
-		return this.bdot.computeDipole(); 
+		Vector3D result  = this.bdot.computeDipole();
+		Controller.logger.info(result.toString());
+		return result;
+		
 	}
 }
