@@ -1,0 +1,41 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>stateVectorToTLE</artifactId>
+	<version>0.6</version>
+	<name>State Vector To TLE</name>
+	<description>Converts a state vector (position velocity) into a NORAD two line element</description>
+	<organization>
+		<name>Melbourne Space Program</name>
+		<url>http://melbournespace.org/</url>
+	</organization>
+	<url>http://melbournespace.org/</url>
+	<dependencies>
+		<dependency>
+			<groupId>org.orekit</groupId>
+			<artifactId>orekit</artifactId>
+			<version>9.1</version>
+		</dependency>
+	</dependencies>
+	<issueManagement>
+		<system>JIRA</system>
+		<url>https://melbournespace.atlassian.net/secure/Dashboard.jspa</url>
+	</issueManagement>
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.7.0</version>
+					<configuration>
+						<source>1.8</source>
+						<target>1.8</target>
+					</configuration>
+				</plugin>
+			</plugins>
+
+		</pluginManagement>
+	</build>
+	<groupId>msp.stateVectorToTLE</groupId>
+</project>
