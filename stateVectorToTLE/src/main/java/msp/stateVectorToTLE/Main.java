@@ -51,12 +51,25 @@ public class Main {
           DataProvidersManager manager = DataProvidersManager.getInstance();
           manager.addProvider(new DirectoryCrawler(orekitData));
 
-          // Fake state vector becauase the real state vector is wrapped in the
-          // thorny blanket of an NDA until launch
-          final Vector3D initialPosition = new Vector3D(1234, 2345, 3456); // m
-          final Vector3D initialVelocity = new Vector3D(4321, 5432, 6543); // m/s
+          ////////////////////
+          ////////////////////
+          ////////////////////
+          // Pre-launch state vector at ACRUX-1 separation, received June 10 2019
+          ////////////////////
+          // The launch window opens 2019-06-27 16:27 Z+12 (NZT)
+          // with separation predicted to be 2983 seconds after launch, or 49 minutes and 53 seconds
+          ////////////////////
+          final Vector3D initialPosition = new Vector3D(5151.1899e3, -1976.6508e3, 4022.4817e3); // m
+          final Vector3D initialVelocity = new Vector3D(0.2142e3, 6.6444e3, 2.9896e3); // m/s
           final AbsoluteDate launchDate =
-              new AbsoluteDate(2111, 1, 1, 1, 1, 1, TimeScalesFactory.getUTC());
+              new AbsoluteDate(2019, 06, 27, 5, 19, 53, TimeScalesFactory.getUTC());
+          ////////////////////
+          ////////////////////
+          ////////////////////
+          ////////////////////
+          ////////////////////
+          ////////////////////
+          ////////////////////
 
           final PVCoordinates initialState = new PVCoordinates​(initialPosition, initialVelocity);
           final double muEarth = 3.986_004_415e14;
