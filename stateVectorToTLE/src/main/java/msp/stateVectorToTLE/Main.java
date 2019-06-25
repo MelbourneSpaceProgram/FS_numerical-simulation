@@ -56,7 +56,7 @@ public class Main {
           ////////////////////
           // Pre-launch state vector at ACRUX-1 separation, received June 10 2019
           ////////////////////
-          // The launch window opens 2019-06-27 16:27 Z+12 (NZT)
+          // The launch window opens 2019-06-27 16:30 Z+12 (NZT)
           // with separation predicted to be 2983 seconds after launch, or 49 minutes and 53 seconds
           ////////////////////
           final Vector3D initialPosition = new Vector3D(5151.1899e3, -1976.6508e3, 4022.4817e3); // m
