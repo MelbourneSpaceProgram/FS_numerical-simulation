@@ -85,26 +85,6 @@ public class Main {
       final AbsoluteDate launchDate =
           new AbsoluteDate(2019, 06, 27, 5, 19, 53, TimeScalesFactory.getUTC());
 
-      // Old state vector
-      // final Vector3D initialPositionItrf = new Vector3D(5149.3374e3, -1378.3296e3, 4264.4110e3);
-      // // m
-      // final Vector3D initialVelocityItrf = new Vector3D(-0.2632e3, 6.8362e3, 2.5275e3); // m/s
-      // final AbsoluteDate launchDate =
-      //   new AbsoluteDate(2019, 06, 25, 5, 17, 14, TimeScalesFactory.getUTC());
-
-      // Cook it for low eccentricity
-      // final Vector3D initialPositionItrf = new Vector3D(5151.1899e3, -1976.6508e3, 4022.4817e3);
-      // // m
-      // final Vector3D initialVelocityItrf = new Vector3D(0.2151e3, 6.6444e3, 2.9896e3); // m/s
-
-      // Test state vector from UNSW
-      // final Vector3D initialPositionItrf = new Vector3D(-3495.024522706921e3,
-      // -5028.062565463392e3, 2934.830111996512e3); // m
-      // final Vector3D initialVelocityItrf = new Vector3D(-2.707965441965147e3,
-      // -2.1225833611150033e3, -6.850800844580249e3); // m/s
-      // final AbsoluteDate launchDate =
-      //    new AbsoluteDate(2019, 06, 17, 22, 0, 0, TimeScalesFactory.getUTC());
-
       // Other ACRUX-1 params
       double acrux1Weight = 0.969; // kg
 
