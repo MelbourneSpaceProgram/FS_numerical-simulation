@@ -23,7 +23,7 @@ public enum TorqueProviderEnum {
 	/* Command torque provider. */
 	MEMCACHED(0),
 	SCENARIO(0),
-	
+	CONTROLLER(0),
 	/* Disturbances. */
 	GRAVITY(1),
 	ATMOSPHERIC(2),

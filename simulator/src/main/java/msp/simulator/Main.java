@@ -47,8 +47,7 @@ public class Main {
 			Dashboard.setInitialRotAcceleration(new Vector3D(0,0,0));
 			Dashboard.setTorqueDisturbances(false);
 
-			Dashboard.setCommandTorqueProvider(TorqueProviderEnum.MEMCACHED);
-			Dashboard.setMemCachedConnection(true, "127.0.0.1:11211");
+			Dashboard.setCommandTorqueProvider(TorqueProviderEnum.CONTROLLER);
 
 			Dashboard.setVtsConnection(false);
 			
