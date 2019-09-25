@@ -16,7 +16,13 @@ Optional, but advised:
 - Right click on simulator project > Maven > Update Project... > Select all > Force Update of Snapchots/Releases > OK
 
 The simulator project is now set up. You can launch the main method and some tests.
-
+## Command Line Execution of Simulation 
+### Linux 
+- cd into /simulator
+- $mvn compile
+- $mvn  mvn exec:java -D"exec.mainClass"="msp.simulator.Main"
+- OR simply use bash runSim.sh 
+- $mvn exec:java -D"exec.mainClass"="msp.simulator.Main"
 ## Simple Test Execution:
 - In Eclipse, select the test to run in src/test/java/msp/simulator
 - Run As > JUnit Test

@@ -12,19 +12,17 @@
  * limitations under the License.
  */
 
-package msp.simulator.satellite.sensors;
+package msp.simulator.satellite.ADACS.sensors;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.util.FastMath;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.errors.OrekitException;
 import org.orekit.models.earth.GeoMagneticElements;
 import org.orekit.propagation.SpacecraftState;
-import org.orekit.frames.Transform;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.hipparchus.random.RandomDataGenerator;
 
 import msp.simulator.environment.Environment;
 import msp.simulator.environment.geomagneticField.EarthMagneticField;
@@ -40,13 +38,18 @@ import msp.simulator.utils.logs.CustomLoggingTools;
  */
 public class Magnetometer {
 	
-	/* ******* Public Static Attributes ******* */
 
+	/* ******* Public Static Attributes ******* */
+	
+	
+	/* Random number generator */
+	private RandomDataGenerator randomDataGenerator = new RandomDataGenerator(1000);
+	
 	/** This intensity is used to generate a random number to be
 	 * added to each components of the true magnetic field. 
 	 * (nanoTesla)
 	 */
-	public static double defaultMagnetoNoiseIntensity = 1e2 ;
+	public static double defaultMagnetoNoiseIntensity = 4.156*1000;
 
 	/* **************************************** */
 
@@ -62,7 +65,7 @@ public class Magnetometer {
 
 	/** Assembly of the satellite. */
 	private Assembly assembly;
-	
+
 	/** Private attribute for the noise intensity. */
 	private double noiseIntensity;
 
@@ -88,13 +91,15 @@ public class Magnetometer {
 	 */
 	public GeoMagneticElements retrieveNoisyField() {
 		/* Perfect Measure. */
+
+		
 		GeoMagneticElements perfectMeasure = this.retrievePerfectField();
 
 		/* Normally distributed random noise contribution. */
 		Vector3D noise = new Vector3D ( new double[] { 
-				2 * (FastMath.random() - 0.5) * this.noiseIntensity,
-				2 * (FastMath.random() - 0.5) * this.noiseIntensity,
-				2 * (FastMath.random() - 0.5) * this.noiseIntensity
+				randomDataGenerator.nextNormal(0, this.noiseIntensity),
+				randomDataGenerator.nextNormal(0, this.noiseIntensity),
+				randomDataGenerator.nextNormal(0, this.noiseIntensity)
 		});
 
 		/* Disturbing the perfect measurement. */
@@ -103,10 +108,10 @@ public class Magnetometer {
 
 		/* Creating the noisy measure. */
 		GeoMagneticElements noisyMeasure = new GeoMagneticElements(noisyFieldVector);	
-		
+
 		logger.debug("Noisy Geo" + noisyMeasure.toString());
-		
-		
+
+
 		return noisyMeasure;
 	}
 
@@ -149,35 +154,26 @@ public class Magnetometer {
 		 * the altitude of the satellite is slightly shifted from the true 
 		 * one.
 		 */
-		GeoMagneticElements trueMagField_ecef = this.geomagField.getField().calculateField(
+		GeoMagneticElements trueField_itrf = this.geomagField.getField().calculateField(
 				FastMath.toDegrees(geodeticPosition.getLatitude()),	/* decimal deg */
 				FastMath.toDegrees(geodeticPosition.getLongitude()),	/* decimal deg */
 				(satState.getA() - this.earth.getRadius()) / 1e3		/* km */
 				);
-		
+
 		logger.debug("Magnetometer Measurement: \n" +
 				"Latitude: " + FastMath.toDegrees(geodeticPosition.getLatitude()) + " °\n" +
 				"Longitud: " + FastMath.toDegrees(geodeticPosition.getLongitude()) + " °\n" +
 				"Altitude: " + (satState.getA() - this.earth.getRadius()) / 1e3 + " km\n" +
-				"True Geo ECEF" + trueMagField_ecef.toString()
+				"True Geo ITRF" + trueField_itrf.toString()
 				);
 
+		/* Rotate the magnetic field reading into the body frame */
+		Vector3D trueField_body = this.assembly.getItrf2body(satState.getDate())
+				.transformVector(trueField_itrf.getFieldVector());
 
-    /* Rotate the magnetic field reading into the body frame */
-    // Assuming WMM outputs vectors in Earth-centred-Earth-fixed frame
-    // This might be backwards
-    Rotation rotation_ecef_to_body =
-        this.assembly.getStates()
-        .getCurrentState().getAttitude().getRotation();
-    Transform ecef_to_body = new Transform(null, rotation_ecef_to_body);
-    Vector3D trueMagField_body_vec =
-        ecef_to_body.transformVector(trueMagField_ecef.getFieldVector());
-    GeoMagneticElements trueMagField_body = new GeoMagneticElements(
-        trueMagField_body_vec);
-
-		return trueMagField_body;
+		return new GeoMagneticElements(trueField_body);
 	}
-	
+
 	/**
 	 * Retrieve the measured data from the magnetometer sensors.
 	 * <p>
@@ -190,10 +186,10 @@ public class Magnetometer {
 	public Vector3D getData_magField() {
 		/* Retrieve the noisy magnetic field. */
 		Vector3D data = this.retrieveNoisyField().getFieldVector();
-	
+
 		/* Convert nTesla into Tesla. */
 		data = data.scalarMultiply(1e-9);
-	
+
 		return data;
 	}
 
