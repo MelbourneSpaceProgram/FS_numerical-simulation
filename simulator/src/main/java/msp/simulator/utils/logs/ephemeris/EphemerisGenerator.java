@@ -26,6 +26,7 @@ import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.orekit.errors.OrekitException;
 import org.orekit.frames.FramesFactory;
+import org.orekit.models.earth.GeoMagneticElements;
 import org.orekit.propagation.SpacecraftState;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.time.TimeScalesFactory;
@@ -94,9 +95,36 @@ public class EphemerisGenerator {
 
 	/** Attitude AEM ephemeris. */
 	private File fileAEM;
+	
+	/** Vector for the magnetic field */
+	
+	private File fileAEM_mag; 
+	
+	/** Vector for the angular momentum */ 
+	
+	private File fileAEM_angMomentum; 
+	
+	/** vector for the angular velocity */
+	
+	private File fileAEM_angVelocity; 
+	
+	/** Vector for applied torque */ 
+	
+	private File fileAEM_torque; 
 
+  /** vector for the change in the magnetic field vector */
+	
+  private File fileAEM_bDot; 
+	
 	/** Attitude AEM File Writer. */
+	private FileWriter writerAEM_mag; 
+	
 	private FileWriter writerAEM;
+	
+	private FileWriter writerAEM_angMomentum; 
+	private FileWriter writerAEM_angVel;
+	private FileWriter writerAEM_torque;
+  private FileWriter writerAEM_bDot;
 
 	/** OrbitWrapper OEM File Writer */
 	private FileWriter writerOEM;
@@ -143,6 +171,11 @@ public class EphemerisGenerator {
 		String common = this.path + this.simuName;
 		this.fileOEM = new File(common + "OEM.txt");
 		this.fileAEM = new File(common + "AEM.txt");
+		this.fileAEM_mag = new File(common + "body_mag-" + "AEM.txt");
+		this.fileAEM_angVelocity = new File(common + "ang_mom-" + "AEM.txt");
+		this.fileAEM_angMomentum = new File(common + "ang_vel-" + "AEM.txt");
+		this.fileAEM_torque = new File(common + "torque-" + "AEM.txt");
+		this.fileAEM_bDot = new File(common + "b_dot-" + "AEM.txt");
 
 		if (!fileOEM.getParentFile().exists()) {
 			fileOEM.getParentFile().mkdirs();
@@ -150,20 +183,57 @@ public class EphemerisGenerator {
 		if (!fileAEM.getParentFile().exists()) {
 			fileAEM.getParentFile().mkdir();
 		}
+		if (!fileAEM_mag.getParentFile().exists()) {
+			fileAEM_mag.getParentFile().mkdir(); 
+		}
+		if (!fileAEM_angVelocity.getParentFile().exists()) {
+			fileAEM_angVelocity.getParentFile().mkdir(); 
+		}
+		if (!fileAEM_angMomentum.getParentFile().exists()) {
+			fileAEM_angMomentum.getParentFile().mkdir(); 
+		}
+		if (!fileAEM_torque.getParentFile().exists()) {
+			fileAEM_torque.getParentFile().mkdir(); 
+		}
+		if (!fileAEM_bDot.getParentFile().exists()) {
+        fileAEM_bDot.getParentFile().mkdir(); 
+		}
+		
 
 		try {
+			
 			/* Creating the files. */
 			fileOEM.createNewFile();
 			fileAEM.createNewFile();
-
+			fileAEM_mag.createNewFile(); 
+			fileAEM_angMomentum.createNewFile();
+			fileAEM_angVelocity.createNewFile(); 
+			fileAEM_torque.createNewFile();
+			fileAEM_bDot.createNewFile();
+			
 			/* Creating each associated Writer. */
 			this.writerOEM = new FileWriter(this.fileOEM);
 			this.writerAEM = new FileWriter(this.fileAEM);
-
+			this.writerAEM_mag = new FileWriter(this.fileAEM_mag);
+			this.writerAEM_angVel = new FileWriter(this.fileAEM_angVelocity); 
+			this.writerAEM_angMomentum = new FileWriter(this.fileAEM_angMomentum);
+			this.writerAEM_torque = new FileWriter(this.fileAEM_torque);
+			this.writerAEM_bDot = new FileWriter(this.fileAEM_bDot);
 			/* Generating the headers. */
 			this.writerAEM.write(this.getAemHeader(OBJECT_NAME, SIMU_ID));
 			this.writerOEM.write(this.getOemHeader(OBJECT_NAME, SIMU_ID));
-
+			this.writerAEM_mag.write(this.getVectorVisHeader("MAGNETIC_FIELD",OBJECT_NAME, SIMU_ID));
+			this.writerAEM_angMomentum.write(this.getVectorVisHeader("ANGULAR-MOMENTUM", OBJECT_NAME,SIMU_ID));
+			this.writerAEM_angVel.write(this.getVectorVisHeader("ANGULAR-VELOCITY", OBJECT_NAME,SIMU_ID));
+			this.writerAEM_torque.write(this.getVectorVisHeader("TORQUE", OBJECT_NAME,SIMU_ID));
+			this.writerAEM_bDot.write(this.getVectorVisHeader("B_DOT", OBJECT_NAME,SIMU_ID));
+			this.writerOEM.flush();
+			this.writerAEM.flush();
+			this.writerAEM_mag.flush();
+			this.writerAEM_angMomentum.flush();
+			this.writerAEM_angVel.flush();
+			this.writerAEM_torque.flush();
+			this.writerAEM_bDot.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -176,6 +246,11 @@ public class EphemerisGenerator {
 		try {
 			this.writerOEM.close();
 			this.writerAEM.close();
+			this.writerAEM_mag.close();
+			this.writerAEM_angMomentum.close();
+			this.writerAEM_angVel.close();
+			this.writerAEM_torque.close();
+			this.writerAEM_bDot.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -189,7 +264,7 @@ public class EphemerisGenerator {
 	public void writeStep(Satellite satellite) {
 		SpacecraftState newState = satellite.getStates().getCurrentState();
 		try {
-			StringBuffer buff = new StringBuffer();
+	
 
 			/* Determining the time of the state (in offset). */
 			AbsoluteDate currentDate = newState.getDate();
@@ -201,7 +276,138 @@ public class EphemerisGenerator {
 					);
 			int days = (int) (seconds / Constants.JULIAN_DAY);
 			seconds = seconds - days * Constants.JULIAN_DAY;
+		
+			StringBuffer buff = new StringBuffer();
+			
+			/** Writing to the torque file */ 
+			
+			/** TODO - rewrite this section to be more elegant and correct*/
+			
+			Vector3D ang_accel = satellite.getStates().getCurrentState().getAttitude().getRotationAcceleration();
+			
+			/** 
+			 * 
+			 *  WARNING!: THis only works for diagonal inertia matrices. 
+			 *  TODO Resolve this so it works for non diagonal systems.
+			 *  */
+			
+			double torqueX = ang_accel.getX()/satellite.getAssembly().getBody().getInertiaMatrix()[0][0];
+			double torqueY = ang_accel.getY()/satellite.getAssembly().getBody().getInertiaMatrix()[1][1];
+			double torqueZ = ang_accel.getZ()/satellite.getAssembly().getBody().getInertiaMatrix()[2][2];
+			Vector3D torque = new Vector3D(torqueX,torqueY,torqueZ);
+			if (torque.getNorm() != 0) {
+				torque = torque.normalize();
+			}
+			buff
+			.append(days)
+			.append(" ") 					/* Column Separator */
+			.append(seconds)
+			.append(" ")
+			.append(torque.getX())
+			.append(" ")
+			.append(torque.getY())
+			.append(" ")
+			.append(torque.getZ())
+			.append(" ")
+			.append(0)
+			;
+			this.writerAEM_torque.append(buff+LS);
+			this.writerAEM_torque.flush();
+			
+			buff = new StringBuffer();
+			
+			/** Writing to the angular velocity file */ 
+			Vector3D vel = satellite.getStates().getCurrentState().getAttitude().getSpin();
+			if (vel.getNorm() != 0) {
+				vel = vel.normalize();
+			}
+			buff
+			.append(days)
+			.append(" ") 					/* Column Separator */
+			.append(seconds)
+			.append(" ")
+			.append(vel.getX()) 	
+			.append(" ")
+			.append(vel.getY())
+			.append(" ")
+			.append(vel.getZ())
+			.append(" ")
+			.append(0)
+			;
+			this.writerAEM_angVel.append(buff+LS);
+			this.writerAEM_angVel.flush();
+			
+			buff = new StringBuffer();
+			
+			/** Writing to the angular momentum file */ 
+			Vector3D mom = satellite.getAssembly().getAngularMomentum();
+			if(mom.getNorm()!= 0) {
+				mom = mom.normalize();	
+			}
+			buff
+			.append(days)
+			.append(" ") 					/* Column Separator */
+			.append(seconds)
+			.append(" ")
+			.append(mom.getX()) 	
+			.append(" ")
+			.append(mom.getY())
+			.append(" ")
+			.append(mom.getZ())
+			.append(" ")
+			.append(0)
+			;
+			this.writerAEM_angMomentum.append(buff+LS);
+			this.writerAEM_angMomentum.flush();
+			
+			buff = new StringBuffer();
+			
+			/* Writing the current mag field to the log file. */ 
+			Vector3D mag_field = satellite.getADCS().getSensors().getMagnetometer().retrievePerfectField().getFieldVector();
+			Vector3D mag_unit; 
+			mag_unit = mag_field.normalize();
+			buff
+			.append(days)
+			.append(" ") 					/* Column Separator */
+			.append(seconds)
+			.append(" ")
+			.append(mag_unit.getX()) 	
+			.append(" ")
+			.append(mag_unit.getY())
+			.append(" ")
+			.append(mag_unit.getZ())
+			.append(" ")
+			.append(0)
+			;
+			this.writerAEM_mag.append(buff.toString()+ LS);
+			this.writerAEM_mag.flush();
 
+
+			buff = new StringBuffer();
+
+			/** Writing to the b dot file */
+      /* Ignore the rotation of the magnetic field due to the linear movement of
+       * the spacecraft
+       */
+      Vector3D b_dot = Vector3D.crossProduct(vel, mag_field);
+			buff
+          .append(days)
+          .append(" ") 					/* Column Separator */
+          .append(seconds)
+          .append(" ")
+          .append(b_dot.getX())
+          .append(" ")
+          .append(b_dot.getY())
+          .append(" ")
+          .append(b_dot.getZ())
+          .append(" ")
+          .append(0)
+          ;
+			this.writerAEM_bDot.append(buff+LS);
+			this.writerAEM_bDot.flush();
+
+
+			buff = new StringBuffer();
 			/* Writing the OEM Ephemeris. */
 			Vector3D position = newState
 					.getPVCoordinates(FramesFactory.getEME2000())
@@ -218,6 +424,7 @@ public class EphemerisGenerator {
 			.append(" ")
 			.append(position.getZ() * 1e-3)
 			;
+
 
 			this.writerOEM.append(buff.toString() + LS);
 			this.writerOEM.flush();
@@ -254,22 +461,65 @@ public class EphemerisGenerator {
 							"Attitude: [{}, {}, {}, {}] \n" +
 							"Spin    : {} \n" +
 							"RotAcc  : {}\n" +
-							"Momentum: {}",
+              "B Dot   : {}\n" +
+							"Momentum: {}\n" +
+              "Momentum Norm: {}",
 							newState.getAttitude().getRotation().getQ0(),
 							newState.getAttitude().getRotation().getQ1(),
 							newState.getAttitude().getRotation().getQ2(),
 							newState.getAttitude().getRotation().getQ3(),
 							newState.getAttitude().getSpin().toString(),
 							newState.getAttitude().getRotationAcceleration().toString(),
-							satellite.getAssembly().getAngularMomentum()
+              b_dot,
+              satellite.getAssembly().getAngularMomentum(),
+              satellite.getAssembly().getAngularMomentum().getNorm()
 					);
 
 		} catch (OrekitException | IOException e) {
 			e.printStackTrace();
 		}
 	}
+	/** 
+	 * Returns the header of the Attitude file for VTS vector visualization
+	 * @param vector name - name of the vector
+	 * @param objectName For the Satellite Object
+	 * @param simuIdentifier Current Simulation ID
+	 * @return Header as a string
+	 */
+private String getVectorVisHeader(String vectorName, String objectName, String simuIdentifier) {
+	try {
+		String headerAEM = new String();
 
+		AbsoluteDate currentDate = new AbsoluteDate(
+				new GregorianCalendar(TimeZone.getTimeZone("GMT+00")).getTime(),
+				TimeScalesFactory.getUTC()
+				);
 
+		headerAEM += "CIC_AEM_VERS = 1.0" + LS ;
+		headerAEM += ("CREATION_DATE = " + 
+				currentDate.toString(TimeScalesFactory.getUTC()) ) + LS ;
+		headerAEM += ("ORIGINATOR = ") + simuIdentifier + LS ;
+		headerAEM += ("     ") + LS ;
+		headerAEM += ("META_START") + LS ;
+		headerAEM += ("") + LS ;
+		headerAEM += ("OBJECT_NAME = ") + objectName +"-"+ vectorName + LS ;
+		headerAEM += ("OBJECT_ID = MSP001") + LS ;
+		headerAEM += ("CENTER_NAME = EARTH") + LS ;
+		headerAEM += ("REF_FRAME_A = EME2000") + LS ;
+		headerAEM += ("REF_FRAME_B = SC_BODY_1") + LS ;
+		headerAEM += ("ATTITUDE_DIR = A2B") + LS ;
+		headerAEM += ("TIME_SYSTEM = UTC") + LS ;
+		headerAEM += ("ATTITUDE_TYPE = QUATERNION") + LS ;
+		headerAEM += ("") + LS ;
+		headerAEM += ("META_STOP") + LS ;
+
+		return headerAEM; 
+		}
+	catch (OrekitException e) {
+		e.printStackTrace();
+	}
+	return null; 
+}
 	/**
 	 * Return the header of an AEM ephemeris.
 	 * @param objectName For the Satellite Object

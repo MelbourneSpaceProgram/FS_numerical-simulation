@@ -37,7 +37,10 @@ public class Torques {
 	/* ******* Public Static Attributes ******* */
 
 	/** Set the torque provider in use by the simulator. */
-	public static TorqueProviderEnum commandTorqueProvider = TorqueProviderEnum.SCENARIO;
+	public static TorqueProviderEnum commandTorqueProvider = TorqueProviderEnum.CONTROLLER;
+
+	/** Allow the torque disturbances in the simulation. */
+	public static boolean allowDisturbances = true;
 
 	/* **************************************** */
 
@@ -46,6 +49,9 @@ public class Torques {
 
 	/** Instance of Torque Provider. */
 	private ArrayList<TorqueProvider> torqueProviders;
+
+	/** Private flag to allow torque disturbances in the simulation. */
+	private boolean isDisturbances;
 
 	/**
 	 * Build the Main Torque Provider of the dynamic module.
@@ -58,9 +64,20 @@ public class Torques {
 
 		/* Build the torque providers in use in the simulation. 	*/
 		this.torqueProviders = new ArrayList<TorqueProvider>();
-		
+
+		/* Set the use of torque disturbances. */
+		this.isDisturbances = Torques.allowDisturbances;
+
 		/*  - Register the command provider.						*/
 		switch (Torques.commandTorqueProvider) {
+		case CONTROLLER:
+			this.torqueProviders.add(
+					TorqueProviderEnum.CONTROLLER.getIndex(), new ControllerTorqueProvider(
+							satellite,
+							satellite.getAssembly().getStates().getInitialState().getDate(), 
+							environment
+							));
+			break;
 		case MEMCACHED:
 			this.torqueProviders.add(
 					TorqueProviderEnum.MEMCACHED.getIndex(),
@@ -71,16 +88,19 @@ public class Torques {
 			this.torqueProviders.add(
 					TorqueProviderEnum.SCENARIO.getIndex(),
 					new TorqueOverTimeScenarioProvider(
-							satellite.getAssembly().getStates().getInitialState().getDate())
+							satellite,
+							satellite.getAssembly().getStates().getInitialState().getDate()
+							)
 					);
 			break;
 		default:
 			break;
 		}
 
-		/*  - Register the disturbances.							*/
-		this.torqueProviders.add(new SimpleTorqueDisturbances());
-
+		/*  - Register the disturbances.	*/
+		if (this.isDisturbances) {						
+			this.torqueProviders.add(new SimpleTorqueDisturbances());
+		}
 	}
 
 	/**

@@ -31,8 +31,6 @@
 			<groupId>net.spy</groupId>
 			<artifactId>spymemcached</artifactId>
 			<version>2.12.3</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/jar/spymemcached-2.12.3.jar</systemPath>
 		</dependency>
 	</dependencies>
 	<issueManagement>

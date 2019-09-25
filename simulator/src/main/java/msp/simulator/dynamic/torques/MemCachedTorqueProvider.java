@@ -16,6 +16,7 @@ package msp.simulator.dynamic.torques;
 
 import java.nio.ByteBuffer;
 
+
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.orekit.time.AbsoluteDate;
 import org.slf4j.Logger;
@@ -28,7 +29,7 @@ import msp.simulator.satellite.io.IO;
 import msp.simulator.satellite.io.MemcachedRawTranscoder;
 import msp.simulator.utils.logs.CustomLoggingTools;
 import net.spy.memcached.MemcachedClient;
-
+import msp.simulator.satellite.ADACS.sensors.*;;
 /**
  *
  * @author Florian CHAUBEYRE <chaubeyre.f@gmail.com>
@@ -39,12 +40,12 @@ public class MemCachedTorqueProvider implements TorqueProvider {
 
 	/** Public key to access the MemCached hash table. */
 	public static String torqueCommandKey = "Simulation_Torque_";
-
+	public static String pwmCommandKey = "Satellite_PWM_";
 	/* **************************************** */
 	
 	/** Private Key to store the public key. */
 	private String torqueKey;
-
+	private String pwmKey; 
 	/** Logger of the class */
 	private static final Logger logger = LoggerFactory.getLogger(
 			MemCachedTorqueProvider.class);
@@ -70,7 +71,25 @@ public class MemCachedTorqueProvider implements TorqueProvider {
 	private Vector3D stepTorque;
 
 	/** Copy of the fixed integration time step. */
-	private final double stepSize = Integration.integrationTimeStep;
+	private static final double stepSize = Integration.integrationTimeStep;
+	
+	/* Copy of the magnetic field*/
+	private Vector3D b_field; 
+	/* Copy of the sensor object*/ 
+	private Magnetometer magnetometer; 
+	
+	private final double[] magnetorquerMaxDipole = {0.2,0.2,0.2};
+	
+	private Vector3D Pwm2Torque(Vector3D pwm) {
+		double x = pwm.getX() * magnetorquerMaxDipole[0];
+		double y = pwm.getY() * magnetorquerMaxDipole[1]; 
+		double z = pwm.getZ() * magnetorquerMaxDipole[2]; 
+		Vector3D dipole = new Vector3D(x,y,z);
+		Vector3D torque; 
+		logger.info("PWM SIGNAL:"+dipole.toString());
+		torque = Vector3D.crossProduct(dipole,this.b_field);
+		return torque;
+	}
 
 	/**
 	 * Create the instance of memcached torque provider.
@@ -89,8 +108,11 @@ public class MemCachedTorqueProvider implements TorqueProvider {
 			this.stepStart = this.satState.getCurrentState().getDate();
 			this.nextAcquisitionDate = this.satState.getInitialState().getDate();
 			this.stepTorque = Vector3D.ZERO;
-
+			this.b_field = satellite.getADCS().getSensors().getMagnetometer().retrievePerfectField().getFieldVector();
+			this.magnetometer = satellite.getADCS().getSensors().getMagnetometer(); 
 			this.torqueKey = MemCachedTorqueProvider.torqueCommandKey;
+			this.pwmKey = MemCachedTorqueProvider.pwmCommandKey; 
+			
 			this.memcached = satellite.getIO().getMemcached();
 			this.memcachedTranscoder = satellite.getIO().getRawTranscoder();
 
@@ -114,7 +136,7 @@ public class MemCachedTorqueProvider implements TorqueProvider {
 	public Vector3D getTorque(AbsoluteDate date) {
 		/* Flag to enable the acquisition of the torque for the step. */
 		boolean acquisition;
-		
+		this.b_field = magnetometer.retrievePerfectField().getFieldVector().scalarMultiply(1E-9); // gets magnetic field (nT) then converts to SI 
 		/* As the torque is considered constant over a step, we only need 
 		 * to acquire the torque once at the very beginning of the step. */
 		this.stepStart = this.satState.getCurrentState().getDate();
@@ -130,31 +152,32 @@ public class MemCachedTorqueProvider implements TorqueProvider {
 
 			/* Reading the torque command from MemCached. */
 			try {
-				Vector3D torqueCommand;
+				Vector3D pwmCommand;
 
-				double torque_x = ByteBuffer.wrap(
+				double pwm_x = ByteBuffer.wrap(
 						this.memcached.get(
-								this.torqueKey + "X",
+								this.pwmKey + "X",
 								this.memcachedTranscoder))
 						.getDouble();
 
-				double torque_y = ByteBuffer.wrap(
+				double pwm_y = ByteBuffer.wrap(
 						this.memcached.get(
-								this.torqueKey + "Y",
+								this.pwmKey + "Y",
 								this.memcachedTranscoder))
 						.getDouble();
 
-				double torque_z = ByteBuffer.wrap(
+				double pwm_z = ByteBuffer.wrap(
 						this.memcached.get(
-								this.torqueKey + "Z",
+								this.pwmKey + "Z",
 								this.memcachedTranscoder))
 						.getDouble();
 
-				torqueCommand = new Vector3D(
-						torque_x,
-						torque_y,
-						torque_z
+				pwmCommand = new Vector3D(
+						pwm_x,
+						pwm_y,
+						pwm_z
 						);
+				Vector3D torqueCommand = this.Pwm2Torque(pwmCommand);
 				
 				/* Checking the data transmission. */
 				if (torqueCommand.isNaN() || torqueCommand.isInfinite()) {
@@ -170,7 +193,7 @@ public class MemCachedTorqueProvider implements TorqueProvider {
 			}
 
 			/* Debug Information */
-			logger.debug("Torque Provider (Acquisition): " + date.toString() +" - " +
+			logger.info("Torque Provider (Acquisition): " + date.toString() +" - " +
 					this.stepTorque.toString());
 
 		} else {

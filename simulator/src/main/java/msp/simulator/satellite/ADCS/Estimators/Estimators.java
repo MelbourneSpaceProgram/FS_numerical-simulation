@@ -11,30 +11,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package msp.simulator.satellite.ADCS.Estimators;
 
-package msp.simulator.satellite.actuators;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import msp.simulator.utils.logs.CustomLoggingTools;
+import msp.simulator.satellite.Satellite;
 
 /**
  *
- * @author Florian CHAUBEYRE <chaubeyre.f@gmail.com>
+ * @author Jack McRobbie
  */
-public class MagnetoTorquers {
-	
-
-	/** Logger of the class */
-	private static final Logger logger = LoggerFactory.getLogger(MagnetoTorquers.class);
+public class Estimators {
 
 	/**
-	 * 
+	 * @param sat
 	 */
-	public MagnetoTorquers() {
-		logger.info(CustomLoggingTools.indentMsg(logger,
-				"Building the MagnetoTorquers..."));
+	public Estimators(Satellite sat) {
+		// TODO Auto-generated constructor stub
 	}
 
 }
