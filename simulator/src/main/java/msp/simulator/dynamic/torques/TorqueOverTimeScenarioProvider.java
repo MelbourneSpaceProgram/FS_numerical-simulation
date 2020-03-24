@@ -18,6 +18,13 @@ import java.util.ArrayList;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.orekit.time.AbsoluteDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import msp.simulator.NumericalSimulator;
+import msp.simulator.dynamic.propagation.integration.Integration;
+import msp.simulator.satellite.Satellite;
+import msp.simulator.satellite.assembly.SatelliteStates;
 
 /**
  * This class implements a simple torque maneuver 
@@ -61,14 +68,34 @@ public class TorqueOverTimeScenarioProvider implements TorqueProvider {
 		public double getDuration() {return duration;}
 		public Vector3D getRotVector() {return rotVector;}
 	}
-	
+
 	/** @return The default torque intensity of the scenario. */
 	public static double getTorqueIntensity() {
 		return maxTorqueIntensity;
 	}
-	
+
 	/* **************************************** */
 	
+	/** Logger of the class */
+	private static final Logger logger = LoggerFactory.getLogger(
+			TorqueOverTimeScenarioProvider.class);
+	
+	/** Buffered date of the beginning of the step. */
+	private AbsoluteDate stepStart;
+
+	/** Satellite states keeping the start date of the step all 
+	 * along the step. */
+	private SatelliteStates satState;
+
+	/** Buffered date of the next acquisition date. */
+	private AbsoluteDate nextAcquisitionDate;
+
+	/** Buffered torque for the current step. */
+	private Vector3D stepTorque;
+
+	/** Copy of the fixed integration time step. */
+	private final double stepSize = Integration.integrationTimeStep;
+
 	/** Absolute start date of  the scenario in the simulation. */
 	private AbsoluteDate startDate;
 
@@ -82,8 +109,8 @@ public class TorqueOverTimeScenarioProvider implements TorqueProvider {
 	 * Constructor with the torque scenario set as default.
 	 * @param startDate of the torque scenario over time
 	 */
-	public TorqueOverTimeScenarioProvider(AbsoluteDate startDate) {
-		this(startDate, TorqueOverTimeScenarioProvider.TORQUE_SCENARIO);
+	public TorqueOverTimeScenarioProvider(Satellite satellite, AbsoluteDate startDate) {
+		this(satellite, startDate, TorqueOverTimeScenarioProvider.TORQUE_SCENARIO);
 	}
 
 	/**
@@ -91,9 +118,17 @@ public class TorqueOverTimeScenarioProvider implements TorqueProvider {
 	 * @param startDate Absolute date to start the scenario in the simulation
 	 * @param scenario List of the torque steps.
 	 */
-	public TorqueOverTimeScenarioProvider(AbsoluteDate startDate, ArrayList<Step> scenario) {
+	public TorqueOverTimeScenarioProvider(
+			Satellite satellite,
+			AbsoluteDate startDate,
+			ArrayList<Step> scenario) {
 		this.scenario = scenario;
 		this.startDate = startDate;
+
+		this.satState = satellite.getStates();
+		this.stepStart = this.satState.getCurrentState().getDate();
+		this.nextAcquisitionDate = this.satState.getInitialState().getDate();
+		this.stepTorque = Vector3D.ZERO;
 	}
 
 	/**
@@ -109,29 +144,69 @@ public class TorqueOverTimeScenarioProvider implements TorqueProvider {
 
 	/** {@inheritDoc} */
 	@Override
-	public Vector3D getTorque(AbsoluteDate currentDate) {
-		Vector3D torque;
-		double offset = currentDate.durationFrom(this.startDate);
-		boolean success = false;
-		Step step = null;
-		/* Iterate the scenario to find the first applicable step. */
-		for (int i = 0; i < this.scenario.size(); i++) {
-			step = this.scenario.get(i);
-			/* If we find a currently operating step, it's a success. */
-			if (	    (step.getStart() <= offset)
-					&&
-					(step.getStart() + step.getDuration() > offset)) 
-			{
-				success = true;
-				break;
+	public Vector3D getTorque(AbsoluteDate date) {
+		/* Flag to enable the acquisition of the torque for the step. */
+		boolean acquisition;
+
+		/* As the torque is considered constant over a step, we only need 
+		 * to acquire the torque once at the very beginning of the step. */
+		this.stepStart = this.satState.getCurrentState().getDate();
+
+		acquisition = 
+				(date.compareTo(this.nextAcquisitionDate) == 0)
+				&&
+				(date.compareTo(this.stepStart) == 0)
+				;
+
+		/* Compute the torque command if a new step is detected. */
+		if (acquisition) {
+
+			/* Reading the torque command from the scenario. */
+			try {
+				Vector3D torqueCommand;
+				double offset = date.durationFrom(this.startDate);
+				boolean success = false;
+				Step step = null;
+
+				/* Iterate the scenario to find the first applicable step. */
+				for (int i = 0; i < this.scenario.size(); i++) {
+					step = this.scenario.get(i);
+					/* If we find a currently operating step, it's a success. */
+					if (	    (step.getStart() <= offset + NumericalSimulator.EPSILON)
+							&&
+							(step.getStart() + step.getDuration() > offset 
+									+ NumericalSimulator.EPSILON)) 
+					{
+						success = true;
+						break;
+					}
+				}
+				if (success) {
+					torqueCommand = step.getRotVector().scalarMultiply(maxTorqueIntensity);
+				} else {
+					torqueCommand = Vector3D.ZERO;
+				}
+
+				/* Then update the buffered data. */
+				this.nextAcquisitionDate = this.stepStart.shiftedBy(this.stepSize);
+				this.stepTorque = torqueCommand;
+
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-		}
-		if (success) {
-			torque = step.getRotVector().scalarMultiply(maxTorqueIntensity);
+
+			/* Debug Information */
+			logger.debug("Torque Provider (Acquisition): " + date.toString() +" - " +
+					this.stepTorque.toString());
+
 		} else {
-			torque = Vector3D.ZERO;
+			/* Else the torque is already computed for the current step. */
+			logger.debug("------------- Torque Provider: " + date.toString() +" - " +
+					this.stepTorque.toString());
 		}
-		return torque;
+
+		/* Finally returns the torque of the step (updated if needed). */
+		return this.stepTorque;
 	}
 
 	/**

@@ -1,4 +1,4 @@
-package msp.simulator.satellite.sensors;
+package msp.simulator.satellite.ADACS.sensors;
 
 import org.hipparchus.geometry.euclidean.threed.*;
 import org.hipparchus.util.FastMath;

@@ -33,7 +33,6 @@ import msp.simulator.dynamic.torques.TorqueOverTimeScenarioProvider;
 import msp.simulator.dynamic.torques.TorqueOverTimeScenarioProvider.Step;
 import msp.simulator.dynamic.torques.TorqueProviderEnum;
 import msp.simulator.user.Dashboard;
-import msp.simulator.utils.logs.CustomLoggingTools;
 
 
 /**
@@ -44,9 +43,14 @@ import msp.simulator.utils.logs.CustomLoggingTools;
 public class TestDynamic {
 
 	/** Instance of the Logger of the class. */
+	@SuppressWarnings("unused")
 	private static final Logger logger = 
 			LoggerFactory.getLogger(TestDynamic.class);
 
+	/**
+	 * Test a simple acceleration during a given duration.
+	 * @throws Exception When simulator's configuration failed.
+	 */
 	@Test
 	public void testRotationAcceleration() throws Exception {
 	
@@ -66,29 +70,20 @@ public class TestDynamic {
 		ArrayList<TorqueOverTimeScenarioProvider.Step> torqueScenario = 
 				new ArrayList<TorqueOverTimeScenarioProvider.Step>();
 	
-		torqueScenario.add(new Step(0., accDuration + 1, rotVector));
+		torqueScenario.add(new Step(0., accDuration, rotVector));
 		//torqueScenario.add(new Step(5., 3., new Vector3D(-1,0,0)));
 		//torqueScenario.add(new Step(55., 10., new Vector3D(1,2,3)));
 		//torqueScenario.add(new Step(70., 10., new Vector3D(-1,-2,-3)));
 	
 		Dashboard.setTorqueScenario(torqueScenario);
+		Dashboard.setTorqueDisturbances(false);
 	
 		Dashboard.checkConfiguration();
 	
 		/**** Creating and launching the simulation. ****/
 		NumericalSimulator simu = new NumericalSimulator();
 		simu.initialize();
-	
-		logger.info(CustomLoggingTools.toString(
-				"Initial State of the satellite", 
-				simu.getSatellite().getStates().getInitialState()));
-	
 		simu.process();
-	
-		logger.info(CustomLoggingTools.toString(
-				"Final State of the satellite", 
-				simu.getSatellite().getStates().getCurrentState()));
-	
 		simu.exit();
 	
 		/* Extracting final state. */
@@ -106,7 +101,7 @@ public class TestDynamic {
 		Assert.assertArrayEquals(
 				expectedRotAcc,
 				finalState.getAdditionalState("RotAcc"), 
-				1e-2);
+				1e-6);
 	
 		/* Checking Spin */
 		Assert.assertArrayEquals(
@@ -115,7 +110,75 @@ public class TestDynamic {
 						finalState.getAdditionalState(SecondaryStates.key), 
 						SecondaryStates.SPIN
 						),
-				1e-2);
+				1e-6);
+	}
+	
+	/**
+	 * Test an acceleration then the exact opposite deceleration to assert
+	 * a zero spin at the end of the given time.
+	 * @throws Exception When simulator's configuration failed.
+	 */
+	@Test
+	public void testRotationDeceleration() throws Exception {
+	
+		/* **** Data of the test **** */
+		long accDuration = 50;
+		Vector3D rotVector = new Vector3D(1, 0.1, 0.2);
+		/* ************************** */
+	
+		/**** Configuration of the simulation. ****/
+		Dashboard.setDefaultConfiguration();
+		Dashboard.setRealTimeProcessing(false);
+		Dashboard.setSimulationDuration(2 * accDuration);
+		Dashboard.setIntegrationTimeStep(0.1);
+	
+		/* Writing the torque scenario. */
+		ArrayList<TorqueOverTimeScenarioProvider.Step> torqueScenario = 
+				new ArrayList<TorqueOverTimeScenarioProvider.Step>();
+		
+		torqueScenario.add(new Step(0., accDuration, rotVector));
+		torqueScenario.add(new Step(accDuration, accDuration, rotVector.negate()));
+		
+		//torqueScenario.add(new Step(5., 3., new Vector3D(-1,0,0)));
+		//torqueScenario.add(new Step(55., 10., new Vector3D(1,2,3)));
+		//torqueScenario.add(new Step(70., 10., new Vector3D(-1,-2,-3)));
+	
+		Dashboard.setTorqueScenario(torqueScenario);
+		Dashboard.setTorqueDisturbances(false);
+	
+		Dashboard.checkConfiguration();
+	
+		/**** Creating and launching the simulation. ****/
+		NumericalSimulator simu = new NumericalSimulator();
+		simu.initialize();
+		simu.process();
+		simu.exit();
+	
+		/* Extracting final state. */
+		SpacecraftState finalState = simu.getSatellite().getStates().getCurrentState();
+	
+		/* Computing the expected final acceleration: negative because of the deceleration. */
+		double[] expectedRotAcc = RotAccProvider.computeEulerEquations(
+				rotVector.scalarMultiply(
+						- 1 * TorqueOverTimeScenarioProvider.getTorqueIntensity()),
+				finalState.getAttitude().getSpin(), 
+				simu.getSatellite().getAssembly().getBody().getInertiaMatrix()
+				);
+	
+		/* Checking Rotational Acceleration. */
+		Assert.assertArrayEquals(
+				expectedRotAcc,
+				finalState.getAdditionalState("RotAcc"), 
+				1e-6);
+	
+		/* Checking Spin */
+		Assert.assertArrayEquals(
+				Vector3D.ZERO.toArray(), 
+				SecondaryStates.extractState(
+						finalState.getAdditionalState(SecondaryStates.key), 
+						SecondaryStates.SPIN
+						),
+				1e-6);
 	
 	}
 
@@ -137,7 +200,7 @@ public class TestDynamic {
 	 * + At the time t = dur, i.e. the end state:<p>
 	 *  Q = ( cos(Pi/2), sin(Pi/2).n )
 	 *    = ( 0, nx, ny, nz)
-	 * @throws Exception when initialization of simulation fails
+	 * @throws Exception When simulator's configuration failed.
 	 * 
 	 */
 	@Test 
@@ -159,7 +222,9 @@ public class TestDynamic {
 		Dashboard.setInitialAttitudeQuaternion(new Quaternion(1, 0, 0, 0));
 		Dashboard.setInitialSpin(new Vector3D(FastMath.PI / rotationTime, n));
 		Dashboard.setInitialRotAcceleration(new Vector3D(0,0,0));
-		//Dashboard.setVtsConnection(true);
+		Dashboard.setTorqueDisturbances(false);
+		
+		Dashboard.setVtsConnection(false);
 
 		/* *** Creating and launching the simulation. *** */
 		NumericalSimulator simu = new NumericalSimulator();
@@ -180,7 +245,7 @@ public class TestDynamic {
 		double[] expectedAttitudeArray = new double[] {0, n.getX(), n.getY(), n.getZ()} ;
 
 		/* Approximation error during the propagation. */
-		double delta = 1e-3;
+		double delta = 1e-6;
 
 		/* Testing the attitude of the satellite after the processing. */
 		Assert.assertArrayEquals(
