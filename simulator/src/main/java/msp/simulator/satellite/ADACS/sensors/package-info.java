@@ -19,4 +19,4 @@
  * @author Florian CHAUBEYRE <chaubeyre.f@gmail.com>
  * @author Braeden BORG
  */
-package msp.simulator.satellite.sensors;
+package msp.simulator.satellite.ADACS.sensors;

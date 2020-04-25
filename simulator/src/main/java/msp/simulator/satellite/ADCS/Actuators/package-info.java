@@ -12,28 +12,9 @@
  * limitations under the License.
  */
 
-package msp.simulator.satellite.actuators;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import msp.simulator.utils.logs.CustomLoggingTools;
-
 /**
+ * Gather all of the models of actuators of the satellite.
  *
  * @author Florian CHAUBEYRE <chaubeyre.f@gmail.com>
  */
-public class Actuators {
-	
-	/** Logger of the class */
-	private static final Logger logger = LoggerFactory.getLogger(Actuators.class);
-
-	/**
-	 * 
-	 */
-	public Actuators() {
-		logger.info(CustomLoggingTools.indentMsg(logger,
-				"Building the Actuators..."));
-	}
-
-}
+package msp.simulator.satellite.ADCS.Actuators;

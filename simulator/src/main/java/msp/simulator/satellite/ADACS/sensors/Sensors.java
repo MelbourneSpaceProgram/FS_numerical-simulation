@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package msp.simulator.satellite.sensors;
+package msp.simulator.satellite.ADACS.sensors;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.slf4j.Logger;
